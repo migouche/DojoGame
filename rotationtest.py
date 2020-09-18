@@ -1,19 +1,12 @@
-import pygame
+from pygamemig import *
 
-pygame.init()
+window = Window(800, 600)
 
-screen = pygame.display.set_mode((800, 600))
-pygame.display.set_caption("Pong")
-pygame.display.set_icon(pygame.image.load("py.png"))
+pac = Object("pacman.png", Vector2(200, 100))
+pac.transform.setPos(Vector2(400, 400))
 
-ball = pygame.image.load("pacman.png")
-angle = 0;
-running = True
-while running:
-    angle += 1
-    for e in pygame.event.get():
-        if e.type == pygame.QUIT:
-            running = False
-    screen.fill((255, 255, 255))
-    screen.blit(pygame.transform.rotate(ball, angle), (200, 150))
-    pygame.display.update()
+while window.running:
+    pac.transform.rotate(.1)
+    print(pac.transform.angle)
+    window.fillBG(white)
+    window.Update()

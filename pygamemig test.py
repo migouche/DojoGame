@@ -1,9 +1,4 @@
 from pygamemig import *
-<<<<<<< HEAD
-
-# init()
-=======
->>>>>>> 70645f50485dd25e373880f2a9b65e08701087e6
 
 canStart = False
 
@@ -12,7 +7,6 @@ window = Window(800, 600, "pong", "py.png")
 ball = Object("ball.png", Vector2(30, 30))
 
 
-#oldRightPaddle = Object("pala.png", Vector2(30, 200), Vector2(0, 0), Vector3(15, 100))
 RightPaddle = Object("pala.png", Vector2(30, 200))
 
 LeftPaddle = Object("pala.png", Vector2(30, 200))

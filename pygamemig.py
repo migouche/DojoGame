@@ -43,6 +43,10 @@ class Vector2:
         return self / self.magnitude()
 
     @staticmethod
+    def fromAngle(angle):
+        return Vector2(math.cos(angle), math.sin(angle))
+
+    @staticmethod
     def Random():
         return Vector2(math.cos(random.randint(0, 628) / 100), math.sin(random.randint(0, 628) / 100)).normalized()
 
@@ -119,6 +123,7 @@ class Object:
         self.transform = Transform(Vector2.zero(), 0, scale)
         self.transform.object = self
         self.Img = pygame.transform.scale(pygame.image.load(img), (self.transform.scale.x, self.transform.scale.y))
+
         self.offset = scale / 2
         objects.append(self)
 
@@ -138,10 +143,20 @@ class Transform:
 
     def setScale(self, scale):
         self.scale = scale
+        self.Update()
+
+    def setRot(self, angle):
+        self.angle = angle % 360
+
+    def rotate(self, angle):
+        self.angle = (self.angle + angle) % 360
+
+    def Update(self):
+        self.object.offset = self.scale / 2
         self.object.Img = pygame.transform.scale(self.object.Img,
                                                  (self.scale.x,
                                                   self.scale.y))
-        self.object.offset = self.scale / 2
+        self.object.Img.get_rect()
 
 
 class Text:
@@ -257,7 +272,7 @@ class Window:
     def Update(self):
         if self.running:
             for obj in objects:
-                self.screen.blit(obj.Img,
+                self.screen.blit(pygame.transform.rotate(obj.Img, obj.transform.angle),
                                  (int(obj.transform.position.x) - int(obj.offset.x),
                                   int(obj.transform.position.y) - int(obj.offset.y)))
             for txt in texts:
