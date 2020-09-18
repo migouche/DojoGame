@@ -32,6 +32,9 @@ class Vector2:
     def zero():
         return Vector2(0, 0)
 
+    def toVector2Int(self):
+        return Vector2Int(int(self.x), int(self.y))
+
     def magnitude(self):
         return math.sqrt(self.x ** 2 + self.y ** 2)
 
@@ -48,17 +51,15 @@ class Vector2:
 
     @staticmethod
     def Random():
-        return Vector2(math.cos(random.randint(0, 628) / 100), math.sin(random.randint(0, 628) / 100)).normalized()
+        return Vector2.RadRandom(0, 6.28)
 
     @staticmethod
     def DegRandom(a, b):
-        angle = random.randint(int(a * 100 * Deg2Rad), int(b * 100 * Deg2Rad)) / 100
-        return Vector2(math.cos(angle), math.sin(angle))
+        return Vector2.RadRandom(a * Deg2Rad, b * Deg2Rad)
 
     @staticmethod
     def RadRandom(a, b):
-        angle = random.randint(int(a * 100), int(b * 100)) / 100
-        return Vector2(math.cos(angle), math.sin(angle))
+        return Vector2.fromAngle(random.randint(int(a * 100), int(b * 100)) / 100).normalized()
 
 
 class Vector2Int:
@@ -100,17 +101,15 @@ class Vector2Int:
 
     @staticmethod
     def Random():
-        return Vector2Int.DegRandom(0, 360)
+        return Vector2.Random().toVector2Int()
 
     @staticmethod
     def DegRandom(a, b):
-        angle = random.randint(int(a * 100 * Deg2Rad), int(b * 100 * Deg2Rad)) / 100
-        return Vector2Int(math.cos(angle), math.sin(angle))
+        return Vector2.DegRandom(a, b).toVector2Int()
 
     @staticmethod
     def RadRandom(a, b):
-        angle = random.randint(int(a * 100), int(b * 100)) / 100
-        return Vector2Int(math.cos(angle), math.sin(angle))
+        return Vector2.RadRandom(a, b).toVector2Int()
 
 
 objects = []
