@@ -177,40 +177,29 @@ class Text:
 
     def Text(self, text):
         self.text = text
-        self.renderText = self.renderFont.render(str(self.text), True,
-                                                 (self.textColor.red, self.textColor.green, self.textColor.blue),
-                                                 (self.BGColor.red, self.BGColor.green, self.BGColor.blue))
+        self.updateText()
 
     def setSize(self, size):
         self.size = size
-        self.renderFont = pygame.font.Font(self.font, self.size)
-        self.renderText = self.renderFont.render(str(self.text), True,
-                                                 (self.textColor.red, self.textColor.green, self.textColor.blue),
-                                                 (self.BGColor.red, self.BGColor.green, self.BGColor.blue))
+        self.updateText()
 
     def setTextColor(self, color):
         self.textColor = color
-        self.renderFont = pygame.font.Font(self.font, self.size)
-        self.renderText = self.renderFont.render(str(self.text), True,
-                                                 (self.textColor.red, self.textColor.green, self.textColor.blue),
-                                                 (self.BGColor.red, self.BGColor.green, self.BGColor.blue))
+        self.updateText()
 
     def setTextColour(self, color):
         self.textColor = color
-        self.renderFont = pygame.font.Font(self.font, self.size)
-        self.renderText = self.renderFont.render(str(self.text), True,
-                                                 (self.textColor.red, self.textColor.green, self.textColor.blue),
-                                                 (self.BGColor.red, self.BGColor.green, self.BGColor.blue))
+        self.updateText()
 
     def setBGColor(self, color):
         self.BGColor = color
-        self.renderFont = pygame.font.Font(self.font, self.size)
-        self.renderText = self.renderFont.render(str(self.text), True,
-                                                 (self.textColor.red, self.textColor.green, self.textColor.blue),
-                                                 (self.BGColor.red, self.BGColor.green, self.BGColor.blue))
+        self.updateText()
 
     def setBGColour(self, color):
         self.BGColor = color
+        self.updateText()
+
+    def updateText(self):
         self.renderFont = pygame.font.Font(self.font, self.size)
         self.renderText = self.renderFont.render(str(self.text), True,
                                                  (self.textColor.red, self.textColor.green, self.textColor.blue),
