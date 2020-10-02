@@ -99,18 +99,6 @@ class Vector2Int:
     def normalized(self):
         return self / self.magnitude()
 
-    @staticmethod
-    def Random():
-        return Vector2.Random().toVector2Int()
-
-    @staticmethod
-    def DegRandom(a, b):
-        return Vector2.DegRandom(a, b).toVector2Int()
-
-    @staticmethod
-    def RadRandom(a, b):
-        return Vector2.RadRandom(a, b).toVector2Int()
-
 
 objects = []
 texts = []
@@ -122,7 +110,7 @@ class Object:
         self.transform = Transform(Vector2.zero(), 0, scale)
         self.transform.object = self
         self.Img = pygame.transform.scale(pygame.image.load(img), (self.transform.scale.x, self.transform.scale.y))
-
+        self.rect = self.Img.get_rect()
         self.offset = scale / 2
         objects.append(self)
 
@@ -260,9 +248,10 @@ class Window:
     def Update(self):
         if self.running:
             for obj in objects:
+                size = pygame.transform.rotate(obj.Img, obj.transform.angle).get_rect().size
                 self.screen.blit(pygame.transform.rotate(obj.Img, obj.transform.angle),
-                                 (int(obj.transform.position.x) - int(obj.offset.x),
-                                  int(obj.transform.position.y) - int(obj.offset.y)))
+                                 (int(obj.transform.position.x) - int(size[0] / 2),
+                                  int(obj.transform.position.y) - int(size[1] / 2)))
             for txt in texts:
                 txt.Text(txt.text)
                 self.screen.blit(txt.renderText, txt.rect)
