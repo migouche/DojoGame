@@ -206,6 +206,12 @@ class RectTransform:
     def translate(self, translation):
         self.setPos(self.position + translation)
 
+    def setRot(self, angle):
+        self.angle = angle % 360
+
+    def rotate(self, angle):
+        self.angle = (self.angle + angle) % 360
+
 
 def init():
     pygame.init()
@@ -254,7 +260,10 @@ class Window:
                                   int(obj.transform.position.y) - int(size[1] / 2)))
             for txt in texts:
                 txt.Text(txt.text)
-                self.screen.blit(txt.renderText, txt.rect)
+                size = pygame.transform.rotate(txt.renderText, txt.rectTransform.angle).get_rect().size
+                self.screen.blit(pygame.transform.rotate(txt.renderText, txt.rectTransform.angle),
+                                 (int(txt.rectTransform.position.x) - int(size[0] / 2),
+                                  int(txt.rectTransform.position.y) - int(size[1] / 2)))
 
             Input.Update()
             pygame.display.update()
