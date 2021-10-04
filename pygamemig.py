@@ -237,11 +237,15 @@ class Window:
             self.__init__(args[0], args[1], "Game Window")
         else:
             raise TypeError("Window() takes from 2 to 4 positional arguments, but  " + str(len(args)) + " were given")
+        self.bgColor = Colors.white
         Input.Update()
 
     def fillBG(self, color):
         if self.running:
             self.screen.fill((color.red, color.green, color.blue))
+
+    def setBG(self, color):
+        self.bgColor = color
 
     def setTitle(self, title):
         self.title = title
@@ -253,6 +257,12 @@ class Window:
 
     def Update(self):
         if self.running:
+            for event in Input.Events():
+                if event.type == QUIT:
+                    self.Quit()
+                    return
+
+            self.fillBG(self.bgColor)
             for obj in objects:
                 size = pygame.transform.rotate(obj.Img, obj.transform.angle).get_rect().size
                 self.screen.blit(pygame.transform.rotate(obj.Img, obj.transform.angle),
@@ -268,10 +278,6 @@ class Window:
             Input.Update()
             pygame.display.update()
 
-            for event in Input.Events():
-                if event.type == QUIT:
-                    self.Quit()
-
     def Quit(self):
         self.running = False
         pygame.quit()
@@ -283,14 +289,23 @@ class Color:
         self.green = g
         self.blue = b
 
+    @staticmethod
+    def fromHex(h):
+        c = tuple(int(h.lstrip('#')[i:i + 2], 16) for i in (0, 2, 4))
+        return Color(c[0], c[1], c[2])
+
+
+class Colors:
+    white = Color(255, 255, 255)
+    black = Color(0, 0, 0)
+    red = Color(255, 0, 0)
+    green = Color(0, 255, 0)
+    blue = Color(0, 0, 255)
+
 
 Colour = Color
-# colors:
-white = Color(255, 255, 255)
-black = Color(0, 0, 0)
-red = Color(255, 0, 0)
-green = Color(0, 255, 0)
-blue = Color(0, 0, 255)
+Colours = Colors
+# colors
 
 keys = []
 events = []
