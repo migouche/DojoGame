@@ -14,12 +14,12 @@ LeftPaddle = Object("pala.png", Vector2(30, 200))
 LeftScore = RightScore = 0
 
 # RightText = Text(Vector2((window.width / 2) + 200, 50), RightScore, 30, "freesansbold.ttf", black, white)
-RightText = Text("freesansbold.ttf", 30, black, white)
+RightText = Text("freesansbold.ttf", 30, Colors.black, Colors.white)
 RightText.rectTransform.setPos(Vector2(window.width / 2 + 200, 50))
 RightText.Text(0)
 
 # LeftText = Text(Vector2((window.width / 2) - 200, 50), LeftScore, 30, "freesansbold.ttf", black, white)
-LeftText = Text("freesansbold.ttf", 30, black, white)
+LeftText = Text("freesansbold.ttf", 30, Colors.black, Colors.white)
 LeftText.rectTransform.setPos(Vector2(window.width / 2 - 200, 50))
 LeftText.Text(0)
 

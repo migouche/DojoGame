@@ -277,6 +277,7 @@ class Window:
 
             Input.Update()
             pygame.display.update()
+            RealTime.waitForRealTime(RealTime.deltaTime)
 
     def Quit(self):
         self.running = False
@@ -354,6 +355,12 @@ quitting = False
 
 class RealTime:
     t = time.monotonic()  # init time
+    deltaTime = 1/60
+
+    @staticmethod
+    def setDT(dt):
+
+        RealTime.deltaTime = dt
 
     @staticmethod
     def waitForRealTime(dt):
