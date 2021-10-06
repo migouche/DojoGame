@@ -13,6 +13,7 @@ window.setBG(Color.fromHex("#ff0000"))
 
 RealTime.setDT(1/30)
 print(RealTime.deltaTime)
+print(Vector2.angleDeg(Vector2(0,10), Vector2(1, 0)))
 
 while window.running:
     pac.transform.rotate(30 * RealTime.deltaTime)

@@ -32,6 +32,18 @@ class Vector2:
     def zero():
         return Vector2(0, 0)
 
+    @staticmethod
+    def scalar(a, b):
+        return a.x * b.x + a.y * b.y
+
+    @staticmethod
+    def angleRad(a, b):
+        return math.acos(Vector2.scalar(a, b) / (a.magnitude() * b.magnitude()))
+
+    @staticmethod
+    def angleDeg(a, b):
+        return Vector2.angleRad(a, b) * Mathf.Rad2Deg
+
     def toVector2Int(self):
         return Vector2Int(int(self.x), int(self.y))
 
@@ -55,7 +67,7 @@ class Vector2:
 
     @staticmethod
     def DegRandom(a, b):
-        return Vector2.RadRandom(a * Deg2Rad, b * Deg2Rad)
+        return Vector2.RadRandom(a * Mathf.Deg2Rad, b * Mathf.Deg2Rad)
 
     @staticmethod
     def RadRandom(a, b):
@@ -347,8 +359,8 @@ class Mathf:
             return value
 
 
-Deg2Rad = math.pi / 180
-Rad2Deg = 1 / Deg2Rad
+    Deg2Rad = math.pi / 180
+    Rad2Deg = 1 / Deg2Rad
 
 quitting = False
 
