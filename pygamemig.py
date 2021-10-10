@@ -35,6 +35,9 @@ class Vector2:
     @staticmethod
     def scalar(a, b):
         return a.x * b.x + a.y * b.y
+    @staticmethod
+    def scale(a, b):
+        return Vector2(a.x * b.x, a.y * b.y)
 
     @staticmethod
     def angleRad(a, b):
