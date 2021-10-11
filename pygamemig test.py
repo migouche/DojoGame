@@ -25,7 +25,7 @@ LeftText.Text(0)
 
 paddleSpeed = 500
 ballSpeed = 250
-ballDir = Vector2.Random()
+ballDir = Vector2.random()
 
 
 def ResetPos():
@@ -35,7 +35,7 @@ def ResetPos():
     LeftPaddle.transform.setPos(Vector2(0, window.height / 2))
     RightText.Text(RightScore)
     LeftText.Text(LeftScore)
-    ballDir = Vector2.Random()
+    ballDir = Vector2.random()
     ballSpeed = 250
 
 
@@ -67,7 +67,7 @@ while window.running:
 
     if Vector2.distance(ball.transform.position, Vector2(window.width, ball.transform.position.y)) <= 20.0:
         if Vector2.distance(ball.transform.position, RightPaddle.transform.position) <= 110:
-            ballDir = Vector2.DegRandom(135, 225)
+            ballDir = Vector2.degRandom(135, 225)
             ballSpeed += 50
         else:
             LeftScore += 1
@@ -75,7 +75,7 @@ while window.running:
 
     if Vector2.distance(ball.transform.position, Vector2(0, ball.transform.position.y)) <= 20.0:
         if Vector2.distance(ball.transform.position, LeftPaddle.transform.position) <= 110:
-            ballDir = Vector2.DegRandom(-45, 45)
+            ballDir = Vector2.degRandom(-45, 45)
             ballSpeed += 50
         else:
             RightScore += 1

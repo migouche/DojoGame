@@ -5,7 +5,7 @@
 * [Usage](#about)
 
 ## About
-Pygamemig is a wrapper for the Pygame 2D engine. It was created for people with few coding and Python knowledge to be able to use a 2D engine. As the complexity of the code necessary is less than that of Pygame, Pygamemig is less powerful than Pygame. Pygamemig is inspired by Unity3D syntax.
+Pygamemig is a wrapper for the Pygame 2D engine. It was created for people with little coding and Python knowledge to be able to use a 2D engine. As the complexity of the code necessary is less than that of Pygame, Pygamemig is less powerful than Pygame. Pygamemig is inspired by Unity3D syntax.
 
 ## Installation
 This projects depends on Python3, so, if not installed head to [Python's homepage](https://python.org) and follow the instructions to install Python3 on your computer.
@@ -65,6 +65,7 @@ Updates everything in the screen.
 my_window = Window(600, 600)
 my_window.Update()
 ```
+This function will first fill the whole screen whit the [background colour](#window-setbg) and then print all sprites([objects](#objects)) and [texts](texts) on top of that layer
 #### Window setTitle
 Changes the window title to the function parameter:
 
@@ -108,3 +109,63 @@ v = Vector2(5, 7) # this 2d vector represents a point 5 pixels to the right and 
 
 **NOTE:** In pygamemig positive *x* values are to the right of the origin, and positive *y* values are below, **not on top** of the origin
 The value of the components of vectors can be floating points, but will be put on screen with integer components.
+
+#### Vector2 magnitue
+Returns the magnitue of the vector:
+
+```python
+v.magnitude() # returns sqrt(5*5 + 7*7)
+```
+
+#### Vector2.normalized
+Returns a vector with the same direction and [magnitude](#vector2-magnitue) 1:
+
+```python
+v.normalized()
+```
+
+#### Vector2 zero
+Returns an empty vector:
+
+```python
+Vector2.zero() # returns Vector2(0, 0)
+```
+
+#### Vector2 scale
+Returns the [hadamard product](#https://en.wikipedia.org/wiki/Hadamard_product_(matrices)) of the two given vectors:
+
+```python
+Vector2.scale(a, b) # returns Vector2(a.x * b.x, a.y * b.y)
+```
+
+#### Vector2 scalar
+Returns the [dot product](#https://en.wikipedia.org/wiki/Dot_product) of the two given vectors:
+
+```python
+Vector2.scalar(a, b) # returns the dot product between a and b
+```
+
+#### Vector2 angleDeg
+Returns the angle between two vectors in degrees:
+
+```python
+Vector2.angleDeg(a, b) # returns the angle that a and b make in degrees
+```
+
+#### Vector2 angleRad
+Returns the angle between two vectors in radians:
+
+```python
+Vector2.angleRad(a, b) # returns the angle that a and b make in radians
+```
+
+**NOTE:** Use [Deg2Rad](#deg2rad) and [Rad2Deg](#rad2deg) to convert from radians to vectors and viceversa
+
+#### Vector random
+Returns a random [unitary vector](#vector2normalized):
+
+```python
+Vector2.random()
+```
+
+#### Vector2.degRandom

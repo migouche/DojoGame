@@ -65,15 +65,15 @@ class Vector2:
         return Vector2(math.cos(angle), math.sin(angle))
 
     @staticmethod
-    def Random():
-        return Vector2.RadRandom(0, 6.28)
+    def random():
+        return Vector2.radRandom(0, 6.28)
 
     @staticmethod
-    def DegRandom(a, b):
-        return Vector2.RadRandom(a * Mathf.Deg2Rad, b * Mathf.Deg2Rad)
+    def degRandom(a, b):
+        return Vector2.radRandom(a * Mathf.Deg2Rad, b * Mathf.Deg2Rad)
 
     @staticmethod
-    def RadRandom(a, b):
+    def radRandom(a, b):
         return Vector2.fromAngle(random.randint(int(a * 100), int(b * 100)) / 100).normalized()
 
 
