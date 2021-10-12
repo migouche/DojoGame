@@ -413,9 +413,25 @@ col3 = Colour(0, 0, 255) # blue
 Converts a hexadecimal colour to a Pygame colour:
 
 ```python
-col = Colour.fromHex("#ff00aa")
+col = Colour.fromHex("#ff00aa") # Colour(255, 0, 170)
 ```
 
+#### Predefined Colours
+The class *Colours* or *Colors* contains a list of already defined colours:
+
+| Colour     |      RGB      |  Hex   |
+|:----------:|:-------------:|:------:|
+| white      | 255, 255, 255 | #ffffff|
+| black      |    0, 0, 0    | #000000|
+| red        |  255, 0, 0    | #ff0000|
+| green      |   0, 255, 0   | #00ff00|
+| blue       |    0, 0, 255  | #0000ff|
+
+```python
+Colours.green
+Colours.red
+Colours.black
+```
 ### Mathf
 Mathf stands for Math Functions, and it's a set of useful operation one might need.
 
@@ -434,7 +450,7 @@ Converts from radians to degrees:
 ```
 
 #### Clamp
-Clamps a value between two numbers. If the value is smaller than the minimum value, it will return the minimum value; if the value is greater than the maximum value, it will return the maximum value; and if the value is between the maximum and minimum values, it will return the given value:
+Clamps a value between two numbers. If the value is smaller than the minimum value, it will return the minimum value; if the value is greater than the maximum value, it will return the maximum value; and if the value is between the maximum and minimum values, it will return the given value. This function is useful to clamp an objects position to be inside the screen:
 
 ```python
 val = 50
