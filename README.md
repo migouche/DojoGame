@@ -69,7 +69,7 @@ my_window = Window(600, 600)
 my_window.Update()
 ```
 
-This function will first fill the whole screen whit the [background colour](#windowsetbg) and then print all sprites([objects](#objects)) and [texts](#texts) on top of that layer
+This function will first fill the whole screen whit the [background colour](#windowsetbg) and then print all sprites ([objects](#objects)) and [texts](#texts) on top of that layer
 
 #### Window.setTitle
 Changes the window title to the function parameter:
@@ -241,7 +241,7 @@ txt.setBGColor(Colours.green) # changes the background colour to green
 #### Text.setBGColour
 Equivalent to [Text.setBGColor](#textsetbgcolor)
 
-For more info on colours see [Colour](#colours). A text [position](#recttransformposition), [rotation](#recttransformrotation), and [scale](#recttransformscale) are controlled through its [RectTransform](#recttransform)
+For more info on colours see [Colour](#colours). A text [position](#recttransformposition), and [rotation](#recttransformrotation) are controlled through its [RectTransform](#recttransform). Its size is changed with [Text.setSize](#textsetsize).
 
 ### Transform
 An objects Transform determines its [position](#transformposition), [rotation](#transformrotation), and [scale](#transformscale). There is no need to declare any Transform ever, as Pygamemig does it already for every [Object](#objects)
@@ -307,7 +307,7 @@ obj.transform.setScale(Vector(100, 100)) # it is recommended to use this functio
 ```
 
 ### RectTransform
-A texts Transform determines its [position](#recttransformposition), [rotation](#recttransformrotation), and [scale](#recttransformscale). There is no need to declare any Transform ever, as Pygamemig does it already for every [Object](#objects)
+A texts Transform determines its [position](#recttransformposition), and [rotation](#recttransformrotation). There is no need to declare any RectTransform ever, as Pygamemig does it already for every [Object](#objects)
 
 #### RectTransform.position
 A texts position is expressed with a [Vector2](#vectors). The position origin is in the top left corner of the window, so that increasing the *x* value will move the text right, and increasing the *y* value will move the text down. To change a texts position, you can use:
@@ -357,17 +357,6 @@ If the rotation of *txt* was 90, the new rotation would be 270.
 
 **NOTE:** For every translation it is **very** recommended to use [RealTime.dt](#realtimedeltatime)
 
-
-#### RectTransform.scale
-A texts scale is expressed with a [Vector2](#vectors), and it can be changed using:
-
-```python
-txt.RectTransform.scale = Vector2(100, 100)
-```
-or:
-```python
-txt.RectTransform.setScale(Vector(100, 100)) # it is recommended to use this function instead of changing the property directly
-```
 ### RealTime
 RealTime is a functionality of Pygamemig that handles everything needed to have a constant framerate and constant speeds across different devices and framerates. [Window.Update()](#windowupdate) will wait the correspondent time to begin the next frame. By default, Pygamemig runs at 60 fps, but can be changed like so:
 
