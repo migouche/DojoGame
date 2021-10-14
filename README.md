@@ -143,13 +143,19 @@ Returns the [hadamard product](https://en.wikipedia.org/wiki/Hadamard_product_(m
 Vector2.scale(a, b) # returns Vector2(a.x * b.x, a.y * b.y)
 ```
 
-#### Vector2.scalar
+#### Vector2.dot
 Returns the [dot product](https://en.wikipedia.org/wiki/Dot_product) of the two given vectors:
 
 ```python
-Vector2.scalar(a, b) # returns the dot product between a and b
+Vector2.dot(a, b) # returns the dot product between a and b
 ```
 
+#### Vector2.cross
+Returns the *z* value of the resultant vector from the [cross product](https://en.wikipedia.org/wiki/Cross_product) between two vectors:
+
+```python
+Vector2.cross(a, b)
+```
 #### Vector2.angleDeg
 Returns the angle between two vectors in degrees:
 

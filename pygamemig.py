@@ -33,15 +33,20 @@ class Vector2:
         return Vector2(0, 0)
 
     @staticmethod
-    def scalar(a, b):
+    def dot(a, b):
         return a.x * b.x + a.y * b.y
+
+    @staticmethod
+    def cross(a, b):
+        return a.x * b.y - b.x * a.y
+
     @staticmethod
     def scale(a, b):
         return Vector2(a.x * b.x, a.y * b.y)
 
     @staticmethod
     def angleRad(a, b):
-        return math.acos(Vector2.scalar(a, b) / (a.magnitude() * b.magnitude()))
+        return math.atan2(Vector2.cross(a, b), Vector2.dot(a, b))
 
     @staticmethod
     def angleDeg(a, b):
@@ -52,6 +57,10 @@ class Vector2:
 
     def magnitude(self):
         return math.sqrt(self.x ** 2 + self.y ** 2)
+
+    @staticmethod
+    def distance(_from, _to):
+        return (_to - _from).magnitude()
 
     @staticmethod
     def distance(a, b):
