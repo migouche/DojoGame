@@ -33,7 +33,9 @@ Next download [the latest release of Pygamemig](https://github.com/migouche/pyga
 ### Importing Pygame
 On your script, import Pygamemig:
 
-```from pygamemig import *```
+```python
+from pygamemig import *
+```
 
 ### Creating a Pygamemig window
 First we have to create a window for our sprites and texts to appear. We will [later](#windows) cover the Window class with more detail
