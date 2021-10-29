@@ -287,17 +287,19 @@ class Window:
                     return
 
             self.fillBG(self.bgColor)
-            for obj in objects:
-                size = pygame.transform.rotate(obj.Img, obj.transform.angle).get_rect().size
-                self.screen.blit(pygame.transform.rotate(obj.Img, obj.transform.angle),
-                                 (int(obj.transform.position.x) - int(size[0] / 2),
-                                  int(obj.transform.position.y) - int(size[1] / 2)))
+
             for txt in texts:
                 txt.Text(txt.text)
                 size = pygame.transform.rotate(txt.renderText, txt.rectTransform.angle).get_rect().size
                 self.screen.blit(pygame.transform.rotate(txt.renderText, txt.rectTransform.angle),
                                  (int(txt.rectTransform.position.x) - int(size[0] / 2),
                                   int(txt.rectTransform.position.y) - int(size[1] / 2)))
+
+            for obj in objects:
+                size = pygame.transform.rotate(obj.Img, obj.transform.angle).get_rect().size
+                self.screen.blit(pygame.transform.rotate(obj.Img, obj.transform.angle),
+                                 (int(obj.transform.position.x) - int(size[0] / 2),
+                                  int(obj.transform.position.y) - int(size[1] / 2)))
 
             Input.Update()
             pygame.display.update()
