@@ -15,6 +15,9 @@ RealTime.setDT(1/30)
 print(RealTime.deltaTime)
 print(Vector2.angleDeg(Vector2(0,10), Vector2(1, 0)))
 
+polygon = Object.regularPolygon(5, Vector2(150, 150))
+polygon.transform.setPos(Vector2(window.width/2, window.height/2))
+
 while window.running:
     pac.transform.rotate(30 * RealTime.deltaTime)
     txt.rectTransform.rotate(30 * RealTime.deltaTime)

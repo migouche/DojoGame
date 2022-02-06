@@ -138,6 +138,15 @@ class Object:
         self.offset = scale / 2
         objects.append(self)
 
+    @classmethod
+    def regularPolygon(cls, sides, scale):
+        self = cls.__new__(cls)
+        self.transform = Transform(Vector2.zero(), 0, scale)
+        self.transform.object = self
+        self.Img = pygame.Surface((self.transform.scale.x, self.transform.scale.y))
+        self.rect = pygame.draw.lines(self.Img, (255, 255, 255), True, [(0, 0), (1, 0), (1, 1), (0, 1)])
+        return self
+
 
 class Transform:
     def __init__(self, pos, angle, scale):
@@ -372,20 +381,19 @@ class Mathf:
         else:
             return value
 
-
     Deg2Rad = math.pi / 180
     Rad2Deg = 1 / Deg2Rad
+
 
 quitting = False
 
 
 class RealTime:
     t = time.monotonic()  # init time
-    deltaTime = 1/60
+    deltaTime = 1 / 60
 
     @staticmethod
     def setDT(dt):
-
         RealTime.deltaTime = dt
 
     @staticmethod
