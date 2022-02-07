@@ -19,6 +19,8 @@ polygon = Object.regularPolygon(5, Vector2(150, 150))
 polygon.transform.setPos(Vector2(window.width/2, window.height/2))
 
 while window.running:
+    if Input.GetKeyUp(K_SPACE):
+        print("up")
     pac.transform.rotate(30 * RealTime.deltaTime)
     txt.rectTransform.rotate(30 * RealTime.deltaTime)
     #window.fillBG(white)

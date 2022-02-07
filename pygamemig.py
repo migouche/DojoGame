@@ -344,6 +344,7 @@ Colours = Colors
 # colors
 
 keys = []
+oldKeys = []
 events = []
 
 
@@ -351,6 +352,14 @@ class Input:
     @staticmethod
     def GetKey(key):
         return keys[key]
+
+    @staticmethod
+    def GetKeyDown(key):
+        return (not oldKeys[key]) and keys[key]
+
+    @staticmethod
+    def GetKeyUp(key):
+        return oldKeys[key] and not keys[key]
 
     @staticmethod
     def GetEvent(event):
@@ -366,7 +375,8 @@ class Input:
 
     @staticmethod
     def Update():
-        global keys, events
+        global keys, events, oldKeys
+        oldKeys = keys
         keys = pygame.key.get_pressed()
         events = pygame.event.get()
 
