@@ -337,6 +337,7 @@ class Colors:
     red = Color(255, 0, 0)
     green = Color(0, 255, 0)
     blue = Color(0, 0, 255)
+    purple = Color(100, 0 , 255)
 
 
 Colour = Color

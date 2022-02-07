@@ -9,7 +9,7 @@ txt = Text("freesansbold.ttf", 30, Colors.black, Colours.white)
 txt.Text("wtf")
 txt.rectTransform.setPos(Vector2(100, 100))
 
-window.setBG(Color.fromHex("#ff0000"))
+window.setBG(Colors.purple)
 
 RealTime.setDT(1/30)
 print(RealTime.deltaTime)
