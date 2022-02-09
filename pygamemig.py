@@ -290,10 +290,9 @@ class Window:
 
     def Update(self):
         if self.running:
-            for event in Input.Events():
-                if event.type == QUIT:
-                    self.Quit()
-                    return
+            if Input.GetEvent(QUIT):
+                self.Quit()
+                return
 
             self.fillBG(self.bgColor)
 
@@ -337,7 +336,7 @@ class Colors:
     red = Color(255, 0, 0)
     green = Color(0, 255, 0)
     blue = Color(0, 0, 255)
-    purple = Color(100, 0 , 255)
+    purple = Color(100, 0, 255)
 
 
 Colour = Color
@@ -363,16 +362,25 @@ class Input:
         return oldKeys[key] and not keys[key]
 
     @staticmethod
-    def GetEvent(event):
+    def GetEvent(event, atribute: str = "", value=None):
         b = False
-        for ev in pygame.event.get():
+        for ev in events:
             if ev.type == event:
-                b = True
+                if atribute == "":
+                    b = True
+                else:
+                    if getattr(ev, atribute) == value:
+                        b = True
         return b
 
+    # Mouse
     @staticmethod
-    def Events():
-        return pygame.event.get()
+    def GetMouseButtonDown(button):
+        return Input.GetEvent(MOUSEBUTTONDOWN, "button", button)
+
+    @staticmethod
+    def GetMouseButtonUp(button):
+        return Input.GetEvent(MOUSEBUTTONUP, "button", button)
 
     @staticmethod
     def Update():
