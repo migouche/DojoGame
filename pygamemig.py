@@ -59,10 +59,6 @@ class Vector2:
         return math.sqrt(self.x ** 2 + self.y ** 2)
 
     @staticmethod
-    def distance(_from, _to):
-        return (_to - _from).magnitude()
-
-    @staticmethod
     def distance(a, b):
         return (b - a).magnitude()
 
@@ -189,7 +185,7 @@ class Text:
         self.textColor = txtColor
         self.BGColor = bgColor
         self.renderFont = pygame.font.Font(self.font, self.size)
-        self.renderText = None
+        self.renderText = pygame.Surface.__new__(pygame.Surface)
         self.Text(self.text)
         self.rect = self.renderText.get_rect()
         self.rect.center = (self.rectTransform.position.x, self.rectTransform.position.y)
@@ -362,25 +358,37 @@ class Input:
         return oldKeys[key] and not keys[key]
 
     @staticmethod
-    def GetEvent(event, atribute: str = "", value=None):
+    def GetEvent(event, attribute: str = "", value=None):
         b = False
         for ev in events:
             if ev.type == event:
-                if atribute == "":
+                if attribute == "":
                     b = True
                 else:
-                    if getattr(ev, atribute) == value:
+                    if getattr(ev, attribute) == value:
                         b = True
         return b
 
+    @staticmethod
+    def GetEventProperty(event, prop: str):
+        for ev in events:
+            if ev.type == event:
+                return getattr(ev, prop)
+        raise Exception(f"Event '{event}' doesn't exist. Maybe doesn't happen every frame?")
+
     # Mouse
     @staticmethod
-    def GetMouseButtonDown(button):
+    def MouseButtonDown(button):
         return Input.GetEvent(MOUSEBUTTONDOWN, "button", button)
 
     @staticmethod
-    def GetMouseButtonUp(button):
+    def MouseButtonUp(button):
         return Input.GetEvent(MOUSEBUTTONUP, "button", button)
+
+    @staticmethod
+    def MousePosition():
+        pos = pygame.mouse.get_pos()
+        return Vector2(pos[0], pos[1])
 
     @staticmethod
     def Update():
@@ -421,3 +429,4 @@ class RealTime:
         wait = RealTime.t - time.monotonic()
         if wait > 0:
             time.sleep(wait)
+

@@ -24,8 +24,11 @@ while window.running:
         print("up")
     pac.transform.rotate(30 * RealTime.deltaTime)
     txt.rectTransform.rotate(30 * RealTime.deltaTime)
+    pac.transform.position = Input.MousePosition()
 
-    if Input.GetMouseButtonUp(1):
+    if Input.MouseButtonUp(1):
         print("yeet")
+
+    print(Input.MousePosition())
     #window.fillBG(white)
     window.Update()
