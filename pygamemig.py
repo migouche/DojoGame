@@ -3,6 +3,8 @@ from pygame.constants import *
 import math
 import random
 import time
+from enum import Enum
+from typing import Union
 
 
 class Vector2:
@@ -27,6 +29,9 @@ class Vector2:
 
     def __eq__(self, v):
         return self.x == v.x and self.y == v.y
+
+    def toTuple(self):
+        return self.x, self.y
 
     @staticmethod
     def zero():
@@ -57,6 +62,9 @@ class Vector2:
 
     def magnitude(self):
         return math.sqrt(self.x ** 2 + self.y ** 2)
+
+    def unit(self):
+        return self / self.magnitude()
 
     @staticmethod
     def distance(a, b):
@@ -122,6 +130,39 @@ class Vector2Int:
 
 objects = []
 texts = []
+debug = []
+lambdas = {}
+
+
+class Color:
+    def __init__(self, r, g, b):
+        self.red = r
+        self.green = g
+        self.blue = b
+
+    def __eq__(self, c):
+        return self.red == c.red and self.green == c.green and self.blue == c.blue
+
+    @staticmethod
+    def fromHex(h):
+        c = tuple(int(h.lstrip('#')[i:i + 2], 16) for i in (0, 2, 4))
+        return Color(c[0], c[1], c[2])
+
+    def toTuple(self):
+        return self.red, self.green, self.blue
+
+
+class Colors:
+    white = Color(255, 255, 255)
+    black = Color(0, 0, 0)
+    red = Color(255, 0, 0)
+    green = Color(0, 255, 0)
+    blue = Color(0, 0, 255)
+    purple = Color(100, 0, 255)
+
+
+Colour = Color
+Colours = Colors
 
 
 class Object:
@@ -135,13 +176,137 @@ class Object:
         objects.append(self)
 
     @classmethod
-    def regularPolygon(cls, sides, scale):
+    def regularPolygon(cls, scale):  # have to add sides parameter
         self = cls.__new__(cls)
         self.transform = Transform(Vector2.zero(), 0, scale)
         self.transform.object = self
         self.Img = pygame.Surface((self.transform.scale.x, self.transform.scale.y))
         self.rect = pygame.draw.lines(self.Img, (255, 255, 255), True, [(0, 0), (1, 0), (1, 1), (0, 1)])
+
         return self
+
+
+class ForceMode(Enum):
+    Force = 1
+    Acceleration = 2
+    Impulse = 3
+    VelocityChange = 4
+
+
+class Rigidbody:
+    def __init__(self, pos: Vector2 = Vector2.zero(), angle: float = 0):
+        self.position = pos
+        self.angle = angle
+        self.velocity = Vector2.zero()
+        self.kinematic = False
+
+    def translate(self, pos: Vector2):
+        self.position += pos
+
+    def rotate(self, angle: float):
+        self.angle += angle
+
+
+class Circle:
+    def __init__(self, radius: int, outline: int = 0, color: Color = Colors.black):
+        self.rigidbody = Rigidbody()
+        self.rigidbody.object = self
+        self.radius = radius
+        self.outline = outline
+        self.color = color
+        self.collider = CircleCollider(self)
+        lambdas.update(
+            {self.rigidbody: lambda screen, rb: pygame.draw.circle(screen,
+                                                                   rb.object.color.toTuple(),
+                                                                   (rb.position.x, rb.position.y),
+                                                                   rb.object.radius, rb.object.outline)})
+
+
+class Raycast:
+    @staticmethod
+    def raycast(start: Vector2, _dir: Union[float, Vector2], length: float = None):
+        pos = start
+        step = 0
+        while (length is None or Vector2.distance(pos, start) < length) and (  # checks for length and for inside screen
+                0 < pos.x < pygame.display.get_window_size()[0] and
+                0 < pos.y < pygame.display.get_window_size()[1]):
+            pos = start + _dir * step
+
+            for rb in lambdas:
+                if hasattr(rb.object, 'collider') and rb.object.collider.hitInsideCollider(pos):
+                    return rb.object.collider.hitInsideCollider(pos)
+            step += 1
+        return RaycastHit(False)
+
+
+class RaycastHit:
+    def __init__(self, collide: bool, point: Vector2 = None, normal: Vector2 = None, dist: float = None):
+        self.collide = collide
+        self.point = point
+        self.normal = normal
+        self.distance = dist
+
+    def __bool__(self):
+        return self.collide
+
+
+class CircleCollider:
+    def __init__(self, circle: Circle):
+        self.circle = circle
+
+    def hitInsideCollider(self, point: Vector2):
+        if Vector2.distance(self.circle.rigidbody.position, point) <= self.circle.radius:
+            n = (point - self.circle.rigidbody.position).unit()
+            return RaycastHit(True, self.circle.rigidbody.position + n * self.circle.radius, n,
+                              Vector2.distance(self.circle.rigidbody.position, point))
+        else:
+            return RaycastHit(False)
+
+
+class RectangleCollider:
+    def __init__(self, rectangle):
+        self.rectangle = rectangle
+
+
+class Square:
+    def __init__(self, side: int, color: Color = Colors.black):
+        self.rigidbody = Rigidbody()
+        self.side = side
+        self.color = color
+        self.rigidbody.object = self
+        lambdas.update(
+            {self.rigidbody: lambda screen, rb: rb.object.draw(screen)}
+        )
+
+    def draw(self, screen):  # doing this cause of not multi-line lambdas :v
+
+        self.colorkey = Colors.white if self.color == Colors.black else Colors.black
+
+        #  Message for future me: I went utra-instinct doing this, I don't remember what any of this means
+        initSquare = pygame.Surface((self.side, self.side))
+        initSquare.set_colorkey(self.colorkey.toTuple())
+        initSquare.fill(self.color.toTuple())
+
+        imgcopy = initSquare.copy()
+        imgcopy.set_colorkey(self.colorkey.toTuple())
+        rect = imgcopy.get_rect()
+        rect.center = (self.rigidbody.position.x, self.rigidbody.position.y)
+        old_center = rect.center
+        rotSquare = pygame.transform.rotate(initSquare, self.rigidbody.angle)
+        rect = rotSquare.get_rect()
+        rect.center = old_center
+        screen.blit(rotSquare, rect)
+
+
+class Lines:
+    @staticmethod
+    def drawLine(_from: Vector2, _to: Vector2, width: int = 1, color: Color = Colors.black):
+        debug.append(lambda screen: pygame.draw.line(screen, color.toTuple(), _from.toTuple(), _to.toTuple(), width))
+
+    @staticmethod
+    def drawRay(start: Vector2, _dir: Union[float, Vector2], length: int, width: int = 1, color: Color = Colors.black):
+        vec = _dir.unit() * length if type(_dir) is Vector2 else Vector2.fromAngle(_dir * Mathf.Deg2Rad).unit() * length
+        Lines.drawLine(start, start + vec, width, color)
 
 
 class Transform:
@@ -285,6 +450,7 @@ class Window:
         pygame.display.set_icon(self.icon)
 
     def Update(self):
+        global debug
         if self.running:
             if Input.GetEvent(QUIT):
                 self.Quit()
@@ -304,6 +470,13 @@ class Window:
                 self.screen.blit(pygame.transform.rotate(obj.Img, obj.transform.angle),
                                  (int(obj.transform.position.x) - int(size[0] / 2),
                                   int(obj.transform.position.y) - int(size[1] / 2)))
+            for key in lambdas:
+                lambdas[key](self.screen, key)
+
+            for func in debug:
+                func(self.screen)
+
+            debug = []
 
             Input.Update()
             pygame.display.update()
@@ -314,29 +487,6 @@ class Window:
         pygame.quit()
 
 
-class Color:
-    def __init__(self, r, g, b):
-        self.red = r
-        self.green = g
-        self.blue = b
-
-    @staticmethod
-    def fromHex(h):
-        c = tuple(int(h.lstrip('#')[i:i + 2], 16) for i in (0, 2, 4))
-        return Color(c[0], c[1], c[2])
-
-
-class Colors:
-    white = Color(255, 255, 255)
-    black = Color(0, 0, 0)
-    red = Color(255, 0, 0)
-    green = Color(0, 255, 0)
-    blue = Color(0, 0, 255)
-    purple = Color(100, 0, 255)
-
-
-Colour = Color
-Colours = Colors
 # colors
 
 keys = []
@@ -429,4 +579,3 @@ class RealTime:
         wait = RealTime.t - time.monotonic()
         if wait > 0:
             time.sleep(wait)
-
