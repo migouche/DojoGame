@@ -74,8 +74,12 @@ class Vector2:
         return self / self.magnitude()
 
     @staticmethod
-    def fromAngle(angle):
+    def fromAngleRad(angle):
         return Vector2(math.cos(angle), math.sin(angle))
+
+    @staticmethod
+    def fromAngleDeg(angle):
+        return Vector2.fromAngleRad(angle * Mathf.Deg2Rad)
 
     @staticmethod
     def random():
@@ -87,7 +91,7 @@ class Vector2:
 
     @staticmethod
     def radRandom(a, b):
-        return Vector2.fromAngle(random.randint(int(a * 100), int(b * 100)) / 100).normalized()
+        return Vector2.fromAngleRad(random.randint(int(a * 100), int(b * 100)) / 100).normalized()
 
 
 class Vector2Int:
@@ -135,13 +139,14 @@ lambdas = {}
 
 
 class Color:
-    def __init__(self, r, g, b):
+    def __init__(self, r: int, g: int, b: int, a:int = 255):
         self.red = r
         self.green = g
         self.blue = b
+        self.alpha = a
 
     def __eq__(self, c):
-        return self.red == c.red and self.green == c.green and self.blue == c.blue
+        return self.red == c.red and self.green == c.green and self.blue == c.blue and self.alpha == c.alpha
 
     @staticmethod
     def fromHex(h):
@@ -149,7 +154,7 @@ class Color:
         return Color(c[0], c[1], c[2])
 
     def toTuple(self):
-        return self.red, self.green, self.blue
+        return self.red, self.green, self.blue, self.alpha
 
 
 class Colors:
@@ -205,6 +210,14 @@ class Rigidbody:
 
     def rotate(self, angle: float):
         self.angle += angle
+
+    def rotateAroundOrigin(self, angle: float, origin: Vector2):
+        s = math.sin(angle * Mathf.Deg2Rad)
+        c = math.cos(angle * Mathf.Deg2Rad)
+
+        point = self.position - origin
+
+        self.position = Vector2(point.x * c - point.y * s + origin.x, point.x * s + point.y * c + origin.y)
 
 
 class Circle:
@@ -263,39 +276,78 @@ class CircleCollider:
             return RaycastHit(False)
 
 
-class RectangleCollider:
-    def __init__(self, rectangle):
-        self.rectangle = rectangle
-
-
-class Square:
-    def __init__(self, side: int, color: Color = Colors.black):
+class Rectangle:
+    def __init__(self, w: int, h: int, color: Color = Colors.black):
         self.rigidbody = Rigidbody()
-        self.side = side
+        self.width = w
+        self.height = h
         self.color = color
         self.rigidbody.object = self
-        lambdas.update(
-            {self.rigidbody: lambda screen, rb: rb.object.draw(screen)}
-        )
+        self.collider = RectangleCollider(self)
+        lambdas.update({self.rigidbody: lambda screen, rb: rb.object.draw(screen)})
 
     def draw(self, screen):  # doing this cause of not multi-line lambdas :v
-
-        self.colorkey = Colors.white if self.color == Colors.black else Colors.black
+        colorkey = Colors.white if self.color == Colors.black else Colors.black
 
         #  Message for future me: I went utra-instinct doing this, I don't remember what any of this means
-        initSquare = pygame.Surface((self.side, self.side))
-        initSquare.set_colorkey(self.colorkey.toTuple())
+        initSquare = pygame.Surface((self.width, self.height))
+        initSquare.set_colorkey(colorkey.toTuple())
         initSquare.fill(self.color.toTuple())
 
         imgcopy = initSquare.copy()
-        imgcopy.set_colorkey(self.colorkey.toTuple())
+        imgcopy.set_colorkey(colorkey.toTuple())
         rect = imgcopy.get_rect()
         rect.center = (self.rigidbody.position.x, self.rigidbody.position.y)
         old_center = rect.center
-        rotSquare = pygame.transform.rotate(initSquare, self.rigidbody.angle)
+        rotSquare = pygame.transform.rotate(initSquare, -self.rigidbody.angle)
         rect = rotSquare.get_rect()
         rect.center = old_center
         screen.blit(rotSquare, rect)
+
+
+class RectangleCollider:
+    def __init__(self, rectangle: Rectangle):
+        self.rectangle = rectangle
+
+    def hitInsideCollider(self, point: Vector2):  # approximation with starting circle
+
+        diagonal = math.sqrt(((self.rectangle.width / 2) ** 2) + ((self.rectangle.height / 2) ** 2))
+        if Vector2.distance(self.rectangle.rigidbody.position, point) < diagonal:
+            rb = Rigidbody(point)
+
+            rb.rotateAroundOrigin(-self.rectangle.rigidbody.angle, self.rectangle.rigidbody.position)
+
+            p = rb.position
+            pos = self.rectangle.rigidbody.position
+
+            # rectangle is horizontal: check for sides:
+
+            w = self.rectangle.width
+            h = self.rectangle.height
+
+            if (pos.x - w / 2 < p.x < pos.x + w / 2 and
+                    pos.y - h / 2 < p.y < pos.y + h / 2):  # we suppose we are in surface now
+                offset = 1  # in pixels. Better if int
+                normal = None
+                if pos.y - (h/2 - offset) > p.y:
+                    normal = Vector2(0, -1)
+                elif pos.y + (h/2 - offset) < p.y:
+                    normal = Vector2(0, 1)
+                elif pos.x - (2/2 - offset) > p.x:
+                    normal = Vector2(-1, 0)
+                elif pos.x + (w/2 - offset) < p.x:
+                    normal = Vector2(1, 0)
+                else:
+                    return RaycastHit(False)
+                vec = Vector2.fromAngleDeg(Vector2.angleDeg(Vector2(1, 0), normal) + self.rectangle.rigidbody.angle)
+                vecf = Vector2(vec.x, -vec.y)
+                return RaycastHit(True, point, vec.unit())
+            return RaycastHit(False)
+
+
+class Square(Rectangle):
+    def __init__(self, side: int, color: Color = Colors.black):
+        super().__init__(side, side, color)
 
 
 class Lines:
@@ -305,7 +357,7 @@ class Lines:
 
     @staticmethod
     def drawRay(start: Vector2, _dir: Union[float, Vector2], length: int, width: int = 1, color: Color = Colors.black):
-        vec = _dir.unit() * length if type(_dir) is Vector2 else Vector2.fromAngle(_dir * Mathf.Deg2Rad).unit() * length
+        vec = _dir.unit() * length if type(_dir) is Vector2 else Vector2.fromAngleDeg(_dir).unit() * length
         Lines.drawLine(start, start + vec, width, color)
 
 
@@ -383,8 +435,8 @@ class Text:
     def updateText(self):
         self.renderFont = pygame.font.Font(self.font, self.size)
         self.renderText = self.renderFont.render(str(self.text), True,
-                                                 (self.textColor.red, self.textColor.green, self.textColor.blue),
-                                                 (self.BGColor.red, self.BGColor.green, self.BGColor.blue))
+                                                 self.textColor.toTuple(),
+                                                 self.BGColor.toTuple())
 
 
 class RectTransform:
@@ -436,7 +488,7 @@ class Window:
 
     def fillBG(self, color):
         if self.running:
-            self.screen.fill((color.red, color.green, color.blue))
+            self.screen.fill(color.toTuple())
 
     def setBG(self, color):
         self.bgColor = color
@@ -461,13 +513,13 @@ class Window:
             for txt in texts:
                 txt.Text(txt.text)
                 size = pygame.transform.rotate(txt.renderText, txt.rectTransform.angle).get_rect().size
-                self.screen.blit(pygame.transform.rotate(txt.renderText, txt.rectTransform.angle),
+                self.screen.blit(pygame.transform.rotate(txt.renderText, -txt.rectTransform.angle),
                                  (int(txt.rectTransform.position.x) - int(size[0] / 2),
                                   int(txt.rectTransform.position.y) - int(size[1] / 2)))
 
             for obj in objects:
                 size = pygame.transform.rotate(obj.Img, obj.transform.angle).get_rect().size
-                self.screen.blit(pygame.transform.rotate(obj.Img, obj.transform.angle),
+                self.screen.blit(pygame.transform.rotate(obj.Img, -obj.transform.angle),
                                  (int(obj.transform.position.x) - int(size[0] / 2),
                                   int(obj.transform.position.y) - int(size[1] / 2)))
             for key in lambdas:

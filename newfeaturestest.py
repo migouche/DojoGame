@@ -5,7 +5,7 @@ window = Window(800, 800)
 pac = Object("pacman.png", Vector2(200, 100))
 pac.transform.setPos(Vector2(400, 400))
 
-txt = Text("freesansbold.ttf", 30, Colors.black, Colours.white)
+txt = Text("freesansbold.ttf", 30, Colors.black, Color(255, 255, 255, 0))
 txt.Text("wtf")
 txt.rectTransform.setPos(Vector2(100, 100))
 
@@ -16,19 +16,26 @@ print(Vector2.angleDeg(Vector2(0, 10), Vector2(1, 0)))
 
 square = Square(40, color=Colors.purple)
 square.rigidbody.position = Vector2(200, 200)
-square.rigidbody.angle = -20
+
+point2 = Circle(10)
+point2.rigidbody.position = Vector2(300, 250)
+point2.rigidbody.rotateAroundOrigin(90, square.rigidbody.position)
 
 point = Circle(10, color=Colors.purple)
 point.rigidbody.position = Vector2(300, 250)
 
-fsquare = Square(40, color=Colors.black)
-fsquare.rigidbody.position = square.rigidbody.position
+rec = Rectangle(200, 100)
+rec.rigidbody.position = Vector2(400, 400)
+rec.rigidbody.angle = 45
 
+_dir = Vector2(0, -1)
 while window.running:
+    if Input.MouseButtonDown(1):
+        _dir.y *= -1
+    Lines.drawRay(Input.MousePosition(), _dir, 350)
+    square.rigidbody.rotate(3)
 
-    Lines.drawRay(Input.MousePosition(), Vector2(-1, -1), 350)
-
-    hit = Raycast.raycast(Input.MousePosition(), Vector2(-1, -1), 350)
+    hit = Raycast.raycast(Input.MousePosition(), _dir, 350)
 
     if hit:
         Lines.drawRay(hit.point, hit.normal, 100)
@@ -47,6 +54,6 @@ while window.running:
     # window.fillBG(white)
     window.Update()
 
-    if Input.GetKey(K_q):
+    if Input.GetKeyDown(K_q):
         window.Quit()
     # print(pygame.display.get_window_size())
