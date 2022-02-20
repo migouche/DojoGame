@@ -28,16 +28,18 @@ rec = Rectangle(200, 100)
 rec.rigidbody.position = Vector2(400, 400)
 rec.rigidbody.angle = 45
 
+
+player = Square(100)
 _dir = Vector2(0, -1)
+
+#RealTime.setDT(1/20)
 while window.running:
     if Input.MouseButtonDown(1):
         _dir.y *= -1
     Lines.drawRay(Input.MousePosition(), _dir, 350)
     square.rigidbody.rotate(3)
 
-    hit = Raycast.raycast(Input.MousePosition(), _dir, 350)
-
-    if hit:
+    if hit := Raycast.raycast(Input.MousePosition(), _dir, 350):
         Lines.drawRay(hit.point, hit.normal, 100)
     # print(hit.point)
 
@@ -46,6 +48,15 @@ while window.running:
     pac.transform.rotate(30 * RealTime.deltaTime)
     txt.rectTransform.rotate(30 * RealTime.deltaTime)
     pac.transform.position = Input.MousePosition()
+
+    if Input.GetKey(K_a):
+        player.rigidbody.addForce(Vector2(-30, 0))
+    if Input.GetKey(K_d):
+        player.rigidbody.addForce(Vector2(30, 0))
+    if Input.GetKey(K_w):
+        player.rigidbody.addForceAtPosition(Vector2(0, -30), Vector2(10, 0), space=Space.Self)
+    if Input.GetKey(K_s):
+        player.rigidbody.addForce(Vector2(0, 30))
 
     if Input.MouseButtonUp(1):
         print("yeet")

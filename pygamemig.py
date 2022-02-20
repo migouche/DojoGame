@@ -63,9 +63,6 @@ class Vector2:
     def magnitude(self):
         return math.sqrt(self.x ** 2 + self.y ** 2)
 
-    def unit(self):
-        return self / self.magnitude()
-
     @staticmethod
     def distance(a, b):
         return (b - a).magnitude()
@@ -139,7 +136,7 @@ lambdas = {}
 
 
 class Color:
-    def __init__(self, r: int, g: int, b: int, a:int = 255):
+    def __init__(self, r: int, g: int, b: int, a: int = 255):
         self.red = r
         self.green = g
         self.blue = b
@@ -198,12 +195,30 @@ class ForceMode(Enum):
     VelocityChange = 4
 
 
+class Space(Enum):
+    World = 1
+    Self = 2
+
+
+class Action:
+    def __init__(self, dSpeed: Vector2 = Vector2.zero(), dAngle: float = 0):
+        self.dSpeed = dSpeed
+        self.dAngle = dAngle
+
+    def __add__(self, other):
+        return Action(self.dSpeed + other.dSpeed, self.dAngle + other.dAngle)
+
+
 class Rigidbody:
-    def __init__(self, pos: Vector2 = Vector2.zero(), angle: float = 0):
+    def __init__(self, mass: float, pos: Vector2 = Vector2.zero(), angle: float = 0):
+        self.totalAction = Action()
         self.position = pos
         self.angle = angle
         self.velocity = Vector2.zero()
+        self.angularVelocity = 0
+        self.mass = mass
         self.kinematic = False
+        self.useGravity = False  # May use it later, may not
 
     def translate(self, pos: Vector2):
         self.position += pos
@@ -219,10 +234,42 @@ class Rigidbody:
 
         self.position = Vector2(point.x * c - point.y * s + origin.x, point.x * s + point.y * c + origin.y)
 
+    def addForceAtPosition(self, force: Vector2, position: Vector2,
+                           mode: ForceMode = ForceMode.Force,
+                           space: Space = Space.World):
+
+        posRel = position if space == Space.Self else position - self.position if space == Space.World else None
+
+        if posRel is None:
+            raise TypeError("Wrong Space given")
+
+        if mode == ForceMode.Force:  # dv = F * dt / m
+            self.totalAction += Action(f := force * RealTime.deltaTime / self.mass, Vector2.cross(posRel, f))
+        elif mode == ForceMode.Acceleration:  # dv = F * dt
+            self.totalAction += Action(f := force * RealTime.deltaTime, Vector2.cross(posRel, f))
+        elif mode == ForceMode.Impulse:  # dv = F / m
+            self.totalAction += Action(f := force / self.mass, Vector2.cross(posRel, f))
+        elif mode == ForceMode.VelocityChange:  # dv = F
+            self.totalAction += Action(f := force, Vector2.cross(posRel, f))
+        else:
+            raise TypeError("Wrong ForceMode given")
+
+    def addForce(self, force: Vector2, mode: ForceMode = ForceMode.Force):
+        self.addForceAtPosition(force, self.position, mode)
+
+    def updateAction(self):
+        self.velocity += self.totalAction.dSpeed
+        self.angularVelocity += self.totalAction.dAngle
+
+        self.position += self.velocity * RealTime.deltaTime
+        self.angle += self.angularVelocity * RealTime.deltaTime
+
+        self.totalAction = Action()
+
 
 class Circle:
     def __init__(self, radius: int, outline: int = 0, color: Color = Colors.black):
-        self.rigidbody = Rigidbody()
+        self.rigidbody = Rigidbody(1)
         self.rigidbody.object = self
         self.radius = radius
         self.outline = outline
@@ -269,7 +316,7 @@ class CircleCollider:
 
     def hitInsideCollider(self, point: Vector2):
         if Vector2.distance(self.circle.rigidbody.position, point) <= self.circle.radius:
-            n = (point - self.circle.rigidbody.position).unit()
+            n = (point - self.circle.rigidbody.position).normalized()
             return RaycastHit(True, self.circle.rigidbody.position + n * self.circle.radius, n,
                               Vector2.distance(self.circle.rigidbody.position, point))
         else:
@@ -278,7 +325,7 @@ class CircleCollider:
 
 class Rectangle:
     def __init__(self, w: int, h: int, color: Color = Colors.black):
-        self.rigidbody = Rigidbody()
+        self.rigidbody = Rigidbody(1)
         self.width = w
         self.height = h
         self.color = color
@@ -313,7 +360,7 @@ class RectangleCollider:
 
         diagonal = math.sqrt(((self.rectangle.width / 2) ** 2) + ((self.rectangle.height / 2) ** 2))
         if Vector2.distance(self.rectangle.rigidbody.position, point) < diagonal:
-            rb = Rigidbody(point)
+            rb = Rigidbody(1, point)
 
             rb.rotateAroundOrigin(-self.rectangle.rigidbody.angle, self.rectangle.rigidbody.position)
 
@@ -329,19 +376,18 @@ class RectangleCollider:
                     pos.y - h / 2 < p.y < pos.y + h / 2):  # we suppose we are in surface now
                 offset = 1  # in pixels. Better if int
                 normal = None
-                if pos.y - (h/2 - offset) > p.y:
+                if pos.y - (h / 2 - offset) > p.y:
                     normal = Vector2(0, -1)
-                elif pos.y + (h/2 - offset) < p.y:
+                elif pos.y + (h / 2 - offset) < p.y:
                     normal = Vector2(0, 1)
-                elif pos.x - (2/2 - offset) > p.x:
+                elif pos.x - (2 / 2 - offset) > p.x:
                     normal = Vector2(-1, 0)
-                elif pos.x + (w/2 - offset) < p.x:
+                elif pos.x + (w / 2 - offset) < p.x:
                     normal = Vector2(1, 0)
                 else:
                     return RaycastHit(False)
                 vec = Vector2.fromAngleDeg(Vector2.angleDeg(Vector2(1, 0), normal) + self.rectangle.rigidbody.angle)
-                vecf = Vector2(vec.x, -vec.y)
-                return RaycastHit(True, point, vec.unit())
+                return RaycastHit(True, point, vec.normalized())
             return RaycastHit(False)
 
 
@@ -357,7 +403,7 @@ class Lines:
 
     @staticmethod
     def drawRay(start: Vector2, _dir: Union[float, Vector2], length: int, width: int = 1, color: Color = Colors.black):
-        vec = _dir.unit() * length if type(_dir) is Vector2 else Vector2.fromAngleDeg(_dir).unit() * length
+        vec = _dir.normalized() * length if type(_dir) is Vector2 else Vector2.fromAngleDeg(_dir).normalized() * length
         Lines.drawLine(start, start + vec, width, color)
 
 
@@ -522,6 +568,11 @@ class Window:
                 self.screen.blit(pygame.transform.rotate(obj.Img, -obj.transform.angle),
                                  (int(obj.transform.position.x) - int(size[0] / 2),
                                   int(obj.transform.position.y) - int(size[1] / 2)))
+
+            for rb in lambdas:
+                if type(rb) is Rigidbody:
+                    rb.updateAction()
+
             for key in lambdas:
                 lambdas[key](self.screen, key)
 
