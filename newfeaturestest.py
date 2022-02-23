@@ -15,29 +15,33 @@ print(RealTime.deltaTime)
 print(Vector2.angleDeg(Vector2(0, 10), Vector2(1, 0)))
 
 square = Square(40, color=Colors.purple)
-square.rigidbody.position = Vector2(200, 200)
+square.transform.position = Vector2(200, 200)
 
 point2 = Circle(10)
-point2.rigidbody.position = Vector2(300, 250)
-point2.rigidbody.rotateAroundOrigin(90, square.rigidbody.position)
+point2.transform.position = Vector2(300, 250)
+point2.transform.rotateAroundOrigin(90, square.transform.position)
 
-point = Circle(10, color=Colors.purple)
-point.rigidbody.position = Vector2(300, 250)
+
+point = Circle(10, 4, color=Colors.purple)
+point.transform.position = Vector2(300, 250)
 
 rec = Rectangle(200, 100)
-rec.rigidbody.position = Vector2(400, 400)
-rec.rigidbody.angle = 45
+rec.transform.position = Vector2(400, 400)
+rec.transform.angle = 45
 
 
 player = Square(100)
 _dir = Vector2(0, -1)
 
+lastCircle = Circle(radius=5, color=Colors.white, position=rec.transform.position) #  should be and is in the middle
+
 #RealTime.setDT(1/20)
 while window.running:
+    print(square.rigidbody.mass)
     if Input.MouseButtonDown(1):
         _dir.y *= -1
     Lines.drawRay(Input.MousePosition(), _dir, 350)
-    square.rigidbody.rotate(3)
+    square.transform.rotate(3)
 
     if hit := Raycast.raycast(Input.MousePosition(), _dir, 350):
         Lines.drawRay(hit.point, hit.normal, 100)

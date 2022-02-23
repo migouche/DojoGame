@@ -200,6 +200,34 @@ class Space(Enum):
     Self = 2
 
 
+class Raycast:
+    @staticmethod
+    def raycast(start: Vector2, _dir: Union[float, Vector2], length: float = None):
+        pos = start
+        step = 0
+        while (length is None or Vector2.distance(pos, start) < length) and (  # checks for length and for inside screen
+                0 < pos.x < pygame.display.get_window_size()[0] and
+                0 < pos.y < pygame.display.get_window_size()[1]):
+            pos = start + _dir * step
+
+            for obj in lambdas:
+                if hasattr(obj, 'collider') and obj.collider.hitInsideCollider(pos):
+                    return obj.collider.hitInsideCollider(pos)
+            step += 1
+        return RaycastHit(False)
+
+
+class RaycastHit:
+    def __init__(self, collide: bool, point: Vector2 = None, normal: Vector2 = None, dist: float = None):
+        self.collide = collide
+        self.point = point
+        self.normal = normal
+        self.distance = dist
+
+    def __bool__(self):
+        return self.collide
+
+
 class Action:
     def __init__(self, dSpeed: Vector2 = Vector2.zero(), dAngle: float = 0):
         self.dSpeed = dSpeed
@@ -210,35 +238,22 @@ class Action:
 
 
 class Rigidbody:
-    def __init__(self, mass: float, pos: Vector2 = Vector2.zero(), angle: float = 0):
+    def __init__(self, mass: float):
         self.totalAction = Action()
-        self.position = pos
-        self.angle = angle
+        # self.position = pos
+        # self.angle = angle
         self.velocity = Vector2.zero()
         self.angularVelocity = 0
         self.mass = mass
         self.kinematic = False
         self.useGravity = False  # May use it later, may not
 
-    def translate(self, pos: Vector2):
-        self.position += pos
-
-    def rotate(self, angle: float):
-        self.angle += angle
-
-    def rotateAroundOrigin(self, angle: float, origin: Vector2):
-        s = math.sin(angle * Mathf.Deg2Rad)
-        c = math.cos(angle * Mathf.Deg2Rad)
-
-        point = self.position - origin
-
-        self.position = Vector2(point.x * c - point.y * s + origin.x, point.x * s + point.y * c + origin.y)
-
     def addForceAtPosition(self, force: Vector2, position: Vector2,
                            mode: ForceMode = ForceMode.Force,
                            space: Space = Space.World):
 
-        posRel = position if space == Space.Self else position - self.position if space == Space.World else None
+        posRel = position if space == Space.Self else \
+            position - self.object.transform.position if space == Space.World else None
 
         if posRel is None:
             raise TypeError("Wrong Space given")
@@ -255,59 +270,40 @@ class Rigidbody:
             raise TypeError("Wrong ForceMode given")
 
     def addForce(self, force: Vector2, mode: ForceMode = ForceMode.Force):
-        self.addForceAtPosition(force, self.position, mode)
+        self.addForceAtPosition(force, self.object.transform.position, mode)
 
     def updateAction(self):
         self.velocity += self.totalAction.dSpeed
         self.angularVelocity += self.totalAction.dAngle
 
-        self.position += self.velocity * RealTime.deltaTime
-        self.angle += self.angularVelocity * RealTime.deltaTime
+        self.object.transform.position += self.velocity * RealTime.deltaTime
+        self.object.transform.angle += self.angularVelocity * RealTime.deltaTime
 
         self.totalAction = Action()
 
 
-class Circle:
-    def __init__(self, radius: int, outline: int = 0, color: Color = Colors.black):
-        self.rigidbody = Rigidbody(1)
-        self.rigidbody.object = self
-        self.radius = radius
-        self.outline = outline
+class __BaseObject:
+    def __init__(self, _lambda, mass: float, position: Vector2, rotation: float, collider: type, color: Color,
+                 *args, **kwargs):  # args contains parameters to pass to the collider __init__()
+        for kwarg in kwargs.items():  # kwargs contains all attributes that need to be added to the object
+            setattr(self, kwarg[0], kwarg[1])
         self.color = color
-        self.collider = CircleCollider(self)
-        lambdas.update(
-            {self.rigidbody: lambda screen, rb: pygame.draw.circle(screen,
-                                                                   rb.object.color.toTuple(),
-                                                                   (rb.position.x, rb.position.y),
-                                                                   rb.object.radius, rb.object.outline)})
+        self.rigidbody = Rigidbody(mass)
+        self.transform = Transform(position, rotation, Vector2.zero())
+        self.rigidbody.object = self
+        self.collider = collider(*args)
+        lambdas.update({self: _lambda})
 
 
-class Raycast:
-    @staticmethod
-    def raycast(start: Vector2, _dir: Union[float, Vector2], length: float = None):
-        pos = start
-        step = 0
-        while (length is None or Vector2.distance(pos, start) < length) and (  # checks for length and for inside screen
-                0 < pos.x < pygame.display.get_window_size()[0] and
-                0 < pos.y < pygame.display.get_window_size()[1]):
-            pos = start + _dir * step
-
-            for rb in lambdas:
-                if hasattr(rb.object, 'collider') and rb.object.collider.hitInsideCollider(pos):
-                    return rb.object.collider.hitInsideCollider(pos)
-            step += 1
-        return RaycastHit(False)
-
-
-class RaycastHit:
-    def __init__(self, collide: bool, point: Vector2 = None, normal: Vector2 = None, dist: float = None):
-        self.collide = collide
-        self.point = point
-        self.normal = normal
-        self.distance = dist
-
-    def __bool__(self):
-        return self.collide
+class Circle(__BaseObject):
+    def __init__(self, radius: int, mass: float = 1, outline: int = 0, color: Color = Colors.black,
+                 position: Vector2 = Vector2.zero(), rotation: float = 0):
+        super().__init__(lambda screen, obj: pygame.draw.circle(screen,
+                                                                obj.color.toTuple(),
+                                                                obj.transform.position.toTuple(),
+                                                                obj.radius, obj.outline),
+                         mass, position, rotation, CircleCollider, color, self, radius=radius,
+                         outline=outline)
 
 
 class CircleCollider:
@@ -315,23 +311,21 @@ class CircleCollider:
         self.circle = circle
 
     def hitInsideCollider(self, point: Vector2):
-        if Vector2.distance(self.circle.rigidbody.position, point) <= self.circle.radius:
-            n = (point - self.circle.rigidbody.position).normalized()
-            return RaycastHit(True, self.circle.rigidbody.position + n * self.circle.radius, n,
-                              Vector2.distance(self.circle.rigidbody.position, point))
+        if Vector2.distance(self.circle.transform.position, point) <= self.circle.radius:
+            n = (point - self.circle.transform.position).normalized()
+            return RaycastHit(True, self.circle.transform.position + n * self.circle.radius, n,
+                              Vector2.distance(self.circle.transform.position, point))
         else:
             return RaycastHit(False)
 
 
-class Rectangle:
-    def __init__(self, w: int, h: int, color: Color = Colors.black):
-        self.rigidbody = Rigidbody(1)
-        self.width = w
-        self.height = h
-        self.color = color
-        self.rigidbody.object = self
-        self.collider = RectangleCollider(self)
-        lambdas.update({self.rigidbody: lambda screen, rb: rb.object.draw(screen)})
+class Rectangle(__BaseObject):
+    def __init__(self, w: int, h: int, mass: float = 1, color: Color = Colors.black,
+                 position: Vector2 = Vector2.zero(), rotation: float = 0):
+        super().__init__(lambda screen, obj: obj.draw(screen), mass, position, rotation,
+                         RectangleCollider,
+                         color,
+                         self, width=w, height=h)
 
     def draw(self, screen):  # doing this cause of not multi-line lambdas :v
         colorkey = Colors.white if self.color == Colors.black else Colors.black
@@ -344,9 +338,9 @@ class Rectangle:
         imgcopy = initSquare.copy()
         imgcopy.set_colorkey(colorkey.toTuple())
         rect = imgcopy.get_rect()
-        rect.center = (self.rigidbody.position.x, self.rigidbody.position.y)
+        rect.center = self.transform.position.toTuple()
         old_center = rect.center
-        rotSquare = pygame.transform.rotate(initSquare, -self.rigidbody.angle)
+        rotSquare = pygame.transform.rotate(initSquare, -self.transform.angle)
         rect = rotSquare.get_rect()
         rect.center = old_center
         screen.blit(rotSquare, rect)
@@ -359,13 +353,13 @@ class RectangleCollider:
     def hitInsideCollider(self, point: Vector2):  # approximation with starting circle
 
         diagonal = math.sqrt(((self.rectangle.width / 2) ** 2) + ((self.rectangle.height / 2) ** 2))
-        if Vector2.distance(self.rectangle.rigidbody.position, point) < diagonal:
-            rb = Rigidbody(1, point)
+        if Vector2.distance(self.rectangle.transform.position, point) < diagonal:
+            t = Transform(pos=point)
 
-            rb.rotateAroundOrigin(-self.rectangle.rigidbody.angle, self.rectangle.rigidbody.position)
+            t.rotateAroundOrigin(-self.rectangle.transform.angle, self.rectangle.transform.position)
 
-            p = rb.position
-            pos = self.rectangle.rigidbody.position
+            p = t.position
+            pos = self.rectangle.transform.position
 
             # rectangle is horizontal: check for sides:
 
@@ -386,14 +380,14 @@ class RectangleCollider:
                     normal = Vector2(1, 0)
                 else:
                     return RaycastHit(False)
-                vec = Vector2.fromAngleDeg(Vector2.angleDeg(Vector2(1, 0), normal) + self.rectangle.rigidbody.angle)
+                vec = Vector2.fromAngleDeg(Vector2.angleDeg(Vector2(1, 0), normal) + self.rectangle.transform.angle)
                 return RaycastHit(True, point, vec.normalized())
             return RaycastHit(False)
 
 
 class Square(Rectangle):
-    def __init__(self, side: int, color: Color = Colors.black):
-        super().__init__(side, side, color)
+    def __init__(self, side: int, mass: float = 1, color: Color = Colors.black):
+        super().__init__(side, side, mass, color)
 
 
 class Lines:
@@ -408,7 +402,7 @@ class Lines:
 
 
 class Transform:
-    def __init__(self, pos, angle, scale):
+    def __init__(self, pos: Vector2 = Vector2.zero(), angle: float = 0, scale: Vector2 = Vector2.zero()):
         self.position = pos
         self.angle = angle
         self.scale = scale
@@ -429,6 +423,14 @@ class Transform:
 
     def rotate(self, angle):
         self.angle = (self.angle + angle) % 360
+
+    def rotateAroundOrigin(self, angle: float, origin: Vector2):
+        s = math.sin(angle * Mathf.Deg2Rad)
+        c = math.cos(angle * Mathf.Deg2Rad)
+
+        point = self.position - origin
+
+        self.position = Vector2(point.x * c - point.y * s + origin.x, point.x * s + point.y * c + origin.y)
 
     def Update(self):
         self.object.offset = self.scale / 2
@@ -569,9 +571,9 @@ class Window:
                                  (int(obj.transform.position.x) - int(size[0] / 2),
                                   int(obj.transform.position.y) - int(size[1] / 2)))
 
-            for rb in lambdas:
-                if type(rb) is Rigidbody:
-                    rb.updateAction()
+            for obj in lambdas:
+                if hasattr(obj, "rigidbody"):
+                    obj.rigidbody.updateAction()
 
             for key in lambdas:
                 lambdas[key](self.screen, key)
