@@ -27,7 +27,7 @@ point.transform.position = Vector2(300, 250)
 
 rec = Rectangle(200, 100)
 rec.transform.position = Vector2(400, 400)
-rec.transform.angle = 45
+rec.transform.rotation = 45
 
 
 player = Square(100)

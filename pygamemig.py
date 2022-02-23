@@ -277,7 +277,7 @@ class Rigidbody:
         self.angularVelocity += self.totalAction.dAngle
 
         self.object.transform.position += self.velocity * RealTime.deltaTime
-        self.object.transform.angle += self.angularVelocity * RealTime.deltaTime
+        self.object.transform.rotation += self.angularVelocity * RealTime.deltaTime
 
         self.totalAction = Action()
 
@@ -340,7 +340,7 @@ class Rectangle(__BaseObject):
         rect = imgcopy.get_rect()
         rect.center = self.transform.position.toTuple()
         old_center = rect.center
-        rotSquare = pygame.transform.rotate(initSquare, -self.transform.angle)
+        rotSquare = pygame.transform.rotate(initSquare, -self.transform.rotation)
         rect = rotSquare.get_rect()
         rect.center = old_center
         screen.blit(rotSquare, rect)
@@ -356,7 +356,7 @@ class RectangleCollider:
         if Vector2.distance(self.rectangle.transform.position, point) < diagonal:
             t = Transform(pos=point)
 
-            t.rotateAroundOrigin(-self.rectangle.transform.angle, self.rectangle.transform.position)
+            t.rotateAroundOrigin(-self.rectangle.transform.rotation, self.rectangle.transform.position)
 
             p = t.position
             pos = self.rectangle.transform.position
@@ -380,7 +380,7 @@ class RectangleCollider:
                     normal = Vector2(1, 0)
                 else:
                     return RaycastHit(False)
-                vec = Vector2.fromAngleDeg(Vector2.angleDeg(Vector2(1, 0), normal) + self.rectangle.transform.angle)
+                vec = Vector2.fromAngleDeg(Vector2.angleDeg(Vector2(1, 0), normal) + self.rectangle.transform.rotation)
                 return RaycastHit(True, point, vec.normalized())
             return RaycastHit(False)
 
@@ -404,7 +404,7 @@ class Lines:
 class Transform:
     def __init__(self, pos: Vector2 = Vector2.zero(), angle: float = 0, scale: Vector2 = Vector2.zero()):
         self.position = pos
-        self.angle = angle
+        self.rotation = angle
         self.scale = scale
         self.object = None
 
@@ -419,10 +419,10 @@ class Transform:
         self.Update()
 
     def setRot(self, angle):
-        self.angle = angle % 360
+        self.rotation = angle % 360
 
     def rotate(self, angle):
-        self.angle = (self.angle + angle) % 360
+        self.rotation = (self.rotation + angle) % 360
 
     def rotateAroundOrigin(self, angle: float, origin: Vector2):
         s = math.sin(angle * Mathf.Deg2Rad)
@@ -490,7 +490,7 @@ class Text:
 class RectTransform:
     def __init__(self, pos, angle):
         self.position = pos
-        self.angle = angle
+        self.rotation = angle
         self.text = None
 
     def setPos(self, pos):
@@ -501,10 +501,10 @@ class RectTransform:
         self.setPos(self.position + translation)
 
     def setRot(self, angle):
-        self.angle = angle % 360
+        self.rotation = angle % 360
 
     def rotate(self, angle):
-        self.angle = (self.angle + angle) % 360
+        self.rotation = (self.rotation + angle) % 360
 
 
 def init():
@@ -560,14 +560,14 @@ class Window:
 
             for txt in texts:
                 txt.Text(txt.text)
-                size = pygame.transform.rotate(txt.renderText, txt.rectTransform.angle).get_rect().size
-                self.screen.blit(pygame.transform.rotate(txt.renderText, -txt.rectTransform.angle),
+                size = pygame.transform.rotate(txt.renderText, txt.rectTransform.rotation).get_rect().size
+                self.screen.blit(pygame.transform.rotate(txt.renderText, -txt.rectTransform.rotation),
                                  (int(txt.rectTransform.position.x) - int(size[0] / 2),
                                   int(txt.rectTransform.position.y) - int(size[1] / 2)))
 
             for obj in objects:
-                size = pygame.transform.rotate(obj.Img, obj.transform.angle).get_rect().size
-                self.screen.blit(pygame.transform.rotate(obj.Img, -obj.transform.angle),
+                size = pygame.transform.rotate(obj.Img, obj.transform.rotation).get_rect().size
+                self.screen.blit(pygame.transform.rotate(obj.Img, -obj.transform.rotation),
                                  (int(obj.transform.position.x) - int(size[0] / 2),
                                   int(obj.transform.position.y) - int(size[1] / 2)))
 
