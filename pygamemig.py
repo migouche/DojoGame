@@ -133,6 +133,7 @@ objects = []
 texts = []
 debug = []
 lambdas = {}
+IDCouter = 1
 
 
 class Color:
@@ -218,11 +219,12 @@ class Raycast:
 
 
 class RaycastHit:
-    def __init__(self, collide: bool, point: Vector2 = None, normal: Vector2 = None, dist: float = None):
+    def __init__(self, collide: bool, point: Vector2 = None, normal: Vector2 = None, dist: float = None, collider=None):
         self.collide = collide
         self.point = point
         self.normal = normal
         self.distance = dist
+        self.collider = collider
 
     def __bool__(self):
         return self.collide
@@ -285,6 +287,9 @@ class Rigidbody:
 class __BaseObject:
     def __init__(self, _lambda, mass: float, position: Vector2, rotation: float, collider: type, color: Color,
                  *args, **kwargs):  # args contains parameters to pass to the collider __init__()
+        global IDCouter
+        self.id = IDCouter
+        IDCouter += 1
         for kwarg in kwargs.items():  # kwargs contains all attributes that need to be added to the object
             setattr(self, kwarg[0], kwarg[1])
         self.color = color
@@ -292,7 +297,26 @@ class __BaseObject:
         self.transform = Transform(position, rotation, Vector2.zero())
         self.rigidbody.object = self
         self.collider = collider(*args)
+        self.collider.id = self.id
         lambdas.update({self: _lambda})
+
+
+class Collision:
+    def __init__(self, collide: bool, point: Vector2 = None, normal: Vector2 = None):
+        self.collide = collide
+        self.point = point
+        self.normal = normal
+
+    def __bool__(self):
+        return self.collide
+
+
+class __BaseCollider:
+    def hitInsideCollider(self, point: Vector2):
+        raise NotImplementedError
+
+    def collideWith(self, other):
+        raise NotImplementedError
 
 
 class Circle(__BaseObject):
@@ -306,7 +330,7 @@ class Circle(__BaseObject):
                          outline=outline)
 
 
-class CircleCollider:
+class CircleCollider(__BaseCollider):
     def __init__(self, circle: Circle):
         self.circle = circle
 
@@ -314,9 +338,15 @@ class CircleCollider:
         if Vector2.distance(self.circle.transform.position, point) <= self.circle.radius:
             n = (point - self.circle.transform.position).normalized()
             return RaycastHit(True, self.circle.transform.position + n * self.circle.radius, n,
-                              Vector2.distance(self.circle.transform.position, point))
+                              Vector2.distance(self.circle.transform.position, point), collider=self)
         else:
             return RaycastHit(False)
+
+    def collideWith(self, other):
+        if hasattr(other, "collider"):
+            pass
+        else:
+            raise TypeError("Argument must be a collider")
 
 
 class Rectangle(__BaseObject):
@@ -330,7 +360,6 @@ class Rectangle(__BaseObject):
     def draw(self, screen):  # doing this cause of not multi-line lambdas :v
         colorkey = Colors.white if self.color == Colors.black else Colors.black
 
-        #  Message for future me: I went utra-instinct doing this, I don't remember what any of this means
         initSquare = pygame.Surface((self.width, self.height))
         initSquare.set_colorkey(colorkey.toTuple())
         initSquare.fill(self.color.toTuple())
@@ -345,8 +374,21 @@ class Rectangle(__BaseObject):
         rect.center = old_center
         screen.blit(rotSquare, rect)
 
+    def getVertices(self):
+        v = [self.transform.position + Vector2(self.width / 2, self.height / 2),
+             self.transform.position + Vector2(self.width / 2, -self.height / 2),
+             self.transform.position + Vector2(-self.width / 2, self.height / 2),
+             self.transform.position + Vector2(-self.width / 2, -self.height / 2)]
 
-class RectangleCollider:
+        vf = []
+        for pos in v:
+            t = Transform(pos)
+            t.rotateAroundOrigin(self.transform.rotation, self.transform.position)
+            vf.append(t.position)
+        return vf
+
+
+class RectangleCollider(__BaseCollider):
     def __init__(self, rectangle: Rectangle):
         self.rectangle = rectangle
 
@@ -367,9 +409,9 @@ class RectangleCollider:
             h = self.rectangle.height
 
             if (pos.x - w / 2 < p.x < pos.x + w / 2 and
-                    pos.y - h / 2 < p.y < pos.y + h / 2):  # we suppose we are in surface now
+                    pos.y - h / 2 < p.y < pos.y + h / 2):  # we suppose we are in the surface now
                 offset = 1  # in pixels. Better if int
-                normal = None
+
                 if pos.y - (h / 2 - offset) > p.y:
                     normal = Vector2(0, -1)
                 elif pos.y + (h / 2 - offset) < p.y:
@@ -379,10 +421,35 @@ class RectangleCollider:
                 elif pos.x + (w / 2 - offset) < p.x:
                     normal = Vector2(1, 0)
                 else:
-                    return RaycastHit(False)
+                    return RaycastHit(True, point, (point - self.rectangle.transform.position).normalized(),
+                                      collider=self)
                 vec = Vector2.fromAngleDeg(Vector2.angleDeg(Vector2(1, 0), normal) + self.rectangle.transform.rotation)
-                return RaycastHit(True, point, vec.normalized())
+                return RaycastHit(True, point, vec.normalized(), collider=self)
             return RaycastHit(False)
+
+    def collideWith(self, other):
+        if hasattr(other, "collider"):
+            vertices = self.rectangle.getVertices()
+            for v in vertices:
+                if hit := other.collider.hitInsideCollider(v):
+                    return Collision(True, v)
+            try:
+                return other.collider.tryReverseCollision(self.rectangle)
+            except:
+                return Collision(False)
+        else:
+            raise TypeError("Argument must be have a 'collider' property of class BaseCollider")
+
+    def tryReverseCollision(self, other):
+        print("reverse collision")
+        if hasattr(other, "collider"):
+            vertices = self.rectangle.getVertices()
+            for v in vertices:
+                if hit := other.collider.hitInsideCollider(v):
+                    return Collision(True, v)
+            return Collision(False)
+        else:
+            raise TypeError("Argument must be have a 'collider' property of class BaseCollider")
 
 
 class Square(Rectangle):
