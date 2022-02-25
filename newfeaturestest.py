@@ -1,6 +1,7 @@
 from pygamemig import *
 
-window = Window(800, 800)
+window = Window(400, 400)
+window.setBG(Color.fromHex("ff00ff"))
 
 pac = Object("pacman.png", Vector2(200, 100))
 pac.transform.setPos(Vector2(400, 400))
@@ -8,7 +9,6 @@ pac.transform.setPos(Vector2(400, 400))
 txt = Text("freesansbold.ttf", 30, Colors.black, Color(255, 255, 255, 0))
 txt.Text("wtf")
 txt.rectTransform.setPos(Vector2(100, 100))
-
 
 print(RealTime.deltaTime)
 print(Vector2.angleDeg(Vector2(0, 10), Vector2(1, 0)))
@@ -19,6 +19,7 @@ square.transform.position = Vector2(200, 200)
 point2 = Circle(10)
 point2.transform.position = Vector2(300, 250)
 point2.transform.rotateAroundOrigin(90, square.transform.position)
+pos = point2.transform.position
 
 point = Circle(10, 4, color=Colors.purple)
 point.transform.position = Vector2(300, 250)
@@ -27,19 +28,16 @@ rec = Rectangle(200, 100)
 rec.transform.position = Vector2(400, 400)
 rec.transform.rotation = 45
 
-player = Circle(100)
+player = Circle(10)
 _dir = Vector2(0, -1)
 
 lastCircle = Circle(radius=5, color=Colors.white, position=rec.transform.position)  # should be and is in the middle
 
 player.transform.rotation = 10
 
-
-
 # RealTime.setDT(1/20)
 while window.running:
-
-
+    print(window.width, window.height)
     if Input.MouseButtonDown(1):
         _dir.y *= -1
     Lines.drawRay(Input.MousePosition(), _dir, 350)
@@ -48,8 +46,6 @@ while window.running:
     if hit := Raycast.raycast(Input.MousePosition(), _dir, 350):
         Lines.drawRay(hit.point, hit.normal, 100)
 
-    col = square.collider.collideWith(player)
-    window.setBG(Colors.red if col else Colors.blue)
     # print(hit.point)
 
     if Input.GetKeyUp(K_SPACE):

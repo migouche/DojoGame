@@ -344,7 +344,25 @@ class CircleCollider(__BaseCollider):
 
     def collideWith(self, other):
         if hasattr(other, "collider"):
-            pass
+            if isinstance(other, Circle):
+                if Vector2.distance(self.circle.transform.position,
+                                    other.transform.position) < self.circle.radius + other.radius:
+                    normal = (other.transform.position - self.circle.transform.position).normalized()
+                    return Collision(True, normal * self.circle.radius + self.circle.transform.position, normal)
+                else:
+                    return Collision(False)
+            elif isinstance(other, Rectangle):
+                '''if other.collider.tryReverseCollision(self.circle):
+                    return Collision(True)
+                else:
+                    smallSide = other.width if other.width < other.height else other.height
+                    if smallSide + self.circle.radius > Vector2.distance(self.circle.transform.position,
+                                                                         other.transform.position):
+                        return Collision(True)
+                    else:
+                        return Collision(False)'''
+                raise NotImplementedError("Circle-Rectangle collisions are not implemented yet")
+
         else:
             raise TypeError("Argument must be a collider")
 
@@ -432,10 +450,10 @@ class RectangleCollider(__BaseCollider):
             vertices = self.rectangle.getVertices()
             for v in vertices:
                 if hit := other.collider.hitInsideCollider(v):
-                    return Collision(True, v)
+                    return Collision(True, v, hit.normal)
             try:
                 return other.collider.tryReverseCollision(self.rectangle)
-            except:
+            except AttributeError:
                 return Collision(False)
         else:
             raise TypeError("Argument must be have a 'collider' property of class BaseCollider")
@@ -446,7 +464,7 @@ class RectangleCollider(__BaseCollider):
             vertices = self.rectangle.getVertices()
             for v in vertices:
                 if hit := other.collider.hitInsideCollider(v):
-                    return Collision(True, v)
+                    return Collision(True, v, hit.normal)
             return Collision(False)
         else:
             raise TypeError("Argument must be have a 'collider' property of class BaseCollider")
@@ -582,24 +600,26 @@ init()
 
 
 class Window:
-    def __init__(self, *args):  # (self, Width, Height, title, icon):
-        self.running = True
-        if len(args) == 4:
-            self.__init__(args[0], args[1], args[2])
-            self.icon = pygame.image.load(str(args[3]))
-            self.setIcon(str(args[3]))
-        elif len(args) == 3:
-            self.width = int(args[0])
-            self.height = int(args[1])
-            self.screen = pygame.display.set_mode((self.width, self.height))
-            self.title = str(args[2])
-            self.setTitle(self.title)
-        elif len(args) == 2:
-            self.__init__(args[0], args[1], "Game Window")
-        else:
-            raise TypeError("Window() takes from 2 to 4 positional arguments, but  " + str(len(args)) + " were given")
-        self.bgColor = Colors.white
+    def __init__(self, width: int = 0, height: int = 0, title: str = "Game Window", icon: str = None,
+                 flags: Union[list[int], int] = 0,
+                 depth: int = 0, display: int = 0, vsync: bool = False):
         Input.Update()
+        self.running = True
+        totalFlags = 0
+        if type(flags) is not int:
+            for flag in flags:
+                totalFlags |= flag
+        else:
+            totalFlags = flags
+
+        self.screen = pygame.display.set_mode((width, height), totalFlags, depth, display, 1 if vsync else 0)
+        self.width, self.height = pygame.display.get_window_size()
+        if icon is not None:
+            self.setIcon(icon)
+        self.setTitle(title)
+
+        self.bgColor = Colors.white
+        Input.Update()  # can't figure out why I need 2 Input.Update(). It just works like that
 
     def fillBG(self, color):
         if self.running:
@@ -619,6 +639,7 @@ class Window:
     def Update(self):
         global debug
         if self.running:
+            self.width, self.height = pygame.display.get_window_size()
             if Input.GetEvent(QUIT):
                 self.Quit()
                 return
@@ -651,7 +672,7 @@ class Window:
             debug = []
 
             Input.Update()
-            pygame.display.update()
+            pygame.display.flip()
             RealTime.waitForRealTime(RealTime.deltaTime)
 
     def Quit(self):
