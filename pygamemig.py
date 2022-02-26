@@ -133,7 +133,7 @@ objects = []
 texts = []
 debug = []
 lambdas = {}
-IDCouter = 1
+IDCounter = 1
 
 
 class Color:
@@ -162,6 +162,7 @@ class Colors:
     green = Color(0, 255, 0)
     blue = Color(0, 0, 255)
     purple = Color(100, 0, 255)
+    transparent = Color(0, 0, 0, 0)
 
 
 Colour = Color
@@ -284,12 +285,12 @@ class Rigidbody:
         self.totalAction = Action()
 
 
-class __BaseObject:
+class BaseObject:
     def __init__(self, _lambda, mass: float, position: Vector2, rotation: float, collider: type, color: Color,
                  *args, **kwargs):  # args contains parameters to pass to the collider __init__()
-        global IDCouter
-        self.id = IDCouter
-        IDCouter += 1
+        global IDCounter
+        self.id = IDCounter
+        IDCounter += 1
         for kwarg in kwargs.items():  # kwargs contains all attributes that need to be added to the object
             setattr(self, kwarg[0], kwarg[1])
         self.color = color
@@ -311,7 +312,7 @@ class Collision:
         return self.collide
 
 
-class __BaseCollider:
+class BaseCollider:
     def hitInsideCollider(self, point: Vector2):
         raise NotImplementedError
 
@@ -319,7 +320,7 @@ class __BaseCollider:
         raise NotImplementedError
 
 
-class Circle(__BaseObject):
+class Circle(BaseObject):
     def __init__(self, radius: int, mass: float = 1, outline: int = 0, color: Color = Colors.black,
                  position: Vector2 = Vector2.zero(), rotation: float = 0):
         super().__init__(lambda screen, obj: pygame.draw.circle(screen,
@@ -330,25 +331,25 @@ class Circle(__BaseObject):
                          outline=outline)
 
 
-class CircleCollider(__BaseCollider):
+class CircleCollider(BaseCollider):
     def __init__(self, circle: Circle):
-        self.circle = circle
+        self.object = circle
 
     def hitInsideCollider(self, point: Vector2):
-        if Vector2.distance(self.circle.transform.position, point) <= self.circle.radius:
-            n = (point - self.circle.transform.position).normalized()
-            return RaycastHit(True, self.circle.transform.position + n * self.circle.radius, n,
-                              Vector2.distance(self.circle.transform.position, point), collider=self)
+        if Vector2.distance(self.object.transform.position, point) <= self.object.radius:
+            n = (point - self.object.transform.position).normalized()
+            return RaycastHit(True, self.object.transform.position + n * self.object.radius, n,
+                              Vector2.distance(self.object.transform.position, point), collider=self)
         else:
             return RaycastHit(False)
 
     def collideWith(self, other):
         if hasattr(other, "collider"):
             if isinstance(other, Circle):
-                if Vector2.distance(self.circle.transform.position,
-                                    other.transform.position) < self.circle.radius + other.radius:
-                    normal = (other.transform.position - self.circle.transform.position).normalized()
-                    return Collision(True, normal * self.circle.radius + self.circle.transform.position, normal)
+                if Vector2.distance(self.object.transform.position,
+                                    other.transform.position) < self.object.radius + other.radius:
+                    normal = (other.transform.position - self.object.transform.position).normalized()
+                    return Collision(True, normal * self.object.radius + self.object.transform.position, normal)
                 else:
                     return Collision(False)
             elif isinstance(other, Rectangle):
@@ -367,7 +368,7 @@ class CircleCollider(__BaseCollider):
             raise TypeError("Argument must be a collider")
 
 
-class Rectangle(__BaseObject):
+class Rectangle(BaseObject):
     def __init__(self, w: int, h: int, mass: float = 1, color: Color = Colors.black,
                  position: Vector2 = Vector2.zero(), rotation: float = 0):
         super().__init__(lambda screen, obj: obj.draw(screen), mass, position, rotation,
@@ -406,25 +407,25 @@ class Rectangle(__BaseObject):
         return vf
 
 
-class RectangleCollider(__BaseCollider):
+class RectangleCollider(BaseCollider):
     def __init__(self, rectangle: Rectangle):
-        self.rectangle = rectangle
+        self.object = rectangle
 
     def hitInsideCollider(self, point: Vector2):  # approximation with starting circle
 
-        diagonal = math.sqrt(((self.rectangle.width / 2) ** 2) + ((self.rectangle.height / 2) ** 2))
-        if Vector2.distance(self.rectangle.transform.position, point) < diagonal:
+        diagonal = math.sqrt(((self.object.width / 2) ** 2) + ((self.object.height / 2) ** 2))
+        if Vector2.distance(self.object.transform.position, point) < diagonal:
             t = Transform(pos=point)
 
-            t.rotateAroundOrigin(-self.rectangle.transform.rotation, self.rectangle.transform.position)
+            t.rotateAroundOrigin(-self.object.transform.rotation, self.object.transform.position)
 
             p = t.position
-            pos = self.rectangle.transform.position
+            pos = self.object.transform.position
 
             # rectangle is horizontal: check for sides:
 
-            w = self.rectangle.width
-            h = self.rectangle.height
+            w = self.object.width
+            h = self.object.height
 
             if (pos.x - w / 2 < p.x < pos.x + w / 2 and
                     pos.y - h / 2 < p.y < pos.y + h / 2):  # we suppose we are in the surface now
@@ -439,20 +440,20 @@ class RectangleCollider(__BaseCollider):
                 elif pos.x + (w / 2 - offset) < p.x:
                     normal = Vector2(1, 0)
                 else:
-                    return RaycastHit(True, point, (point - self.rectangle.transform.position).normalized(),
+                    return RaycastHit(True, point, (point - self.object.transform.position).normalized(),
                                       collider=self)
-                vec = Vector2.fromAngleDeg(Vector2.angleDeg(Vector2(1, 0), normal) + self.rectangle.transform.rotation)
+                vec = Vector2.fromAngleDeg(Vector2.angleDeg(Vector2(1, 0), normal) + self.object.transform.rotation)
                 return RaycastHit(True, point, vec.normalized(), collider=self)
             return RaycastHit(False)
 
-    def collideWith(self, other):
+    def collideWith(self, other: BaseObject):
         if hasattr(other, "collider"):
-            vertices = self.rectangle.getVertices()
+            vertices = self.object.getVertices()
             for v in vertices:
                 if hit := other.collider.hitInsideCollider(v):
                     return Collision(True, v, hit.normal)
             try:
-                return other.collider.tryReverseCollision(self.rectangle)
+                return other.collider.tryReverseCollision(self.object)
             except AttributeError:
                 return Collision(False)
         else:
@@ -461,7 +462,7 @@ class RectangleCollider(__BaseCollider):
     def tryReverseCollision(self, other):
         print("reverse collision")
         if hasattr(other, "collider"):
-            vertices = self.rectangle.getVertices()
+            vertices = self.object.getVertices()
             for v in vertices:
                 if hit := other.collider.hitInsideCollider(v):
                     return Collision(True, v, hit.normal)
@@ -526,7 +527,7 @@ class Transform:
 
 
 class Text:
-    def __init__(self, font, size, txtColor, bgColor):
+    def __init__(self, font, size: int, txtColor: Color = Colors.black, bgColor: Color = Colors.white):
         self.rectTransform = RectTransform(Vector2.zero(), 0)
         self.rectTransform.text = self
         self.text = ""
@@ -538,7 +539,7 @@ class Text:
         self.renderText = pygame.Surface.__new__(pygame.Surface)
         self.Text(self.text)
         self.rect = self.renderText.get_rect()
-        self.rect.center = (self.rectTransform.position.x, self.rectTransform.position.y)
+        self.rect.center = self.rectTransform.position.toTuple()
         texts.append(self)
 
     def Text(self, text):
@@ -614,6 +615,8 @@ class Window:
 
         self.screen = pygame.display.set_mode((width, height), totalFlags, depth, display, 1 if vsync else 0)
         self.width, self.height = pygame.display.get_window_size()
+        self.icon = icon
+        self.title = title
         if icon is not None:
             self.setIcon(icon)
         self.setTitle(title)

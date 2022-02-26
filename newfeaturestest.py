@@ -28,7 +28,7 @@ rec = Rectangle(200, 100)
 rec.transform.position = Vector2(400, 400)
 rec.transform.rotation = 45
 
-player = Circle(10)
+player = Square(10)
 _dir = Vector2(0, -1)
 
 lastCircle = Circle(radius=5, color=Colors.white, position=rec.transform.position)  # should be and is in the middle
@@ -37,7 +37,6 @@ player.transform.rotation = 10
 
 # RealTime.setDT(1/20)
 while window.running:
-    print(window.width, window.height)
     if Input.MouseButtonDown(1):
         _dir.y *= -1
     Lines.drawRay(Input.MousePosition(), _dir, 350)
@@ -45,6 +44,8 @@ while window.running:
 
     if hit := Raycast.raycast(Input.MousePosition(), _dir, 350):
         Lines.drawRay(hit.point, hit.normal, 100)
+        print(player == hit.collider.object)
+
 
     # print(hit.point)
 
