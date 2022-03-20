@@ -34,27 +34,29 @@ Next download [the latest release of Pygamemig](https://github.com/migouche/pyga
 On your script, import Pygamemig:
 
 ```python
-from pygamemig import *
+from dojopy.dojopy import *
 ```
 
 ### Creating a Pygamemig window
 First we have to create a window for our sprites and texts to appear. We will [later](#windows) cover the Window class with more detail
-```python
-from pygamemig import *
 
-window = Window(800, 600) # creates a window with 800x600 pixels
-window = Window(800, 600, "window") # same as above, but sets "window" to the window name
-window = Window(800, 600, "window", "icon.png") # same as above, but sets "icon.png" to the window icon
+```python
+from dojopy.dojopy import *
+
+window = Window(800, 600)  # creates a window with 800x600 pixels
+window = Window(800, 600, "window")  # same as above, but sets "window" to the window name
+window = Window(800, 600, "window", "icon.png")  # same as above, but sets "icon.png" to the window icon
 ```
 ### Main Loop
 This is the basic main loop a Pygamemig script should have
+
 ```python
-from pygamemig import *
+from dojopy.dojopy import *
 
-window = Window(800, 600) # creates a pygamemig window
+window = Window(800, 600)  # creates a pygamemig window
 
-while window.running: # it is recommended to use window.running as the main loop condition
-    window.Update() # this line should be called each iteration of the main loop
+while window.running:  # it is recommended to use window.running as the main loop condition
+    window.Update()  # this line should be called each iteration of the main loop
 print("window has been closed")
 ```
 

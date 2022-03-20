@@ -1,15 +1,15 @@
-from pygamemig import *
+from dojopy.dojopy import *
 
 canStart = False
 
-window = Window(800, 600, "pong", "py.png")
+window = Window(800, 600, "pong", "data/py.png")
 
-ball = Object("ball.png", Vector2(30, 30))
+ball = Object("data/ball.png", Vector2(30, 30))
 
 
-RightPaddle = Object("pala.png", Vector2(30, 200))
+RightPaddle = Object("data/pala.png", Vector2(30, 200))
 
-LeftPaddle = Object("pala.png", Vector2(30, 200))
+LeftPaddle = Object("data/pala.png", Vector2(30, 200))
 
 LeftScore = RightScore = 0
 
