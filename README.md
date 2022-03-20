@@ -34,14 +34,14 @@ Next download [the latest release of Pygamemig](https://github.com/migouche/pyga
 On your script, import Pygamemig:
 
 ```python
-from dojopy.dojopy import *
+from dojogame.dojogame import *
 ```
 
 ### Creating a Pygamemig window
 First we have to create a window for our sprites and texts to appear. We will [later](#windows) cover the Window class with more detail
 
 ```python
-from dojopy.dojopy import *
+from dojogame.dojogame import *
 
 window = Window(800, 600)  # creates a window with 800x600 pixels
 window = Window(800, 600, "window")  # same as above, but sets "window" to the window name
@@ -51,7 +51,7 @@ window = Window(800, 600, "window", "icon.png")  # same as above, but sets "icon
 This is the basic main loop a Pygamemig script should have
 
 ```python
-from dojopy.dojopy import *
+from dojogame.dojogame import *
 
 window = Window(800, 600)  # creates a pygamemig window
 

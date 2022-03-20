@@ -1,4 +1,4 @@
-from dojopy.dojopy import *
+from dojogame.dojogame import *
 
 canStart = False
 
@@ -48,22 +48,22 @@ def lose():
 ResetPos()
 
 while window.running:
-    if Input.GetKey(K_UP):
+    if Input.getKey(K_UP):
         RightPaddle.transform.translate(Vector2(0, -1) * paddleSpeed * RealTime.deltaTime)
-    if Input.GetKey(K_DOWN):
+    if Input.getKey(K_DOWN):
         RightPaddle.transform.translate(Vector2(0, 1) * paddleSpeed * RealTime.deltaTime)
-    if Input.GetKey(K_w):
+    if Input.getKey(K_w):
         LeftPaddle.transform.translate(Vector2(0, -1) * paddleSpeed * RealTime.deltaTime)
-    if Input.GetKey(K_s):
+    if Input.getKey(K_s):
         LeftPaddle.transform.translate(Vector2(0, 1) * paddleSpeed * RealTime.deltaTime)
-    if Input.GetKey(K_e):
+    if Input.getKey(K_e):
         # ball.transform.setScale(ball.transform.scale + Vector2(5, 5))
         # RightText.setTextColor(red)
         # RightText.rectTransform.setPos(Vector2(50, 50))
         # RightText.rectTransform.translate(Vector2(-1, 0))
         pass
-    if Input.GetKey(K_q):
-        window.Quit()
+    if Input.getKey(K_q):
+        window.quit()
 
     if Vector2.distance(ball.transform.position, Vector2(window.width, ball.transform.position.y)) <= 20.0:
         if Vector2.distance(ball.transform.position, RightPaddle.transform.position) <= 110:
@@ -81,7 +81,7 @@ while window.running:
             RightScore += 1
             lose()
 
-    canStart = canStart or Input.GetKey(K_SPACE)
+    canStart = canStart or Input.getKey(K_SPACE)
 
     if canStart:
         ball.transform.translate(ballDir * ballSpeed * RealTime.deltaTime)
@@ -91,7 +91,7 @@ while window.running:
 
     if Vector2.distance(ball.transform.position, Vector2(ball.transform.position.x, 0)) <= 30:
         ballDir.y *= -1
-    RightPaddle.transform.position.y = Mathf.Clamp(RightPaddle.transform.position.y, 0, window.height)
-    LeftPaddle.transform.position.y = Mathf.Clamp(LeftPaddle.transform.position.y, 0, window.height)
+    RightPaddle.transform.position.y = Mathf.clamp(RightPaddle.transform.position.y, 0, window.height)
+    LeftPaddle.transform.position.y = Mathf.clamp(LeftPaddle.transform.position.y, 0, window.height)
 
-    window.Update()
+    window.update()

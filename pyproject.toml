@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=42"]
+build-backend = "setuptools.build_meta"
+
+[tool.poetry]
+name = "dojogame"
+version = "0.1.3"
+description = "Wrapper for Pygame"
+license = "GPL-3.0-or-later"
+authors = ["Miguel González <migouche.g.r@gmail.com>"]
+repository = "https://github.com/DojoGame/DojoGame"
+classifiers=[
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU General Public License (GPL)",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX",
+    "Operating System :: Unix",
+    "Operating System :: MacOS",
+    "Topic :: Games/Entertainment"
+]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+pygame = "^2.0"

@@ -601,7 +601,7 @@ class Window:
     def __init__(self, width: int = 0, height: int = 0, title: str = "Game Window", icon: str = None,
                  flags: Union[list[int], int] = 0,
                  depth: int = 0, display: int = 0, vsync: bool = False):
-        Input.Update()
+        Input.update()
         self.running = True
         totalFlags = 0
         if type(flags) is not int:
@@ -619,7 +619,7 @@ class Window:
         self.setTitle(title)
 
         self.bgColor = Colors.white
-        Input.Update()  # can't figure out why I need 2 Input.Update(). It just works like that
+        Input.update()  # can't figure out why I need 2 Input.Update(). It just works like that
 
     def fillBG(self, color):
         if self.running:
@@ -636,12 +636,12 @@ class Window:
         self.icon = pygame.image.load(icon)
         pygame.display.set_icon(self.icon)
 
-    def Update(self):
+    def update(self):
         global debug
         if self.running:
             self.width, self.height = pygame.display.get_window_size()
-            if Input.GetEvent(QUIT):
-                self.Quit()
+            if Input.getEvent(QUIT):
+                self.quit()
                 return
 
             self.fillBG(self.bgColor)
@@ -671,11 +671,11 @@ class Window:
 
             debug = []
 
-            Input.Update()
+            Input.update()
             pygame.display.flip()
             RealTime.waitForRealTime(RealTime.deltaTime)
 
-    def Quit(self):
+    def quit(self):
         self.running = False
         pygame.quit()
 
@@ -689,19 +689,19 @@ events = []
 
 class Input:
     @staticmethod
-    def GetKey(key):
+    def getKey(key):
         return keys[key]
 
     @staticmethod
-    def GetKeyDown(key):
+    def getKeyDown(key):
         return (not oldKeys[key]) and keys[key]
 
     @staticmethod
-    def GetKeyUp(key):
+    def getKeyUp(key):
         return oldKeys[key] and not keys[key]
 
     @staticmethod
-    def GetEvent(event, attribute: str = "", value=None):
+    def getEvent(event, attribute: str = "", value=None):
         b = False
         for ev in events:
             if ev.type == event:
@@ -713,7 +713,7 @@ class Input:
         return b
 
     @staticmethod
-    def GetEventProperty(event, prop: str):
+    def getEventProperty(event, prop: str):
         for ev in events:
             if ev.type == event:
                 return getattr(ev, prop)
@@ -721,20 +721,20 @@ class Input:
 
     # Mouse
     @staticmethod
-    def MouseButtonDown(button):
-        return Input.GetEvent(MOUSEBUTTONDOWN, "button", button)
+    def getMouseButtonDown(button):
+        return Input.getEvent(MOUSEBUTTONDOWN, "button", button)
 
     @staticmethod
-    def MouseButtonUp(button):
-        return Input.GetEvent(MOUSEBUTTONUP, "button", button)
+    def getMouseButtonUp(button):
+        return Input.getEvent(MOUSEBUTTONUP, "button", button)
 
     @staticmethod
-    def MousePosition():
+    def getMousePosition():
         pos = pygame.mouse.get_pos()
         return Vector2(pos[0], pos[1])
 
     @staticmethod
-    def Update():
+    def update():
         global keys, events, oldKeys
         oldKeys = keys
         keys = pygame.key.get_pressed()
@@ -743,7 +743,7 @@ class Input:
 
 class Mathf:
     @staticmethod
-    def Clamp(value, Min, Max):
+    def clamp(value, Min, Max):
         if value <= Min:
             return Min
         elif value >= Max:

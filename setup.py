@@ -1,5 +1,5 @@
 from setuptools import setup, find_packages
-from  codecs import open
+from codecs import open
 from os import path
 
 HERE = path.abspath(path.dirname(__file__))
@@ -8,10 +8,10 @@ with open(path.join(HERE, "README.md"), encoding='utf-8') as f:
     long_desc = f.read()
 
 setup(
-    name="dojopy",
-    version="0.1.0",
+    name="dojogame",
+    version="0.1.2",
     description="wrapper for pygame",
-    long_description=long_desc,
+    long_description="WIP",
     long_description_content_type="text/markdown",
     url="https://github.com/Dojopy2D/Dojopy2D",
     author="Miguel González",
@@ -33,7 +33,8 @@ setup(
         "Operating System :: MacOS",
         "Topic :: Games/Entertainment"
     ],
-    packages=["dojopy"],
+    packages=["dojogame"],
     include_package_data=True,
+    python_requires=">=3.6",
     install_requires=["pygame"]
 )
