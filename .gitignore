@@ -53,3 +53,4 @@ docs/_build/
 
 # My stuff
 my-tests/
+poetry.lock
