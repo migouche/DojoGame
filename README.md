@@ -7,13 +7,14 @@
 * [Basic Usage](#basic-usage)
 * [Dependencies](#dependencies)
 * [License](#license)
-* [Documentation](#doc)
+* [Documentation](#documentation)
 
 ---
 
 ## About
 Dojogame is a 2d graphics engine with an integrated physics motor (Still in WIP). It's open source and cross-platform.
-It wraps around pygame, to make its usage easier (making it easier may make it less powerful also).
+It wraps around [pygame](https://github.com/pygame/pygame "pygame repository"), to make its usage easier 
+(making it easier may make it less powerful also).
 To follow some kind of structure and standard, dojogame uses Unity3d's syntax.
 
 ---
@@ -62,7 +63,7 @@ my_sprite = Object("path/to/image.png", Vector2(50, 100)) # resizes the image to
 ---
 
 ## Dependencies
-Dojopy is a wrapper for Pygame. As such, it depends on pygame and, obviously, pygame's dependencies.
+Dojopy is a wrapper for pygame. As such, it depends on pygame and, obviously, pygame's dependencies.
 Dependency versions:
 * pygame >= 2.0.0
 * pygame's dependencies:
