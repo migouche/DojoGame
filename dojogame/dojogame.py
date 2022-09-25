@@ -1,10 +1,11 @@
-import pygame
-from pygame.constants import *
 import math
 import random
 import time
 from enum import Enum
 from typing import Union
+
+import pygame
+from pygame.constants import *
 
 
 class Vector2:
@@ -30,7 +31,7 @@ class Vector2:
     def __eq__(self, v):
         return self.x == v.x and self.y == v.y
 
-    def toTuple(self):
+    def to_tuple(self):
         return self.x, self.y
 
     @staticmethod
@@ -50,14 +51,14 @@ class Vector2:
         return Vector2(a.x * b.x, a.y * b.y)
 
     @staticmethod
-    def angleRad(a, b):
+    def angle_rad(a, b):
         return math.atan2(Vector2.cross(a, b), Vector2.dot(a, b))
 
     @staticmethod
-    def angleDeg(a, b):
-        return Vector2.angleRad(a, b) * Mathf.Rad2Deg
+    def angle_deg(a, b):
+        return Vector2.angle_rad(a, b) * Mathf.Rad2Deg
 
-    def toVector2Int(self):
+    def to_vector2_int(self):
         return Vector2Int(int(self.x), int(self.y))
 
     def magnitude(self):
@@ -71,24 +72,24 @@ class Vector2:
         return self / self.magnitude()
 
     @staticmethod
-    def fromAngleRad(angle):
+    def from_angle_rad(angle):
         return Vector2(math.cos(angle), math.sin(angle))
 
     @staticmethod
-    def fromAngleDeg(angle):
-        return Vector2.fromAngleRad(angle * Mathf.Deg2Rad)
+    def from_angle_deg(angle):
+        return Vector2.from_angle_rad(angle * Mathf.Deg2Rad)
 
     @staticmethod
     def random():
-        return Vector2.radRandom(0, 6.28)
+        return Vector2.rad_random(0, 6.28)
 
     @staticmethod
-    def degRandom(a, b):
-        return Vector2.radRandom(a * Mathf.Deg2Rad, b * Mathf.Deg2Rad)
+    def deg_random(a, b):
+        return Vector2.rad_random(a * Mathf.Deg2Rad, b * Mathf.Deg2Rad)
 
     @staticmethod
-    def radRandom(a, b):
-        return Vector2.fromAngleRad(random.randint(int(a * 100), int(b * 100)) / 100).normalized()
+    def rad_random(a, b):
+        return Vector2.from_angle_rad(random.randint(int(a * 100), int(b * 100)) / 100).normalized()
 
 
 class Vector2Int:
@@ -147,11 +148,11 @@ class Color:
         return self.red == c.red and self.green == c.green and self.blue == c.blue and self.alpha == c.alpha
 
     @staticmethod
-    def fromHex(h):
+    def from_hex(h):
         c = tuple(int(h.lstrip('#')[i:i + 2], 16) for i in (0, 2, 4))
         return Color(c[0], c[1], c[2])
 
-    def toTuple(self):
+    def to_tuple(self):
         return self.red, self.green, self.blue, self.alpha
 
 
@@ -180,7 +181,7 @@ class Object:
         objects.append(self)
 
     @classmethod
-    def regularPolygon(cls, scale):  # have to add sides parameter
+    def regular_polygon(cls, scale):  # have to add sides parameter
         self = cls.__new__(cls)
         self.transform = Transform(Vector2.zero(), 0, scale)
         self.transform.object = self
@@ -213,8 +214,8 @@ class Raycast:
             pos = start + _dir * step
 
             for obj in lambdas:
-                if hasattr(obj, 'collider') and obj.collider.hitInsideCollider(pos):
-                    return obj.collider.hitInsideCollider(pos)
+                if hasattr(obj, 'collider') and obj.collider.hit_inside_collider(pos):
+                    return obj.collider.hit_inside_collider(pos)
             step += 1
         return RaycastHit(False)
 
@@ -251,9 +252,9 @@ class Rigidbody:
         self.kinematic = False
         self.useGravity = False  # May use it later, may not
 
-    def addForceAtPosition(self, force: Vector2, position: Vector2,
-                           mode: ForceMode = ForceMode.Force,
-                           space: Space = Space.World):
+    def add_force_at_position(self, force: Vector2, position: Vector2,
+                              mode: ForceMode = ForceMode.Force,
+                              space: Space = Space.World):
 
         posRel = position if space == Space.Self else \
             position - self.object.transform.position if space == Space.World else None
@@ -272,10 +273,10 @@ class Rigidbody:
         else:
             raise TypeError("Wrong ForceMode given")
 
-    def addForce(self, force: Vector2, mode: ForceMode = ForceMode.Force):
-        self.addForceAtPosition(force, self.object.transform.position, mode)
+    def add_force(self, force: Vector2, mode: ForceMode = ForceMode.Force):
+        self.add_force_at_position(force, self.object.transform.position, mode)
 
-    def updateAction(self):
+    def update_action(self):
         self.velocity += self.totalAction.dSpeed
         self.angularVelocity += self.totalAction.dAngle
 
@@ -313,19 +314,37 @@ class Collision:
 
 
 class BaseCollider:
-    def hitInsideCollider(self, point: Vector2):
+    def hit_inside_collider(self, point: Vector2):
         raise NotImplementedError
 
-    def collideWith(self, other):
+    def collide_with(self, other):
         raise NotImplementedError
+
+    def on_trigger_enter(self, func):
+        pass
+
+    def on_trigger_stay(self, func):
+        pass
+
+    def on_trigger_leave(self, func):
+        pass
+
+    def on_collision_enter(self, func):
+        pass
+
+    def on_collision_stay(self, func):
+        pass
+
+    def on_collision_leave(self, func):
+        pass
 
 
 class Circle(BaseObject):
     def __init__(self, radius: int, mass: float = 1, outline: int = 0, color: Color = Colors.black,
                  position: Vector2 = Vector2.zero(), rotation: float = 0):
         super().__init__(lambda screen, obj: pygame.draw.circle(screen,
-                                                                obj.color.toTuple(),
-                                                                obj.transform.position.toTuple(),
+                                                                obj.color.to_tuple(),
+                                                                obj.transform.position.to_tuple(),
                                                                 obj.radius, obj.outline),
                          mass, position, rotation, CircleCollider, color, self, radius=radius,
                          outline=outline)
@@ -335,7 +354,7 @@ class CircleCollider(BaseCollider):
     def __init__(self, circle: Circle):
         self.object = circle
 
-    def hitInsideCollider(self, point: Vector2):
+    def hit_inside_collider(self, point: Vector2):
         if Vector2.distance(self.object.transform.position, point) <= self.object.radius:
             n = (point - self.object.transform.position).normalized()
             return RaycastHit(True, self.object.transform.position + n * self.object.radius, n,
@@ -343,7 +362,7 @@ class CircleCollider(BaseCollider):
         else:
             return RaycastHit(False)
 
-    def collideWith(self, other):
+    def collide_with(self, other):
         if hasattr(other, "collider"):
             if isinstance(other, Circle):
                 if Vector2.distance(self.object.transform.position,
@@ -380,20 +399,20 @@ class Rectangle(BaseObject):
         colorkey = Colors.white if self.color == Colors.black else Colors.black
 
         initSquare = pygame.Surface((self.width, self.height))
-        initSquare.set_colorkey(colorkey.toTuple())
-        initSquare.fill(self.color.toTuple())
+        initSquare.set_colorkey(colorkey.to_tuple())
+        initSquare.fill(self.color.to_tuple())
 
         imgcopy = initSquare.copy()
-        imgcopy.set_colorkey(colorkey.toTuple())
+        imgcopy.set_colorkey(colorkey.to_tuple())
         rect = imgcopy.get_rect()
-        rect.center = self.transform.position.toTuple()
+        rect.center = self.transform.position.to_tuple()
         old_center = rect.center
         rotSquare = pygame.transform.rotate(initSquare, -self.transform.rotation)
         rect = rotSquare.get_rect()
         rect.center = old_center
         screen.blit(rotSquare, rect)
 
-    def getVertices(self):
+    def get_vertices(self):
         v = [self.transform.position + Vector2(self.width / 2, self.height / 2),
              self.transform.position + Vector2(self.width / 2, -self.height / 2),
              self.transform.position + Vector2(-self.width / 2, self.height / 2),
@@ -402,7 +421,7 @@ class Rectangle(BaseObject):
         vf = []
         for pos in v:
             t = Transform(pos)
-            t.rotateAroundOrigin(self.transform.rotation, self.transform.position)
+            t.rotate_around_origin(self.transform.rotation, self.transform.position)
             vf.append(t.position)
         return vf
 
@@ -411,13 +430,13 @@ class RectangleCollider(BaseCollider):
     def __init__(self, rectangle: Rectangle):
         self.object = rectangle
 
-    def hitInsideCollider(self, point: Vector2):  # approximation with starting circle
+    def hit_inside_collider(self, point: Vector2):  # approximation with starting circle
 
         diagonal = math.sqrt(((self.object.width / 2) ** 2) + ((self.object.height / 2) ** 2))
         if Vector2.distance(self.object.transform.position, point) < diagonal:
             t = Transform(pos=point)
 
-            t.rotateAroundOrigin(-self.object.transform.rotation, self.object.transform.position)
+            t.rotate_around_origin(-self.object.transform.rotation, self.object.transform.position)
 
             p = t.position
             pos = self.object.transform.position
@@ -442,11 +461,11 @@ class RectangleCollider(BaseCollider):
                 else:
                     return RaycastHit(True, point, (point - self.object.transform.position).normalized(),
                                       collider=self)
-                vec = Vector2.fromAngleDeg(Vector2.angleDeg(Vector2(1, 0), normal) + self.object.transform.rotation)
+                vec = Vector2.from_angle_deg(Vector2.angle_deg(Vector2(1, 0), normal) + self.object.transform.rotation)
                 return RaycastHit(True, point, vec.normalized(), collider=self)
             return RaycastHit(False)
 
-    def collideWith(self, other: BaseObject):
+    def collide_with(self, other: BaseObject):
         if hasattr(other, "collider"):
             vertices = self.object.getVertices()
             for v in vertices:
@@ -459,12 +478,12 @@ class RectangleCollider(BaseCollider):
         else:
             raise TypeError("Argument must be have a 'collider' property of class BaseCollider")
 
-    def tryReverseCollision(self, other):
+    def try_reverse_collision(self, other):
         print("reverse collision")
         if hasattr(other, "collider"):
-            vertices = self.object.getVertices()
+            vertices = self.object.get_vertices()
             for v in vertices:
-                if hit := other.collider.hitInsideCollider(v):
+                if hit := other.collider.hit_inside_collider(v):
                     return Collision(True, v, hit.normal)
             return Collision(False)
         else:
@@ -478,13 +497,14 @@ class Square(Rectangle):
 
 class Lines:
     @staticmethod
-    def drawLine(_from: Vector2, _to: Vector2, width: int = 1, color: Color = Colors.black):
-        debug.append(lambda screen: pygame.draw.line(screen, color.toTuple(), _from.toTuple(), _to.toTuple(), width))
+    def draw_line(_from: Vector2, _to: Vector2, width: int = 1, color: Color = Colors.black):
+        debug.append(lambda screen: pygame.draw.line(screen, color.to_tuple(), _from.to_tuple(), _to.to_tuple(), width))
 
     @staticmethod
-    def drawRay(start: Vector2, _dir: Union[float, Vector2], length: int, width: int = 1, color: Color = Colors.black):
-        vec = _dir.normalized() * length if type(_dir) is Vector2 else Vector2.fromAngleDeg(_dir).normalized() * length
-        Lines.drawLine(start, start + vec, width, color)
+    def draw_ray(start: Vector2, _dir: Union[float, Vector2], length: int, width: int = 1, color: Color = Colors.black):
+        vec = _dir.normalized() * length if type(_dir) is Vector2 else Vector2.from_angle_deg(
+            _dir).normalized() * length
+        Lines.draw_line(start, start + vec, width, color)
 
 
 class Transform:
@@ -494,23 +514,23 @@ class Transform:
         self.scale = scale
         self.object = None
 
-    def setPos(self, pos):
+    def set_pos(self, pos):
         self.position = pos
 
     def translate(self, translation):
         self.position += translation
 
-    def setScale(self, scale):
+    def set_scale(self, scale):
         self.scale = scale
-        self.Update()
+        self.update()
 
-    def setRot(self, angle):
+    def set_rot(self, angle):
         self.rotation = angle % 360
 
     def rotate(self, angle):
         self.rotation = (self.rotation + angle) % 360
 
-    def rotateAroundOrigin(self, angle: float, origin: Vector2):
+    def rotate_around_origin(self, angle: float, origin: Vector2):
         s = math.sin(angle * Mathf.Deg2Rad)
         c = math.cos(angle * Mathf.Deg2Rad)
 
@@ -518,7 +538,7 @@ class Transform:
 
         self.position = Vector2(point.x * c - point.y * s + origin.x, point.x * s + point.y * c + origin.y)
 
-    def Update(self):
+    def update(self):
         self.object.offset = self.scale / 2
         self.object.Img = pygame.transform.scale(self.object.Img,
                                                  (self.scale.x,
@@ -537,40 +557,40 @@ class Text:
         self.BGColor = bgColor
         self.renderFont = pygame.font.Font(self.font, self.size)
         self.renderText = pygame.Surface.__new__(pygame.Surface)
-        self.Text(self.text)
+        self.set_text(self.text)
         self.rect = self.renderText.get_rect()
-        self.rect.center = self.rectTransform.position.toTuple()
+        self.rect.center = self.rectTransform.position.to_tuple()
         texts.append(self)
 
-    def Text(self, text):
+    def set_text(self, text):
         self.text = text
-        self.updateText()
+        self.update_text()
 
-    def setSize(self, size):
+    def set_size(self, size):
         self.size = size
-        self.updateText()
+        self.update_text()
 
-    def setTextColor(self, color):
+    def set_textColor(self, color):
         self.textColor = color
-        self.updateText()
+        self.update_text()
 
     def setTextColour(self, color):
         self.textColor = color
-        self.updateText()
+        self.update_text()
 
-    def setBGColor(self, color):
+    def set_bg_color(self, color):
         self.BGColor = color
-        self.updateText()
+        self.update_text()
 
-    def setBGColour(self, color):
+    def set_bg_colour(self, color):
         self.BGColor = color
-        self.updateText()
+        self.update_text()
 
-    def updateText(self):
+    def update_text(self):
         self.renderFont = pygame.font.Font(self.font, self.size)
         self.renderText = self.renderFont.render(str(self.text), True,
-                                                 self.textColor.toTuple(),
-                                                 self.BGColor.toTuple())
+                                                 self.textColor.to_tuple(),
+                                                 self.BGColor.to_tuple())
 
 
 class RectTransform:
@@ -579,14 +599,14 @@ class RectTransform:
         self.rotation = angle
         self.text = None
 
-    def setPos(self, pos):
+    def set_pos(self, pos):
         self.position = pos
         self.text.rect.center = (self.position.x, self.position.y)
 
     def translate(self, translation):
-        self.setPos(self.position + translation)
+        self.set_pos(self.position + translation)
 
-    def setRot(self, angle):
+    def set_rot(self, angle):
         self.rotation = angle % 360
 
     def rotate(self, angle):
@@ -615,24 +635,24 @@ class Window:
         self.icon = icon
         self.title = title
         if icon is not None:
-            self.setIcon(icon)
-        self.setTitle(title)
+            self.set_icon(icon)
+        self.set_title(title)
 
         self.bgColor = Colors.white
         Input.update()  # can't figure out why I need 2 Input.Update(). It just works like that
 
-    def fillBG(self, color):
+    def fill_bg(self, color):
         if self.running:
-            self.screen.fill(color.toTuple())
+            self.screen.fill(color.to_tuple())
 
-    def setBG(self, color):
+    def set_bg(self, color):
         self.bgColor = color
 
-    def setTitle(self, title):
+    def set_title(self, title):
         self.title = title
         pygame.display.set_caption(title)
 
-    def setIcon(self, icon):
+    def set_icon(self, icon):
         self.icon = pygame.image.load(icon)
         pygame.display.set_icon(self.icon)
 
@@ -640,14 +660,14 @@ class Window:
         global debug
         if self.running:
             self.width, self.height = pygame.display.get_window_size()
-            if Input.getEvent(QUIT):
+            if Input.get_event(QUIT):
                 self.quit()
                 return
 
-            self.fillBG(self.bgColor)
+            self.fill_bg(self.bgColor)
 
             for txt in texts:
-                txt.Text(txt.text)
+                txt.set_text(txt.text)
                 size = pygame.transform.rotate(txt.renderText, txt.rectTransform.rotation).get_rect().size
                 self.screen.blit(pygame.transform.rotate(txt.renderText, -txt.rectTransform.rotation),
                                  (int(txt.rectTransform.position.x) - int(size[0] / 2),
@@ -661,7 +681,7 @@ class Window:
 
             for obj in lambdas:
                 if hasattr(obj, "rigidbody"):
-                    obj.rigidbody.updateAction()
+                    obj.rigidbody.update_action()
 
             for key in lambdas:
                 lambdas[key](self.screen, key)
@@ -673,7 +693,7 @@ class Window:
 
             Input.update()
             pygame.display.flip()
-            RealTime.waitForRealTime(RealTime.deltaTime)
+            RealTime.wait_for_real_time(RealTime.deltaTime)
 
     def quit(self):
         self.running = False
@@ -689,19 +709,19 @@ events = []
 
 class Input:
     @staticmethod
-    def getKey(key):
+    def get_key(key):
         return keys[key]
 
     @staticmethod
-    def getKeyDown(key):
+    def get_key_down(key):
         return (not oldKeys[key]) and keys[key]
 
     @staticmethod
-    def getKeyUp(key):
+    def get_key_up(key):
         return oldKeys[key] and not keys[key]
 
     @staticmethod
-    def getEvent(event, attribute: str = "", value=None):
+    def get_event(event, attribute: str = "", value=None):
         b = False
         for ev in events:
             if ev.type == event:
@@ -713,7 +733,7 @@ class Input:
         return b
 
     @staticmethod
-    def getEventProperty(event, prop: str):
+    def get_event_property(event, prop: str):
         for ev in events:
             if ev.type == event:
                 return getattr(ev, prop)
@@ -721,15 +741,15 @@ class Input:
 
     # Mouse
     @staticmethod
-    def getMouseButtonDown(button):
-        return Input.getEvent(MOUSEBUTTONDOWN, "button", button)
+    def get_mouse_button_down(button):
+        return Input.get_event(MOUSEBUTTONDOWN, "button", button)
 
     @staticmethod
-    def getMouseButtonUp(button):
-        return Input.getEvent(MOUSEBUTTONUP, "button", button)
+    def get_mouse_button_up(button):
+        return Input.get_event(MOUSEBUTTONUP, "button", button)
 
     @staticmethod
-    def getMousePosition():
+    def get_mouse_position():
         pos = pygame.mouse.get_pos()
         return Vector2(pos[0], pos[1])
 
@@ -763,11 +783,11 @@ class RealTime:
     deltaTime = 1 / 60
 
     @staticmethod
-    def setDT(dt):
+    def set_dt(dt):
         RealTime.deltaTime = dt
 
     @staticmethod
-    def waitForRealTime(dt):
+    def wait_for_real_time(dt):
         RealTime.t = RealTime.t + dt
         wait = RealTime.t - time.monotonic()
         if wait > 0:
