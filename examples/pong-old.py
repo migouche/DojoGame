@@ -15,13 +15,13 @@ LeftScore = RightScore = 0
 
 # RightText = Text(Vector2((window.width / 2) + 200, 50), RightScore, 30, "freesansbold.ttf", black, white)
 RightText = Text("freesansbold.ttf", 30, Colors.black, Colors.white)
-RightText.rectTransform.setPos(Vector2(window.width / 2 + 200, 50))
-RightText.Text(0)
+RightText.rectTransform.set_pos(Vector2(window.width / 2 + 200, 50))
+RightText.set_text(0)
 
 # LeftText = Text(Vector2((window.width / 2) - 200, 50), LeftScore, 30, "freesansbold.ttf", black, white)
 LeftText = Text("freesansbold.ttf", 30, Colors.black, Colors.white)
-LeftText.rectTransform.setPos(Vector2(window.width / 2 - 200, 50))
-LeftText.Text(0)
+LeftText.rectTransform.set_pos(Vector2(window.width / 2 - 200, 50))
+LeftText.set_text(0)
 
 paddleSpeed = 500
 ballSpeed = 250
@@ -31,10 +31,10 @@ ballDir = Vector2.random()
 def ResetPos():
     global ballDir, ballSpeed
     ball.transform.position = Vector2(window.width / 2, window.height / 2)
-    RightPaddle.transform.setPos(Vector2(window.width, window.height / 2))
-    LeftPaddle.transform.setPos(Vector2(0, window.height / 2))
-    RightText.Text(RightScore)
-    LeftText.Text(LeftScore)
+    RightPaddle.transform.set_pos(Vector2(window.width, window.height / 2))
+    LeftPaddle.transform.set_pos(Vector2(0, window.height / 2))
+    RightText.set_text(RightScore)
+    LeftText.set_text(LeftScore)
     ballDir = Vector2.random()
     ballSpeed = 250
 
@@ -48,26 +48,26 @@ def lose():
 ResetPos()
 
 while window.running:
-    if Input.getKey(K_UP):
+    if Input.get_key(K_UP):
         RightPaddle.transform.translate(Vector2(0, -1) * paddleSpeed * RealTime.deltaTime)
-    if Input.getKey(K_DOWN):
+    if Input.get_key(K_DOWN):
         RightPaddle.transform.translate(Vector2(0, 1) * paddleSpeed * RealTime.deltaTime)
-    if Input.getKey(K_w):
+    if Input.get_key(K_w):
         LeftPaddle.transform.translate(Vector2(0, -1) * paddleSpeed * RealTime.deltaTime)
-    if Input.getKey(K_s):
+    if Input.get_key(K_s):
         LeftPaddle.transform.translate(Vector2(0, 1) * paddleSpeed * RealTime.deltaTime)
-    if Input.getKey(K_e):
+    if Input.get_key(K_e):
         # ball.transform.setScale(ball.transform.scale + Vector2(5, 5))
         # RightText.setTextColor(red)
         # RightText.rectTransform.setPos(Vector2(50, 50))
         # RightText.rectTransform.translate(Vector2(-1, 0))
         pass
-    if Input.getKey(K_q):
+    if Input.get_key_down(K_q):
         window.quit()
 
     if Vector2.distance(ball.transform.position, Vector2(window.width, ball.transform.position.y)) <= 20.0:
         if Vector2.distance(ball.transform.position, RightPaddle.transform.position) <= 110:
-            ballDir = Vector2.degRandom(135, 225)
+            ballDir = Vector2.deg_random(135, 225)
             ballSpeed += 50
         else:
             LeftScore += 1
@@ -75,13 +75,13 @@ while window.running:
 
     if Vector2.distance(ball.transform.position, Vector2(0, ball.transform.position.y)) <= 20.0:
         if Vector2.distance(ball.transform.position, LeftPaddle.transform.position) <= 110:
-            ballDir = Vector2.degRandom(-45, 45)
+            ballDir = Vector2.deg_random(-45, 45)
             ballSpeed += 50
         else:
             RightScore += 1
             lose()
 
-    canStart = canStart or Input.getKey(K_SPACE)
+    canStart = canStart or Input.get_key(K_SPACE)
 
     if canStart:
         ball.transform.translate(ballDir * ballSpeed * RealTime.deltaTime)
