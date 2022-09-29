@@ -19,6 +19,9 @@ class Vector2:
     def __sub__(self, v):
         return Vector2(self.x - v.x, self.y - v.y)
 
+    def __neg__(self):
+        return Vector2(-self.x, -self.y)
+
     def __mul__(self, f):
         return Vector2(self.x * f, self.y * f)
 
@@ -31,7 +34,7 @@ class Vector2:
     def __eq__(self, v):
         return self.x == v.x and self.y == v.y
 
-    def to_tuple(self):
+    def to_tuple(self) -> tuple:
         return self.x, self.y
 
     @staticmethod
@@ -39,11 +42,11 @@ class Vector2:
         return Vector2(0, 0)
 
     @staticmethod
-    def dot(a, b):
+    def dot(a, b) -> float:
         return a.x * b.x + a.y * b.y
 
     @staticmethod
-    def cross(a, b):
+    def cross(a, b) -> float:
         return a.x * b.y - b.x * a.y
 
     @staticmethod
@@ -51,7 +54,7 @@ class Vector2:
         return Vector2(a.x * b.x, a.y * b.y)
 
     @staticmethod
-    def angle_rad(a, b):
+    def angle_rad(a, b) -> float:
         return math.atan2(Vector2.cross(a, b), Vector2.dot(a, b))
 
     @staticmethod
@@ -90,6 +93,15 @@ class Vector2:
     @staticmethod
     def rad_random(a, b):
         return Vector2.from_angle_rad(random.randint(int(a * 100), int(b * 100)) / 100).normalized()
+
+    @staticmethod
+    def rotate_by_rads(v, r):
+        return Vector2(int((v.x * math.cos(r) - v.y * math.sin(r)) * 1000) / 1000,
+                       int((v.x * math.sin(r) + v.y * math.cos(r)) * 1000) / 1000)
+
+    @staticmethod
+    def rotate_by_degs(v, d):
+        return Vector2.rotate_by_rads(v, d * Mathf.Deg2Rad)
 
 
 class Vector2Int:
@@ -130,9 +142,31 @@ class Vector2Int:
         return self / self.magnitude()
 
 
+class Quaternion:
+    def __init__(self, x, y, z, w):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.w = w
+
+    @staticmethod
+    def euler_angles_rad(x, y, z):
+        return Quaternion(
+            math.sin(x / 2) * math.cos(y / 2) * math.cos(z / 2) - math.cos(x / 2) * math.sin(y / 2) * math.sin(z / 2),
+            math.cos(x / 2) * math.sin(y / 2) * math.cos(z / 2) + math.sin(x / 2) * math.cos(y / 2) * math.sin(z / 2),
+            math.cos(x / 2) * math.cos(y / 2) * math.sin(z / 2) - math.sin(x / 2) * math.sin(y / 2) * math.cos(z / 2),
+            math.cos(x / 2) * math.cos(y / 2) * math.cos(z / 2) + math.sin(x / 2) * math.sin(y / 2) * math.sin(z / 2))
+
+    @staticmethod
+    def euler_angles_deg(x, y, z):
+        return Quaternion.euler_angles_rad(x * Mathf.Deg2Rad, y * Mathf.Deg2Rad, z * Mathf.Deg2Rad)
+
+
 objects = []
 texts = []
 debug = []
+polygons = []
+polygon_colliders = []
 lambdas = {}
 IDCounter = 1
 
@@ -203,9 +237,21 @@ class Space(Enum):
     Self = 2
 
 
+class RaycastHit:
+    def __init__(self, collide: bool, point: Vector2 = None, normal: Vector2 = None, dist: float = None, collider=None):
+        self.collide = collide
+        self.point = point
+        self.normal = normal
+        self.distance = dist
+        self.collider = collider
+
+    def __bool__(self):
+        return self.collide
+
+
 class Raycast:
     @staticmethod
-    def raycast(start: Vector2, _dir: Union[float, Vector2], length: float = None):
+    def raycast(start: Vector2, _dir: Union[float, Vector2], length: float = None) -> RaycastHit:
         pos = start
         step = 0
         while (length is None or Vector2.distance(pos, start) < length) and (  # checks for length and for inside screen
@@ -218,18 +264,6 @@ class Raycast:
                     return obj.collider.hit_inside_collider(pos)
             step += 1
         return RaycastHit(False)
-
-
-class RaycastHit:
-    def __init__(self, collide: bool, point: Vector2 = None, normal: Vector2 = None, dist: float = None, collider=None):
-        self.collide = collide
-        self.point = point
-        self.normal = normal
-        self.distance = dist
-        self.collider = collider
-
-    def __bool__(self):
-        return self.collide
 
 
 class Action:
@@ -256,20 +290,26 @@ class Rigidbody:
                               mode: ForceMode = ForceMode.Force,
                               space: Space = Space.World):
 
-        posRel = position if space == Space.Self else \
-            position - self.object.transform.position if space == Space.World else None
+        # posRel = position if space == Space.Self else \
+        #    position - self.object.transform.position if space == Space.World else None
+        if space == Space.Self:
+            absolute_pos = self.object.transform.relative_pos_to_absolute(position)
+            absolute_force = Vector2.rotate_by_degs(force, self.object.transform.rotation)
 
-        if posRel is None:
+            self.add_force_at_position(absolute_force, absolute_pos, mode, Space.World)
+            return
+        pos_rel = position - self.object.transform.position if space == Space.World else None
+        if pos_rel is None:
             raise TypeError("Wrong Space given")
 
         if mode == ForceMode.Force:  # dv = F * dt / m
-            self.totalAction += Action(f := force * RealTime.deltaTime / self.mass, Vector2.cross(posRel, f))
+            self.totalAction += Action(f := force * RealTime.delta_time / self.mass, Vector2.cross(pos_rel, f))
         elif mode == ForceMode.Acceleration:  # dv = F * dt
-            self.totalAction += Action(f := force * RealTime.deltaTime, Vector2.cross(posRel, f))
+            self.totalAction += Action(f := force * RealTime.delta_time, Vector2.cross(pos_rel, f))
         elif mode == ForceMode.Impulse:  # dv = F / m
-            self.totalAction += Action(f := force / self.mass, Vector2.cross(posRel, f))
+            self.totalAction += Action(f := force / self.mass, Vector2.cross(pos_rel, f))
         elif mode == ForceMode.VelocityChange:  # dv = F
-            self.totalAction += Action(f := force, Vector2.cross(posRel, f))
+            self.totalAction += Action(f := force, Vector2.cross(pos_rel, f))
         else:
             raise TypeError("Wrong ForceMode given")
 
@@ -280,10 +320,160 @@ class Rigidbody:
         self.velocity += self.totalAction.dSpeed
         self.angularVelocity += self.totalAction.dAngle
 
-        self.object.transform.position += self.velocity * RealTime.deltaTime
-        self.object.transform.rotation += self.angularVelocity * RealTime.deltaTime
+        self.object.transform.position += self.velocity * RealTime.delta_time
+        self.object.transform.rotation += self.angularVelocity * RealTime.delta_time
 
         self.totalAction = Action()
+
+
+class GameObject:
+    def draw(self, screen: pygame.Surface):
+        raise NotImplementedError
+
+
+class Polygon(GameObject):
+    def __init__(self, vertices: list, color: Color, width: int = 0, antialias: bool = False,
+                 rigidbody: bool = False, mass: int = 1):
+        self.local_vertices_positions = vertices
+        self.transform = Transform()
+        self.color = color
+        self.width = width
+        self.antialias = antialias
+        self.collider = PolygonCollider(self)
+        polygons.append(self)
+
+    def get_absolute_vertices_positions(self) -> list:
+        return [self.transform.relative_pos_to_absolute(v) for v in self.local_vertices_positions]
+
+    def draw(self, screen: pygame.Surface):
+        pygame.draw.polygon(screen, self.color.to_tuple(),
+                            [v.to_tuple() for v in self.get_absolute_vertices_positions()], self.width)
+
+
+class Collision:
+    def __init__(self, collide: bool, point: Vector2 = None, normal: Vector2 = None):
+        self.collide = collide
+        self.point = point
+        self.normal = normal
+
+    def __bool__(self):
+        return self.collide
+
+
+class AxisAlignedBoundingBox:
+    def __init__(self, obj: Polygon):
+        self.obj = obj
+        self.min_v = self.max_v = Vector2.zero()
+        self.update_aabb()
+
+    def update_aabb(self):
+        vertices = self.obj.get_absolute_vertices_positions()
+        max_x = max_y = float("-inf")
+        min_x = min_y = float("inf")
+        for vertex in vertices:
+            if vertex.x > max_x:
+                max_x = vertex.x
+            if vertex.y > max_y:
+                max_y = vertex.y
+            if vertex.x < min_x:
+                min_x = vertex.x
+            if vertex.y < min_y:
+                min_y = vertex.y
+        self.min_v = Vector2(min_x, min_y)
+        self.max_v = Vector2(max_x, max_y)
+
+    def aabb_overlap(self, other: 'AxisAlignedBoundingBox') -> bool:
+        return self.min_v.x < other.max_v.x and self.max_v.x > other.min_v.x and \
+               self.min_v.y < other.max_v.y and self.max_v.y > other.min_v.y
+
+
+AABB = AxisAlignedBoundingBox
+
+
+class Collisions:
+    @staticmethod
+    def intersect_polygons(p1: Polygon, p2: Polygon) -> Collision:
+        def find_arithmetic_mean(points: list) -> Vector2:
+            x = y = 0
+
+            for i in range(len(points)):
+                x += points[i].x
+                y += points[i].y
+            return Vector2(x / len(points), y / len(points))
+
+        vertices_a = p1.get_absolute_vertices_positions()
+        vertices_b = p2.get_absolute_vertices_positions()
+
+        normal = Vector2.zero()
+        depth = float('inf')
+
+        for i in range(len(vertices_a)):
+            va = vertices_a[i]
+            vb = vertices_a[(i + 1) % len(vertices_a)]
+
+            edge = vb - va
+            axis = Vector2(-edge.y, edge.x)
+
+            (min_a, max_a) = Collisions.project_vertices(vertices_a, axis)
+            (min_b, max_b) = Collisions.project_vertices(vertices_b, axis)
+
+            if min_a >= max_b or min_b >= max_a:
+                return Collision(False)
+
+            axis_depth = min(max_a - min_b, max_b - min_a)
+
+            if axis_depth < depth:
+                depth = axis_depth
+                normal = axis
+
+        for i in range(len(vertices_b)):
+            va = vertices_b[i]
+            vb = vertices_b[(i + 1) % len(vertices_b)]
+
+            edge = vb - va
+            axis = Vector2(-edge.y, edge.x)
+
+            (min_a, max_a) = Collisions.project_vertices(vertices_a, axis)
+            (min_b, max_b) = Collisions.project_vertices(vertices_b, axis)
+
+            if min_a >= max_b or min_b >= max_a:
+                return Collision(False)
+
+            axis_depth = min(max_a - min_b, max_b - min_a)
+
+            if axis_depth < depth:
+                depth = axis_depth
+                normal = axis
+
+        center_a = find_arithmetic_mean(vertices_a)
+        center_b = find_arithmetic_mean(vertices_b)
+
+        direction = center_b - center_a
+
+        if Vector2.dot(direction, normal) < 0:
+            normal = -normal
+        return Collision(True)
+
+    @staticmethod
+    def project_vertices(vertices: list, axis: Vector2) -> tuple:
+        _min = Vector2.dot(vertices[0], axis)
+        _max = _min
+        for v in vertices:
+            p = Vector2.dot(v, axis)
+            if p < _min:
+                _min = p
+            elif p > _max:
+                _max = p
+        return _min, _max
+
+
+class PolygonCollider:
+    def __init__(self, polygon: Polygon):
+        self.polygon = polygon
+        self.aabb = AABB(polygon)
+
+    def collide_with(self, other) -> bool:
+        return bool(Collisions.intersect_polygons(self.polygon, other.polygon))
 
 
 class BaseObject:
@@ -301,16 +491,6 @@ class BaseObject:
         self.collider = collider(*args)
         self.collider.id = self.id
         lambdas.update({self: _lambda})
-
-
-class Collision:
-    def __init__(self, collide: bool, point: Vector2 = None, normal: Vector2 = None):
-        self.collide = collide
-        self.point = point
-        self.normal = normal
-
-    def __bool__(self):
-        return self.collide
 
 
 class BaseCollider:
@@ -467,12 +647,12 @@ class RectangleCollider(BaseCollider):
 
     def collide_with(self, other: BaseObject):
         if hasattr(other, "collider"):
-            vertices = self.object.getVertices()
+            vertices = self.object.get_vertices()
             for v in vertices:
-                if hit := other.collider.hitInsideCollider(v):
+                if hit := other.collider.hit_inside_collider(v):
                     return Collision(True, v, hit.normal)
             try:
-                return other.collider.tryReverseCollision(self.object)
+                return other.collider.try_reverse_collision(self.object)
             except AttributeError:
                 return Collision(False)
         else:
@@ -507,8 +687,32 @@ class Lines:
         Lines.draw_line(start, start + vec, width, color)
 
 
+class Debug:
+    @staticmethod
+    def draw_axis_aligned_bounding_box(polygon: Polygon, color: Color = Colors.black, width: int = 1):
+        aabb = polygon.collider.aabb
+
+        Debug.draw_rectangle_vertices([aabb.min_v,
+                                       Vector2(aabb.min_v.x, aabb.max_v.y),
+                                       aabb.max_v,
+                                       Vector2(aabb.max_v.x, aabb.min_v.y)], color, width)
+
+    @staticmethod
+    def draw_rectangle_vertices(vertices: list[Vector2, Vector2, Vector2, Vector2],
+                                color: Color = Colors.black, width: int = 1):
+        if(len(vertices) != 4):
+            raise ValueError("Vertices must be 4")
+        debug.append(lambda screen: pygame.draw.polygon(screen, color.to_tuple(),
+                                                        [v.to_tuple() for v in vertices], width))
+
+
+    @staticmethod
+    def draw_circle(position: Vector2, radius: int, color: Color = Colors.black, width: int = 1):
+        debug.append(lambda screen: pygame.draw.circle(screen, color.to_tuple(), position.to_tuple(), radius, width))
+
+
 class Transform:
-    def __init__(self, pos: Vector2 = Vector2.zero(), angle: float = 0, scale: Vector2 = Vector2.zero()):
+    def __init__(self, pos: Vector2 = Vector2.zero(), angle: float = 0, scale: Vector2 = Vector2(1, 1)):
         self.position = pos
         self.rotation = angle
         self.scale = scale
@@ -537,6 +741,16 @@ class Transform:
         point = self.position - origin
 
         self.position = Vector2(point.x * c - point.y * s + origin.x, point.x * s + point.y * c + origin.y)
+
+    def relative_pos_to_absolute(self, pos: Vector2) -> Vector2:
+        t = Transform(pos + self.position)
+        t.rotate_around_origin(self.rotation, self.position)
+        return t.position
+
+    def absolute_pos_to_relative(self, pos: Vector2) -> Vector2:
+        t = Transform(pos - self.position)
+        t.rotate_around_origin(-self.rotation, self.position)
+        return t.position
 
     def update(self):
         self.object.offset = self.scale / 2
@@ -679,6 +893,9 @@ class Window:
                                  (int(obj.transform.position.x) - int(size[0] / 2),
                                   int(obj.transform.position.y) - int(size[1] / 2)))
 
+            for polygon in polygons:
+                polygon.draw(self.screen)
+
             for obj in lambdas:
                 if hasattr(obj, "rigidbody"):
                     obj.rigidbody.update_action()
@@ -693,7 +910,7 @@ class Window:
 
             Input.update()
             pygame.display.flip()
-            RealTime.wait_for_real_time(RealTime.deltaTime)
+            RealTime.wait_for_real_time(RealTime.delta_time)
 
     def quit(self):
         self.running = False
@@ -709,19 +926,19 @@ events = []
 
 class Input:
     @staticmethod
-    def get_key(key):
+    def get_key(key) -> bool:
         return keys[key]
 
     @staticmethod
-    def get_key_down(key):
+    def get_key_down(key) -> bool:
         return (not oldKeys[key]) and keys[key]
 
     @staticmethod
-    def get_key_up(key):
+    def get_key_up(key) -> bool:
         return oldKeys[key] and not keys[key]
 
     @staticmethod
-    def get_event(event, attribute: str = "", value=None):
+    def get_event(event, attribute: str = "", value=None) -> bool:
         b = False
         for ev in events:
             if ev.type == event:
@@ -741,15 +958,15 @@ class Input:
 
     # Mouse
     @staticmethod
-    def get_mouse_button_down(button):
+    def get_mouse_button_down(button) -> bool:
         return Input.get_event(MOUSEBUTTONDOWN, "button", button)
 
     @staticmethod
-    def get_mouse_button_up(button):
+    def get_mouse_button_up(button) -> bool:
         return Input.get_event(MOUSEBUTTONUP, "button", button)
 
     @staticmethod
-    def get_mouse_position():
+    def get_mouse_position() -> Vector2:
         pos = pygame.mouse.get_pos()
         return Vector2(pos[0], pos[1])
 
@@ -780,11 +997,11 @@ quitting = False
 
 class RealTime:
     t = time.monotonic()  # init time
-    deltaTime = 1 / 60
+    delta_time = 1 / 60
 
     @staticmethod
     def set_dt(dt):
-        RealTime.deltaTime = dt
+        RealTime.delta_time = dt
 
     @staticmethod
     def wait_for_real_time(dt):
