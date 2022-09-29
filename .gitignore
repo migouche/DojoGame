@@ -52,6 +52,6 @@ coverage.xml
 docs/_build/
 
 # My stuff
-my-tests/
+# my-tests/
 poetry.lock
 .pytest_cache/
