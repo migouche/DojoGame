@@ -49,13 +49,13 @@ ResetPos()
 
 while window.running:
     if Input.get_key(K_UP):
-        RightPaddle.transform.translate(Vector2(0, -1) * paddleSpeed * RealTime.deltaTime)
+        RightPaddle.transform.translate(Vector2(0, -1) * paddleSpeed * RealTime.delta_time)
     if Input.get_key(K_DOWN):
-        RightPaddle.transform.translate(Vector2(0, 1) * paddleSpeed * RealTime.deltaTime)
+        RightPaddle.transform.translate(Vector2(0, 1) * paddleSpeed * RealTime.delta_time)
     if Input.get_key(K_w):
-        LeftPaddle.transform.translate(Vector2(0, -1) * paddleSpeed * RealTime.deltaTime)
+        LeftPaddle.transform.translate(Vector2(0, -1) * paddleSpeed * RealTime.delta_time)
     if Input.get_key(K_s):
-        LeftPaddle.transform.translate(Vector2(0, 1) * paddleSpeed * RealTime.deltaTime)
+        LeftPaddle.transform.translate(Vector2(0, 1) * paddleSpeed * RealTime.delta_time)
     if Input.get_key(K_e):
         # ball.transform.setScale(ball.transform.scale + Vector2(5, 5))
         # RightText.setTextColor(red)
@@ -84,7 +84,7 @@ while window.running:
     canStart = canStart or Input.get_key(K_SPACE)
 
     if canStart:
-        ball.transform.translate(ballDir * ballSpeed * RealTime.deltaTime)
+        ball.transform.translate(ballDir * ballSpeed * RealTime.delta_time)
 
     if Vector2.distance(ball.transform.position, Vector2(ball.transform.position.x, window.height)) <= 20:
         ballDir.y *= -1
