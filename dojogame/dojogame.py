@@ -349,6 +349,9 @@ class Polygon(GameObject):
         pygame.draw.polygon(screen, self.color.to_tuple(),
                             [v.to_tuple() for v in self.get_absolute_vertices_positions()], self.width)
 
+    def update(self):
+        self.collider.aabb.update_aabb()
+
 
 class Collision:
     def __init__(self, collide: bool, point: Vector2 = None, normal: Vector2 = None):
@@ -393,6 +396,9 @@ AABB = AxisAlignedBoundingBox
 class Collisions:
     @staticmethod
     def intersect_polygons(p1: Polygon, p2: Polygon) -> Collision:
+        if not p1.collider.aabb.aabb_overlap(p2.collider.aabb):
+            return Collision(False)
+
         def find_arithmetic_mean(points: list) -> Vector2:
             x = y = 0
 
@@ -700,11 +706,10 @@ class Debug:
     @staticmethod
     def draw_rectangle_vertices(vertices: list[Vector2, Vector2, Vector2, Vector2],
                                 color: Color = Colors.black, width: int = 1):
-        if(len(vertices) != 4):
+        if (len(vertices) != 4):
             raise ValueError("Vertices must be 4")
         debug.append(lambda screen: pygame.draw.polygon(screen, color.to_tuple(),
                                                         [v.to_tuple() for v in vertices], width))
-
 
     @staticmethod
     def draw_circle(position: Vector2, radius: int, color: Color = Colors.black, width: int = 1):
@@ -894,6 +899,7 @@ class Window:
                                   int(obj.transform.position.y) - int(size[1] / 2)))
 
             for polygon in polygons:
+                polygon.update()
                 polygon.draw(self.screen)
 
             for obj in lambdas:

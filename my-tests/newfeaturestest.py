@@ -48,12 +48,9 @@ while window.running:
     triangle.transform.rotate(RealTime.delta_time * 10)
     triangle2.transform.rotate(-RealTime.delta_time * 10)
 
-    Debug.draw_circle(triangle.collider.aabb.max_v, 5, Colors.white)
-    Debug.draw_circle(triangle.collider.aabb.min_v, 5, Colors.white)
-
     Debug.draw_axis_aligned_bounding_box(triangle)
-    Debug.draw_rectangle_vertices([Vector2(0, 0), Vector2(0, 100), Vector2(100, 100), Vector2(100, 0)], Colors.red, 5)
-    #print(triangle.collider.collide_with(triangle2.collider))
+    Debug.draw_axis_aligned_bounding_box(triangle2)
+    triangle.color = triangle2.color = Colors.red if triangle.collider.collide_with(triangle2.collider) else Colors.blue
 
     if Input.get_mouse_button_down(1):
         _dir.y *= -1
