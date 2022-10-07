@@ -1,6 +1,7 @@
-import math
-import random
-import sys
+# dojogame.py
+# This file contains the base of the engine.
+# This file acts as a link between all submodules
+
 import time
 from enum import Enum
 from typing import Union
@@ -8,10 +9,8 @@ from typing import Union
 import pygame
 from pygame.constants import *
 
-sys.path.append("")
 
-from dojogame.vectors import *
-from dojogame.dojomathfunctions import *
+from dojogame.dojomaths import *
 
 
 class Quaternion:

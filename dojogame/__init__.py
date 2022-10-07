@@ -1,4 +1,5 @@
-# __init__.py
+# dojogame __init__.py
+
 from dojogame.dojogame import *
 
 print("Thanks for using DojoGame!")
