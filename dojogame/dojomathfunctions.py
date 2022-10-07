@@ -1,6 +1,8 @@
 import math
+import sys
 from sys import float_info
 
+sys.path.append("")
 
 class Mathf:
     @staticmethod
