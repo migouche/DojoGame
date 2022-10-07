@@ -1,5 +1,6 @@
 import math
 import random
+import sys
 import time
 from enum import Enum
 from typing import Union
@@ -7,139 +8,10 @@ from typing import Union
 import pygame
 from pygame.constants import *
 
+sys.path.append("")
 
-class Vector2:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def __add__(self, v):
-        return Vector2(self.x + v.x, self.y + v.y)
-
-    def __sub__(self, v):
-        return Vector2(self.x - v.x, self.y - v.y)
-
-    def __neg__(self):
-        return Vector2(-self.x, -self.y)
-
-    def __mul__(self, f):
-        return Vector2(self.x * f, self.y * f)
-
-    def __truediv__(self, f):
-        return Vector2(self.x / f, self.y / f)
-
-    def __str__(self):
-        return "Vector2:(" + str(self.x) + ", " + str(self.y) + ")"
-
-    def __eq__(self, v):
-        return self.x == v.x and self.y == v.y
-
-    def to_tuple(self) -> tuple:
-        return self.x, self.y
-
-    @staticmethod
-    def zero():
-        return Vector2(0, 0)
-
-    @staticmethod
-    def dot(a, b) -> float:
-        return a.x * b.x + a.y * b.y
-
-    @staticmethod
-    def cross(a, b) -> float:
-        return a.x * b.y - b.x * a.y
-
-    @staticmethod
-    def scale(a, b):
-        return Vector2(a.x * b.x, a.y * b.y)
-
-    @staticmethod
-    def angle_rad(a, b) -> float:
-        return math.atan2(Vector2.cross(a, b), Vector2.dot(a, b))
-
-    @staticmethod
-    def angle_deg(a, b):
-        return Vector2.angle_rad(a, b) * Mathf.Rad2Deg
-
-    def to_vector2_int(self):
-        return Vector2Int(int(self.x), int(self.y))
-
-    def magnitude(self):
-        return math.sqrt(self.x ** 2 + self.y ** 2)
-
-    @staticmethod
-    def distance(a, b):
-        return (b - a).magnitude()
-
-    def normalized(self):
-        return self / self.magnitude()
-
-    @staticmethod
-    def from_angle_rad(angle):
-        return Vector2(math.cos(angle), math.sin(angle))
-
-    @staticmethod
-    def from_angle_deg(angle):
-        return Vector2.from_angle_rad(angle * Mathf.Deg2Rad)
-
-    @staticmethod
-    def random():
-        return Vector2.rad_random(0, 6.28)
-
-    @staticmethod
-    def deg_random(a, b):
-        return Vector2.rad_random(a * Mathf.Deg2Rad, b * Mathf.Deg2Rad)
-
-    @staticmethod
-    def rad_random(a, b):
-        return Vector2.from_angle_rad(random.randint(int(a * 100), int(b * 100)) / 100).normalized()
-
-    @staticmethod
-    def rotate_by_rads(v, r):
-        return Vector2(int((v.x * math.cos(r) - v.y * math.sin(r)) * 1000) / 1000,
-                       int((v.x * math.sin(r) + v.y * math.cos(r)) * 1000) / 1000)
-
-    @staticmethod
-    def rotate_by_degs(v, d):
-        return Vector2.rotate_by_rads(v, d * Mathf.Deg2Rad)
-
-
-class Vector2Int:
-    def __init__(self, x, y):
-        self.x = int(x)
-        self.y = int(y)
-
-    def __add__(self, v):
-        return Vector2Int(self.x + v.x, self.y + v.y)
-
-    def __sub__(self, v):
-        return Vector2Int(self.x - v.x, self.y - v.y)
-
-    def __mul__(self, f):
-        return Vector2Int(self.x * f, self.y * f)
-
-    def __truediv__(self, f):
-        return Vector2Int(self.x / f, self.y / f)
-
-    def __str__(self):
-        return "Vector2Int:(" + str(self.x) + ", " + str(self.y) + ")"
-
-    def __eq__(self, v):
-        return self.x == v.x and self.y == v.y
-
-    @staticmethod
-    def zero():
-        return Vector2(0, 0)
-
-    def magnitude(self):
-        return math.sqrt(self.x ** 2 + self.y ** 2)
-
-    @staticmethod
-    def distance(a, b):
-        return (b - a).magnitude()
-
-    def normalized(self):
-        return self / self.magnitude()
+from dojogame.vectors import *
+from dojogame.dojomathfunctions import *
 
 
 class Quaternion:
@@ -165,7 +37,7 @@ class Quaternion:
 objects = []
 texts = []
 debug = []
-polygons = []
+game_objects = []
 polygon_colliders = []
 lambdas = {}
 IDCounter = 1
@@ -237,35 +109,6 @@ class Space(Enum):
     Self = 2
 
 
-class RaycastHit:
-    def __init__(self, collide: bool, point: Vector2 = None, normal: Vector2 = None, dist: float = None, collider=None):
-        self.collide = collide
-        self.point = point
-        self.normal = normal
-        self.distance = dist
-        self.collider = collider
-
-    def __bool__(self):
-        return self.collide
-
-
-class Raycast:
-    @staticmethod
-    def raycast(start: Vector2, _dir: Union[float, Vector2], length: float = None) -> RaycastHit:
-        pos = start
-        step = 0
-        while (length is None or Vector2.distance(pos, start) < length) and (  # checks for length and for inside screen
-                0 < pos.x < pygame.display.get_window_size()[0] and
-                0 < pos.y < pygame.display.get_window_size()[1]):
-            pos = start + _dir * step
-
-            for obj in lambdas:
-                if hasattr(obj, 'collider') and obj.collider.hit_inside_collider(pos):
-                    return obj.collider.hit_inside_collider(pos)
-            step += 1
-        return RaycastHit(False)
-
-
 class Action:
     def __init__(self, dSpeed: Vector2 = Vector2.zero(), dAngle: float = 0):
         self.dSpeed = dSpeed
@@ -327,7 +170,10 @@ class Rigidbody:
 
 
 class GameObject:
-    def draw(self, screen: pygame.Surface):
+    def draw(self, screen: pygame.Surface) -> pygame.Rect:
+        raise NotImplementedError
+
+    def update(self):
         raise NotImplementedError
 
 
@@ -340,17 +186,41 @@ class Polygon(GameObject):
         self.width = width
         self.antialias = antialias
         self.collider = PolygonCollider(self)
-        polygons.append(self)
+        self.rect = pygame.Rect(0, 0, 0, 0)
+        game_objects.append(self)
 
-    def get_absolute_vertices_positions(self) -> list:
+    def get_absolute_vertices_positions(self) -> [Vector2]:
         return [self.transform.relative_pos_to_absolute(v) for v in self.local_vertices_positions]
 
-    def draw(self, screen: pygame.Surface):
-        pygame.draw.polygon(screen, self.color.to_tuple(),
-                            [v.to_tuple() for v in self.get_absolute_vertices_positions()], self.width)
+    def draw(self, screen: pygame.Surface) -> pygame.Rect:
+        return pygame.draw.polygon(screen, self.color.to_tuple(),
+                                   [v.to_tuple() for v in self.get_absolute_vertices_positions()], self.width)
 
-    def update(self):
+    def update(self, screen: pygame.Surface = None):
         self.collider.aabb.update_aabb()
+        if screen is not None:
+            self.rect = self.draw(screen)
+
+
+class Circle(GameObject):
+    def __init__(self, radius: float, color: Color = Colors.black, width: int = 0,
+                 rigidbody: bool = False, mass: int = 1):
+        self.radius = radius
+        self.transform = Transform()
+        self.color = color
+        self.width = width
+        self.collider = CircleCollider(self)
+        self.rect = pygame.Rect(0, 0, 0, 0)
+        game_objects.append(self)
+
+    def draw(self, screen: pygame.Surface) -> pygame.Rect:
+        return pygame.draw.circle(screen, self.color.to_tuple(),
+                                  self.transform.position.to_tuple(), self.radius, self.width)
+
+    def update(self, screen: pygame.Surface = None):
+        self.collider.aabb.update_aabb()
+        if screen is not None:
+            self.rect = self.draw(screen)
 
 
 class Collision:
@@ -364,26 +234,32 @@ class Collision:
 
 
 class AxisAlignedBoundingBox:
-    def __init__(self, obj: Polygon):
+    def __init__(self, obj: Polygon | Circle):
         self.obj = obj
         self.min_v = self.max_v = Vector2.zero()
         self.update_aabb()
 
     def update_aabb(self):
-        vertices = self.obj.get_absolute_vertices_positions()
-        max_x = max_y = float("-inf")
-        min_x = min_y = float("inf")
-        for vertex in vertices:
-            if vertex.x > max_x:
-                max_x = vertex.x
-            if vertex.y > max_y:
-                max_y = vertex.y
-            if vertex.x < min_x:
-                min_x = vertex.x
-            if vertex.y < min_y:
-                min_y = vertex.y
-        self.min_v = Vector2(min_x, min_y)
-        self.max_v = Vector2(max_x, max_y)
+        if isinstance(self.obj, Polygon):
+            vertices = self.obj.get_absolute_vertices_positions()
+            max_x = max_y = float("-inf")
+            min_x = min_y = float("inf")
+            for vertex in vertices:
+                if vertex.x > max_x:
+                    max_x = vertex.x
+                if vertex.y > max_y:
+                    max_y = vertex.y
+                if vertex.x < min_x:
+                    min_x = vertex.x
+                if vertex.y < min_y:
+                    min_y = vertex.y
+            self.min_v = Vector2(min_x, min_y)
+            self.max_v = Vector2(max_x, max_y)
+        elif isinstance(self.obj, Circle):
+            self.min_v = self.obj.transform.position - Vector2(self.obj.radius, self.obj.radius)
+            self.max_v = self.obj.transform.position + Vector2(self.obj.radius, self.obj.radius)
+        else:
+            raise TypeError("Wrong type of object given")
 
     def aabb_overlap(self, other: 'AxisAlignedBoundingBox') -> bool:
         return self.min_v.x < other.max_v.x and self.max_v.x > other.min_v.x and \
@@ -402,9 +278,9 @@ class Collisions:
         def find_arithmetic_mean(points: list) -> Vector2:
             x = y = 0
 
-            for i in range(len(points)):
-                x += points[i].x
-                y += points[i].y
+            for j in range(len(points)):
+                x += points[j].x
+                y += points[j].y
             return Vector2(x / len(points), y / len(points))
 
         vertices_a = p1.get_absolute_vertices_positions()
@@ -458,7 +334,7 @@ class Collisions:
 
         if Vector2.dot(direction, normal) < 0:
             normal = -normal
-        return Collision(True)
+        return Collision(True, normal=normal)
 
     @staticmethod
     def project_vertices(vertices: list, axis: Vector2) -> tuple:
@@ -480,6 +356,112 @@ class PolygonCollider:
 
     def collide_with(self, other) -> bool:
         return bool(Collisions.intersect_polygons(self.polygon, other.polygon))
+
+
+class CircleCollider:
+    def __init__(self, circle: Circle):
+        self.circle = circle
+        self.aabb = AABB(circle)
+
+
+class RaycastHit:
+    def __init__(self, collide: bool, point: Vector2 = None, normal: Vector2 = None, dist: float = None, collider=None):
+        self.collide = collide
+        self.point = point
+        self.normal = normal
+        self.distance = dist
+        self.collider = collider
+
+    def __bool__(self):
+        return self.collide
+
+
+class Raycast:
+    @staticmethod
+    def raycast(start: Vector2, _dir: Vector2) -> RaycastHit:
+        pass
+
+    @staticmethod
+    def raycast_circle(start: Vector2, _dir: Vector2, circle: Circle | CircleCollider) -> RaycastHit:
+        # r_squared = 0
+        direction = _dir.normalized()
+        if isinstance(circle, Circle):
+            r_squared = circle.radius ** 2
+        elif isinstance(circle, CircleCollider):
+            r_squared = circle.circle.radius ** 2
+        else:
+            raise TypeError("circle must be of type Circle or CircleCollider")
+
+        origin_to_circle = circle.transform.position - start
+        origin_to_circle_squared = origin_to_circle.x ** 2 + origin_to_circle.y ** 2
+
+        a = Vector2.dot(origin_to_circle, direction)
+        b_squared = origin_to_circle_squared - a ** 2
+
+        if r_squared - b_squared < 0:
+            return RaycastHit(False)
+
+        f = math.sqrt(r_squared - b_squared)
+
+        if origin_to_circle_squared < r_squared:  # inside circle
+            t = a + f
+        else:
+            t = a - f
+
+        if t < 0:
+            return RaycastHit(False)
+
+        point = start + direction * t
+        normal = (point - circle.transform.position).normalized()
+
+        return RaycastHit(True, point, normal, t, circle)
+
+    @staticmethod
+    def raycast_segment(start: Vector2, _dir: Vector2,
+                        point0: Vector2, point1: Vector2, distance: float | int) -> RaycastHit:
+        seg = point1 - point0
+        seg_perp = seg.left_perpendicular()
+        perp_dot_dir = Vector2.dot(_dir, seg_perp)
+
+        if perp_dot_dir == 0 or perp_dot_dir == Mathf.epsilon or -perp_dot_dir == Mathf.epsilon:
+            return RaycastHit(False)
+
+        d = point0 - start
+
+        t = Vector2.dot(seg_perp, d) / perp_dot_dir
+        s = Vector2.dot(_dir.left_perpendicular(), d) / perp_dot_dir
+
+        if 0 <= t <= distance and 0 <= s <= 1:
+            return RaycastHit(True, start + _dir * t, seg_perp.normalized(), t)
+        return RaycastHit(False)
+
+    @staticmethod
+    def raycast_polygon(start: Vector2, _dir: Vector2,
+                        polygon: Polygon | PolygonCollider, distance) -> RaycastHit:
+        if isinstance(polygon, Polygon):
+            vertices = polygon.get_absolute_vertices_positions()
+        elif isinstance(polygon, PolygonCollider):
+            vertices = polygon.polygon.get_absolute_vertices_positions()
+        else:
+            raise TypeError("polygon must be of type Polygon or PolygonCollider")
+
+        t = float("inf")
+        crossings = 0
+
+        point = normal = Vector2.zero()
+
+        for i in range(len(vertices)):
+            j = (i + 1) % len(vertices)
+
+            if hit := Raycast.raycast_segment(start, _dir, vertices[i], vertices[j], float("inf")):
+                crossings += 1
+                if hit.distance < t and distance <= distance:
+                    t = hit.distance
+                    normal = hit.normal
+                    point = hit.point
+        if crossings > 0 and crossings % 2 == 0:
+            return RaycastHit(True, point, normal, t)
+        return RaycastHit(False)
 
 
 class BaseObject:
@@ -525,7 +507,7 @@ class BaseCollider:
         pass
 
 
-class Circle(BaseObject):
+class CircleOld(BaseObject):
     def __init__(self, radius: int, mass: float = 1, outline: int = 0, color: Color = Colors.black,
                  position: Vector2 = Vector2.zero(), rotation: float = 0):
         super().__init__(lambda screen, obj: pygame.draw.circle(screen,
@@ -536,7 +518,7 @@ class Circle(BaseObject):
                          outline=outline)
 
 
-class CircleCollider(BaseCollider):
+class CircleColliderOld(BaseCollider):
     def __init__(self, circle: Circle):
         self.object = circle
 
@@ -706,7 +688,7 @@ class Debug:
     @staticmethod
     def draw_rectangle_vertices(vertices: list[Vector2, Vector2, Vector2, Vector2],
                                 color: Color = Colors.black, width: int = 1):
-        if (len(vertices) != 4):
+        if len(vertices) != 4:
             raise ValueError("Vertices must be 4")
         debug.append(lambda screen: pygame.draw.polygon(screen, color.to_tuple(),
                                                         [v.to_tuple() for v in vertices], width))
@@ -898,9 +880,8 @@ class Window:
                                  (int(obj.transform.position.x) - int(size[0] / 2),
                                   int(obj.transform.position.y) - int(size[1] / 2)))
 
-            for polygon in polygons:
-                polygon.update()
-                polygon.draw(self.screen)
+            for game_object in game_objects:
+                game_object.update(self.screen)
 
             for obj in lambdas:
                 if hasattr(obj, "rigidbody"):
@@ -982,20 +963,6 @@ class Input:
         oldKeys = keys
         keys = pygame.key.get_pressed()
         events = pygame.event.get()
-
-
-class Mathf:
-    @staticmethod
-    def clamp(value, Min, Max):
-        if value <= Min:
-            return Min
-        elif value >= Max:
-            return Max
-        else:
-            return value
-
-    Deg2Rad = math.pi / 180
-    Rad2Deg = 1 / Deg2Rad
 
 
 quitting = False
