@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.poetry]
 name = "dojogame"
-version = "0.1.4"
+version = "0.2.0"
 description = "Wrapper for Pygame"
 readme = "README.md"
 license = "GPL-3.0-or-later"
@@ -15,7 +15,6 @@ classifiers=[
     "License :: OSI Approved :: GNU General Public License (GPL)",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
@@ -32,4 +31,11 @@ python = ">=3.7"
 pygame = ">=2.0"
 
 [tool.poetry.dev-dependencies]
-pytest = "=>7.0"
+pytest = ">=7.0"
+
+[[tool.poetry.source]]
+name = "pypi-test"
+url = "https://test.pypi.org/legacy/"
+default = false
+secondary = false
+
