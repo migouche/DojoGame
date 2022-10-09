@@ -1,6 +1,10 @@
 from typing import Union
 
-import pygame
+from dojogame.dojographics.colors import *
+from dojogame.dojoinputs import *
+from dojogame.dojodata import arrays
+from dojogame.dojomaths.realtime import *
+
 
 class Window:
     def __init__(self, width: int = 0, height: int = 0, title: str = "Game Window", icon: str = None,
@@ -42,7 +46,6 @@ class Window:
         pygame.display.set_icon(self.icon)
 
     def update(self):
-        global debug
         if self.running:
             self.width, self.height = pygame.display.get_window_size()
             if Input.get_event(QUIT):
@@ -51,33 +54,33 @@ class Window:
 
             self.fill_bg(self.bgColor)
 
-            for txt in texts:
+            for txt in arrays.texts:
                 txt.set_text(txt.text)
                 size = pygame.transform.rotate(txt.renderText, txt.rectTransform.rotation).get_rect().size
                 self.screen.blit(pygame.transform.rotate(txt.renderText, -txt.rectTransform.rotation),
                                  (int(txt.rectTransform.position.x) - int(size[0] / 2),
                                   int(txt.rectTransform.position.y) - int(size[1] / 2)))
 
-            for obj in objects:
+            for obj in arrays.objects:
                 size = pygame.transform.rotate(obj.Img, obj.transform.rotation).get_rect().size
                 self.screen.blit(pygame.transform.rotate(obj.Img, -obj.transform.rotation),
                                  (int(obj.transform.position.x) - int(size[0] / 2),
                                   int(obj.transform.position.y) - int(size[1] / 2)))
 
-            for game_object in game_objects:
+            for game_object in arrays.game_objects:
                 game_object.update(self.screen)
 
-            for obj in lambdas:
+            for obj in arrays.lambdas:
                 if hasattr(obj, "rigidbody"):
                     obj.rigidbody.update_action()
 
-            for key in lambdas:
-                lambdas[key](self.screen, key)
+            for key in arrays.lambdas:
+                arrays.lambdas[key](self.screen, key)
 
-            for func in debug:
+            for func in arrays.debug:
                 func(self.screen)
 
-            debug = []
+            arrays.debug = []
 
             Input.update()
             pygame.display.flip()
