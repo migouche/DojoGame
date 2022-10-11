@@ -29,6 +29,8 @@ class Object:  # TODO: Rework to convert to GameObject child
 class GameObject:
     def __init__(self):
         self.collider = None
+        self.rigidbody = None
+        self.transform = Transform()    
 
     def draw(self, screen: pygame.Surface) -> pygame.Rect:
         raise NotImplementedError
@@ -38,18 +40,22 @@ class GameObject:
 
     def get_collider(self):
         if self.collider is None:
-            raise AttributeError("GameObject has no collider")
+            raise AttributeError(f"GameObject has no collider")
         else:
             return self.collider
 
+    def get_rigidbody(self):
+        if self.rigidbody is None:
+            raise AttributeError(f"GameObject has no rigidbody")
+        else:
+            return self.rigidbody
+
 
 class Polygon(GameObject):
-    def __init__(self, vertices: list, color: Color = Colors.black, width: int = 0, antialias: bool = False,
-                 rigidbody: bool = False, mass: int = 1):
+    def __init__(self, vertices: list, color: Color = Colors.black, width: int = 0, antialias: bool = False):
         super().__init__()
         self._collider = None
         self.local_vertices_positions = vertices
-        self.transform = Transform()
         self.color = color
         self.width = width
         self.antialias = antialias
@@ -74,23 +80,21 @@ class Polygon(GameObject):
 
     @staticmethod
     def Rectangle(width: int, height: int, color: Color = Colors.black, line_width: int = 0,
-                  antialias: bool = False, rigidbody: bool = False, mass: int = 1) -> 'Polygon':
+                  antialias: bool = False) -> 'Polygon':
         vertices = [Vector2(-width / 2, -height / 2), Vector2(width / 2, -height / 2),
                     Vector2(width / 2, height / 2), Vector2(-width / 2, height / 2)]
-        return Polygon(vertices, color, line_width, antialias, rigidbody, mass)
+        return Polygon(vertices, color, line_width, antialias)
 
     @staticmethod
     def Square(size: int, color: Color = Colors.black, line_width: int = 0,
-               antialias: bool = False, rigidbody: bool = False, mass: int = 1) -> 'Polygon':
-        return Polygon.Rectangle(size, size, color, line_width, antialias, rigidbody, mass)
+               antialias: bool = False) -> 'Polygon':
+        return Polygon.Rectangle(size, size, color, line_width, antialias)
 
 
 class Circle(GameObject):
-    def __init__(self, radius: float, color: Color = Colors.black, width: int = 0, rigidbody: bool = False,
-                 mass: int = 1):
+    def __init__(self, radius: float, color: Color = Colors.black, width: int = 0):
         super().__init__()
         self.radius = radius
-        self.transform = Transform()
         self.color = color
         self.width = width
         self.rect = pygame.Rect(0, 0, 0, 0)

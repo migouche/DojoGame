@@ -71,8 +71,10 @@ class Window:
                 game_object.update(self.screen)
 
             for obj in arrays.lambdas:
-                if hasattr(obj, "rigidbody"):
-                    obj.rigidbody.update_action()
+                try:
+                    obj.get_rigidbody().update_action()
+                except AttributeError:
+                    pass
 
             for key in arrays.lambdas:
                 arrays.lambdas[key](self.screen, key)

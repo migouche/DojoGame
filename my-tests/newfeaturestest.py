@@ -15,7 +15,6 @@ square.transform.position = Vector2(200, 200)
 
 point2 = Circle(10)
 point2.transform.position = Vector2(300, 250)
-point2.transform.rotate_around_origin(90, square.transform.position)
 pos = point2.transform.position
 
 point = Circle(10, color=Colors.purple)
@@ -27,6 +26,7 @@ rec2.transform.position = Vector2(400, 400)
 rec2.transform.rotation = 45
 
 player = Polygon.Square(10)
+Rigidbody.add_rigidbody(player)
 _dir = Vector2(0, -1)
 
 lastCircle = Circle(radius=5, color=Colors.white)  # should be and is in the middle
@@ -45,7 +45,12 @@ Collider.add_collider(triangle2)
 
 RealTime.set_dt(1/75)
 
+
+print(player.get_rigidbody())
 while window.running:
+
+    print(f"player speed: {player.get_rigidbody().velocity}")
+
     triangle.transform.rotate(RealTime.delta_time * 10)
     triangle2.transform.rotate(-RealTime.delta_time * 10)
 
@@ -72,13 +77,14 @@ while window.running:
     pac.transform.position = Input.get_mouse_position()
 
     if Input.get_key(K_a):
-        player.rigidbody.add_force_at_position(Vector2(-30, 0), player.transform.position)
+        player.get_rigidbody().add_force_at_position(Vector2(-30, 0), player.transform.position)
+        print("a")
     if Input.get_key(K_d):
-        player.rigidbody.add_force_at_position(Vector2(30, 0), player.transform.position)
+        player.get_rigidbody().add_force_at_position(Vector2(30, 0), player.transform.position)
     if Input.get_key(K_w):
-        player.rigidbody.add_force_at_position(Vector2(0, -30), player.transform.position + Vector2(1, 0))
+        player.get_rigidbody().add_force_at_position(Vector2(0, -30), player.transform.position + Vector2(1, 0))
     if Input.get_key(K_s):
-        player.rigidbody.add_force_at_position(Vector2(0, 30), player.transform.position, space=Space.Self)
+        player.get_rigidbody().add_force_at_position(Vector2(0, 30), player.transform.position, space=Space.Self)
 
     if Input.get_mouse_button_down(1):
         print("yeet")

@@ -1,6 +1,7 @@
 from dojogame.dojomaths.vectors import *
 from dojogame.dojodata.enums import *
 from dojogame.dojomaths.realtime import *
+from dojogame.dojographics.gameobjects import *
 
 
 #  requires A LOT of rework
@@ -15,8 +16,8 @@ class Action:
 
 
 class Rigidbody:
-    def __init__(self, mass: float):
-        self.object = None
+    def __init__(self, mass: float = 1, object: GameObject = None):
+        self.object = object
         self.totalAction = Action()
         # self.position = pos
         # self.angle = angle
@@ -64,3 +65,7 @@ class Rigidbody:
         self.object.transform.rotation += self.angularVelocity * RealTime.delta_time
 
         self.totalAction = Action()
+
+    @staticmethod
+    def add_rigidbody(obj, mass: float = 1):
+        obj.rigidbody = Rigidbody(mass, obj)
