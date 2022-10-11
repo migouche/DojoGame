@@ -46,11 +46,7 @@ Collider.add_collider(triangle2)
 RealTime.set_dt(1/75)
 
 
-print(player.get_rigidbody())
 while window.running:
-
-    print(f"player speed: {player.get_rigidbody().velocity}")
-
     triangle.transform.rotate(RealTime.delta_time * 10)
     triangle2.transform.rotate(-RealTime.delta_time * 10)
 
@@ -78,7 +74,6 @@ while window.running:
 
     if Input.get_key(K_a):
         player.get_rigidbody().add_force_at_position(Vector2(-30, 0), player.transform.position)
-        print("a")
     if Input.get_key(K_d):
         player.get_rigidbody().add_force_at_position(Vector2(30, 0), player.transform.position)
     if Input.get_key(K_w):

@@ -70,12 +70,6 @@ class Window:
             for game_object in arrays.game_objects:
                 game_object.update(self.screen)
 
-            for obj in arrays.lambdas:
-                try:
-                    obj.get_rigidbody().update_action()
-                except AttributeError:
-                    pass
-
             for key in arrays.lambdas:
                 arrays.lambdas[key](self.screen, key)
 

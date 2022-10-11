@@ -28,15 +28,27 @@ class Object:  # TODO: Rework to convert to GameObject child
 
 class GameObject:
     def __init__(self):
+        self.rect = pygame.Rect(0, 0, 0, 0)
         self.collider = None
         self.rigidbody = None
-        self.transform = Transform()    
+        self.transform = Transform()
 
     def draw(self, screen: pygame.Surface) -> pygame.Rect:
         raise NotImplementedError
 
-    def update(self):
-        raise NotImplementedError
+    def update(self, screen):
+        try:
+            self.get_collider().aabb.update_aabb()  # change later to get_collider().update()
+        except AttributeError:
+            pass
+
+        try:
+            self.get_rigidbody().update_action()
+        except AttributeError:
+            pass
+
+        if screen is not None:
+            self.rect = self.draw(screen)
 
     def get_collider(self):
         if self.collider is None:
@@ -59,7 +71,6 @@ class Polygon(GameObject):
         self.color = color
         self.width = width
         self.antialias = antialias
-        self.rect = pygame.Rect(0, 0, 0, 0)
         arrays.game_objects.append(self)
 
     def get_absolute_vertices_positions(self) -> [Vector2]:
@@ -68,15 +79,6 @@ class Polygon(GameObject):
     def draw(self, screen: pygame.Surface) -> pygame.Rect:
         return pygame.draw.polygon(screen, self.color.to_tuple(),
                                    [v.to_tuple() for v in self.get_absolute_vertices_positions()], self.width)
-
-    def update(self, screen: pygame.Surface = None):
-        try:
-            self.get_collider().aabb.update_aabb()  # change later to get_collider().update()
-        except AttributeError:
-            pass
-
-        if screen is not None:
-            self.rect = self.draw(screen)
 
     @staticmethod
     def Rectangle(width: int, height: int, color: Color = Colors.black, line_width: int = 0,
@@ -103,15 +105,6 @@ class Circle(GameObject):
     def draw(self, screen: pygame.Surface) -> pygame.Rect:
         return pygame.draw.circle(screen, self.color.to_tuple(),
                                   self.transform.position.to_tuple(), self.radius, self.width)
-
-    def update(self, screen: pygame.Surface = None):
-        try:
-            self.get_collider().aabb.update_aabb()  # change later to get_collider().update()
-        except AttributeError:
-            pass
-
-        if screen is not None:
-            self.rect = self.draw(screen)
 
 
 class Text:  # TODO: Rework to convert to GameObject child
