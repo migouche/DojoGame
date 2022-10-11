@@ -1,24 +1,28 @@
 from dojogame.dojomaths.vectors import *
+from dojogame.dojodata.enums import *
 import pygame.transform
 
+
 class Transform:
-    def __init__(self, pos: Vector2 = Vector2.zero(), angle: float = 0, scale: Vector2 = Vector2(1, 1)):
+    def __init__(self, pos: Vector2 = Vector2.zero(), angle: float = 0, scale: Vector2 = Vector2(1, 1),
+                 parent: 'Transform' = None):
+        self.parent = parent
         self.position = pos
         self.rotation = angle
         self.scale = scale
         self.object = None
 
-    def set_pos(self, pos):
+    def set_pos(self, pos, space: Space = Space.Self):
         self.position = pos
 
-    def translate(self, translation):
+    def translate(self, translation, space: Space = Space.Self):
         self.position += translation
 
     def set_scale(self, scale):
         self.scale = scale
         self.update()
 
-    def set_rot(self, angle):
+    def set_rot(self, angle, space: Space = Space.Self):
         self.rotation = angle % 360
 
     def rotate(self, angle):
@@ -48,6 +52,7 @@ class Transform:
                                                  (self.scale.x,
                                                   self.scale.y))
         self.object.Img.get_rect()
+
 
 class RectTransform:
     def __init__(self, pos, angle):
