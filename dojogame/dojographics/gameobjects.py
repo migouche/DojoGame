@@ -1,29 +1,9 @@
 import pygame.draw
 
-from dojogame.dojographics import arrays
-from dojogame.dojomaths.transform import *
+from dojogame.dojodata import arrays
+from dojogame.dojomaths import *
+from dojogame.dojomaths.vectors import Vector2
 from dojogame.dojographics.colors import *
-
-
-class Object:  # TODO: Rework to convert to GameObject child
-    def __init__(self, img, scale):
-        # self.transform = transform
-        self.transform = Transform(Vector2.zero(), 0, scale)
-        self.transform.object = self
-        self.Img = pygame.transform.scale(pygame.image.load(img), (self.transform.scale.x, self.transform.scale.y))
-        self.rect = self.Img.get_rect()
-        self.offset = scale / 2
-        arrays.objects.append(self)
-
-    @classmethod
-    def regular_polygon(cls, scale):  # have to add sides parameter
-        self = cls.__new__(cls)
-        self.transform = Transform(Vector2.zero(), 0, scale)
-        self.transform.object = self
-        self.Img = pygame.Surface((self.transform.scale.x, self.transform.scale.y))
-        self.rect = pygame.draw.lines(self.Img, (255, 255, 255), True, [(0, 0), (1, 0), (1, 1), (0, 1)])
-
-        return self
 
 
 class GameObject:
@@ -31,7 +11,8 @@ class GameObject:
         self.rect = pygame.Rect(0, 0, 0, 0)
         self.collider = None
         self.rigidbody = None
-        self.transform = Transform()
+        self.transform = Transform(game_object=self)
+        arrays.game_objects.append(self)
 
     def draw(self, screen: pygame.Surface) -> pygame.Rect:
         raise NotImplementedError
@@ -62,6 +43,35 @@ class GameObject:
         else:
             return self.rigidbody
 
+    @staticmethod
+    def get_rotated_surface_size(surface: pygame.Surface, rotation: float) -> Vector2Int:
+        return (Vector2.from_tuple(pygame.transform.rotate(surface, rotation).
+                                   get_size()) / 2).to_vector2_int()
+
+
+class Sprite(GameObject):
+    def __init__(self, img, scale):
+        super().__init__()
+        self.transform.set_scale(scale)
+        self._scale = scale
+        # self.transform = transform
+        self.Img = pygame.transform.scale(pygame.image.load(img), self.transform.scale.to_tuple())
+        self.img_rect = self.Img.get_rect()
+        self.offset = scale / 2
+        arrays.objects.append(self)
+
+    def draw(self, screen) -> pygame.Rect:
+        if self._scale != self.transform.scale:
+            self._scale = self.transform.scale
+            self.Img = pygame.transform.scale(self.Img, self.transform.scale.to_tuple())
+            self.img_rect = self.Img.get_rect()
+
+        return screen.blit(pygame.transform.rotate(self.Img, -self.transform.rotation),
+                           (self.transform.position.to_vector2_int() -
+                            GameObject.get_rotated_surface_size(self.Img,
+                                                                self.transform.rotation)).
+                           to_tuple())
+
 
 class Polygon(GameObject):
     def __init__(self, vertices: list, color: Color = Colors.black, width: int = 0, antialias: bool = False):
@@ -71,7 +81,7 @@ class Polygon(GameObject):
         self.color = color
         self.width = width
         self.antialias = antialias
-        arrays.game_objects.append(self)
+        # arrays.game_objects.append(self)
 
     def get_absolute_vertices_positions(self) -> [Vector2]:
         return [self.transform.relative_pos_to_absolute(v) for v in self.local_vertices_positions]
@@ -100,27 +110,26 @@ class Circle(GameObject):
         self.color = color
         self.width = width
         self.rect = pygame.Rect(0, 0, 0, 0)
-        arrays.game_objects.append(self)
+        # arrays.game_objects.append(self)
 
     def draw(self, screen: pygame.Surface) -> pygame.Rect:
         return pygame.draw.circle(screen, self.color.to_tuple(),
                                   self.transform.position.to_tuple(), self.radius, self.width)
 
 
-class Text:  # TODO: Rework to convert to GameObject child
-    def __init__(self, font, size: int, txtColor: Color = Colors.black, bgColor: Color = Colors.white):
-        self.rectTransform = RectTransform(Vector2.zero(), 0)
-        self.rectTransform.text = self
+class Text(GameObject):  # TODO: Rework to convert to GameObject child
+    def __init__(self, font, size: int, txt_color: Color = Colors.black, bg_color: Color = Colors.white):
+        super().__init__()
         self.text = ""
         self.size = size
         self.font = font
-        self.textColor = txtColor
-        self.BGColor = bgColor
-        self.renderFont = pygame.font.Font(self.font, self.size)
-        self.renderText = pygame.Surface.__new__(pygame.Surface)
+        self.text_color = txt_color
+        self.bg_color = bg_color
+        self.render_font = pygame.font.Font(self.font, self.size)
+        self.render_text = pygame.Surface.__new__(pygame.Surface)
         self.set_text(self.text)
-        self.rect = self.renderText.get_rect()
-        self.rect.center = self.rectTransform.position.to_tuple()
+        self.rect = self.render_text.get_rect()
+        self.rect.center = self.transform.position.to_tuple()
         arrays.texts.append(self)
 
     def set_text(self, text):
@@ -132,23 +141,32 @@ class Text:  # TODO: Rework to convert to GameObject child
         self.update_text()
 
     def set_textColor(self, color):
-        self.textColor = color
+        self.text_color = color
         self.update_text()
 
     def setTextColour(self, color):
-        self.textColor = color
+        self.text_color = color
         self.update_text()
 
     def set_bg_color(self, color):
-        self.BGColor = color
+        self.bg_color = color
         self.update_text()
 
     def set_bg_colour(self, color):
-        self.BGColor = color
+        self.bg_color = color
         self.update_text()
 
     def update_text(self):
-        self.renderFont = pygame.font.Font(self.font, self.size)
-        self.renderText = self.renderFont.render(str(self.text), True,
-                                                 self.textColor.to_tuple(),
-                                                 self.BGColor.to_tuple())
+        self.render_font = pygame.font.Font(self.font, self.size)
+        self.render_text = self.render_font.render(str(self.text), True,
+                                                   self.text_color.to_tuple(),
+                                                   self.bg_color.to_tuple())
+
+    def draw(self, screen: pygame.Surface) -> pygame.Rect:
+        self.update_text()
+
+        return screen.blit(pygame.transform.rotate(self.render_text, -self.transform.rotation),
+                           (self.transform.position.to_vector2_int() -
+                            GameObject.get_rotated_surface_size(self.render_text,
+                                                                self.transform.rotation)).
+                           to_tuple())

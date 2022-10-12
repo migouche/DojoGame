@@ -3,12 +3,12 @@ from dojogame import *
 window = Window(400, 400, flags=RESIZABLE)
 window.set_bg(Color.from_hex("ff00ff"))
 
-pac = Object("data/pacman.png", Vector2(200, 100))
+pac = Sprite("data/pacman.png", Vector2(200, 100))
 pac.transform.set_pos(Vector2(400, 400))
 
 txt = Text("freesansbold.ttf", 30, Colors.black, Color(255, 255, 255, 0))
 txt.set_text("wtf")
-txt.rectTransform.set_pos(Vector2(100, 100))
+txt.transform.set_pos(Vector2(100, 100))
 
 square = Polygon.Square(40, color=Colors.purple)
 square.transform.position = Vector2(200, 200)
@@ -58,7 +58,7 @@ while window.running:
     if Input.get_mouse_button_down(1):
         _dir.y *= -1
     Lines.draw_ray(Input.get_mouse_position(), _dir, 350)
-    square.transform.rotate(3)
+    square.transform.rotate(100 * RealTime.delta_time)
 
     if hit := Raycast.raycast_circle(Input.get_mouse_position(), _dir, point):
         Lines.draw_ray(hit.point, hit.normal, 100)
@@ -69,7 +69,7 @@ while window.running:
     if Input.get_key_up(K_SPACE):
         print("up")
     pac.transform.rotate(30 * RealTime.delta_time)
-    txt.rectTransform.rotate(30 * RealTime.delta_time)
+    txt.transform.rotate(30 * RealTime.delta_time)
     pac.transform.position = Input.get_mouse_position()
 
     if Input.get_key(K_a):

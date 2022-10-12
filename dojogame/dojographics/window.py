@@ -54,13 +54,6 @@ class Window:
 
             self.fill_bg(self.bgColor)
 
-            for txt in arrays.texts:
-                txt.set_text(txt.text)
-                size = pygame.transform.rotate(txt.renderText, txt.rectTransform.rotation).get_rect().size
-                self.screen.blit(pygame.transform.rotate(txt.renderText, -txt.rectTransform.rotation),
-                                 (int(txt.rectTransform.position.x) - int(size[0] / 2),
-                                  int(txt.rectTransform.position.y) - int(size[1] / 2)))
-
             for obj in arrays.objects:
                 size = pygame.transform.rotate(obj.Img, obj.transform.rotation).get_rect().size
                 self.screen.blit(pygame.transform.rotate(obj.Img, -obj.transform.rotation),

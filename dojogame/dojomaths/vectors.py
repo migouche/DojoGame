@@ -37,6 +37,10 @@ class Vector2:
         return self.x, self.y
 
     @staticmethod
+    def from_tuple(t: tuple):
+        return Vector2(t[0], t[1])
+
+    @staticmethod
     def zero():
         return Vector2(0, 0)
 
@@ -131,6 +135,13 @@ class Vector2Int:
 
     def __eq__(self, v):
         return self.x == v.x and self.y == v.y
+
+    def to_tuple(self) -> tuple:
+        return self.x, self.y
+
+    @staticmethod
+    def from_tuple(t: tuple):
+        return Vector2Int(t[0], t[1])
 
     @staticmethod
     def zero():

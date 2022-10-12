@@ -1,16 +1,26 @@
 from dojogame.dojomaths.vectors import *
 from dojogame.dojodata.enums import *
+
 import pygame.transform
+from typing import Union
 
 
 class Transform:
     def __init__(self, pos: Vector2 = Vector2.zero(), angle: float = 0, scale: Vector2 = Vector2(1, 1),
-                 parent: 'Transform' = None):
+                 space: Space = Space.Self, game_object: Union['GameObject', 'Object'] = None, parent: 'Transform' = None):
         self.parent = parent
-        self.position = pos
         self.rotation = angle
         self.scale = scale
-        self.object = None
+        self.game_object = game_object
+
+        if space == Space.Self:
+            self.local_position = pos
+        elif space == Space.World:
+            self.position = pos
+        else:
+            raise TypeError("Wrong Space given")
+
+        self.update()
 
     def set_pos(self, pos, space: Space = Space.Self):
         self.position = pos
@@ -46,12 +56,22 @@ class Transform:
         t.rotate_around_origin(-self.rotation, self.position)
         return t.position
 
-    def update(self):
-        self.object.offset = self.scale / 2
-        self.object.Img = pygame.transform.scale(self.object.Img,
-                                                 (self.scale.x,
-                                                  self.scale.y))
-        self.object.Img.get_rect()
+    def update_position(self):
+        if self.parent is None:
+            self.position = self.local_position
+        else:
+            self.position = self.parent.relative_pos_to_absolute(self.local_position)
+
+    def update(self):  # TODO: Change?
+        self.update_position()
+        try:
+            self.object.offset = self.scale / 2
+            self.object.Img = pygame.transform.scale(self.object.Img,
+                                                     (self.scale.x,
+                                                      self.scale.y))
+            self.object.Img.get_rect()
+        except AttributeError:
+            pass
 
 
 class RectTransform:

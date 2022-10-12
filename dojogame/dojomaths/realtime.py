@@ -2,6 +2,7 @@
 
 import time
 
+
 class RealTime:
     t = time.monotonic()  # init time
     delta_time = 1 / 60
