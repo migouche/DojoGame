@@ -22,17 +22,34 @@ class Transform:
 
         self.update()
 
-    def set_pos(self, pos, space: Space = Space.Self):
-        self.position = pos
+        if space == Space.Self:
+            self.local_rotation = angle
+        elif space == Space.World:
+            self.rotation = angle
+        else:
+            raise TypeError("Wrong Space given")
+
+    def set_position(self, pos, space: Space = Space.Self):
+        if space == Space.Self:
+            self.local_position = pos
+        elif space == Space.World:
+            self.position = pos
+        else:
+            raise TypeError("Wrong Space given")
 
     def translate(self, translation, space: Space = Space.Self):
-        self.position += translation
+        if space == Space.Self:
+            self.local_position += translation
+        elif space == Space.World:
+            self.position += translation
+        else:
+            raise TypeError("Wrong Space given")
 
-    def set_scale(self, scale):
+    def set_local_scale(self, scale):
         self.scale = scale
         self.update()
 
-    def set_rot(self, angle, space: Space = Space.Self):
+    def set_rotation(self, angle, space: Space = Space.Self):
         self.rotation = angle % 360
 
     def rotate(self, angle):
@@ -65,11 +82,11 @@ class Transform:
     def update(self):  # TODO: Change?
         self.update_position()
         try:
-            self.object.offset = self.scale / 2
-            self.object.Img = pygame.transform.scale(self.object.Img,
+            self.game_object.offset = self.scale / 2
+            self.game_object.Img = pygame.transform.scale(self.game_object.Img,
                                                      (self.scale.x,
                                                       self.scale.y))
-            self.object.Img.get_rect()
+            self.game_object.Img.get_rect()
         except AttributeError:
             pass
 
