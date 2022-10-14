@@ -18,6 +18,7 @@ class GameObject:
         raise NotImplementedError
 
     def update(self, screen):
+        self.transform.update()
         try:
             self.get_collider().aabb.update_aabb()  # change later to get_collider().update()
         except AttributeError:
@@ -52,7 +53,7 @@ class GameObject:
 class Sprite(GameObject):
     def __init__(self, img, scale):
         super().__init__()
-        self.transform.set_scale(scale)
+        self.transform.set_local_scale(scale)
         self._scale = scale
         # self.transform = transform
         self.Img = pygame.transform.scale(pygame.image.load(img), self.transform.scale.to_tuple())

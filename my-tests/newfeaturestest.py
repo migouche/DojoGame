@@ -4,26 +4,27 @@ window = Window(400, 400, flags=RESIZABLE)
 window.set_bg(Color.from_hex("ff00ff"))
 
 pac = Sprite("data/pacman.png", Vector2(200, 100))
-pac.transform.set_pos(Vector2(400, 400))
+pac.transform.set_position(Vector2(400, 400))
 
 txt = Text("freesansbold.ttf", 30, Colors.black, Color(255, 255, 255, 0))
 txt.set_text("wtf")
-txt.transform.set_pos(Vector2(100, 100))
+txt.transform.set_position(Vector2(100, 100))
 
 square = Polygon.Square(40, color=Colors.purple)
-square.transform.position = Vector2(200, 200)
+square.transform.set_position(Vector2(200, 200))
+Collider.add_collider(square)
 
 point2 = Circle(10)
 point2.transform.position = Vector2(300, 250)
 pos = point2.transform.position
 
 point = Circle(10, color=Colors.purple)
-point.transform.position = Vector2(300, 250)
+point.transform.set_position(Vector2(300, 250))
 Collider.add_collider(point)
 
-rec2 = Polygon.Rectangle(200, 100)
-rec2.transform.position = Vector2(400, 400)
-rec2.transform.rotation = 45
+rec2 = Polygon.Rectangle(200, 100, color=Color(255, 5, 5))
+rec2.transform.set_position(Vector2(400, 400))
+rec2.transform.set_rotation(45)
 
 player = Polygon.Square(10)
 Rigidbody.add_rigidbody(player)
@@ -32,18 +33,24 @@ _dir = Vector2(0, -1)
 lastCircle = Circle(radius=5, color=Colors.white)  # should be and is in the middle
 lastCircle.transform.position = rec2.transform.position
 
-player.transform.rotation = 10
+player.transform.set_rotation(10)
 
 triangle = Polygon([Vector2(0, 0), Vector2(100, 0), Vector2(50, 100)], color=Colors.red, width=0)
-triangle.transform.position = Vector2(window.width / 2, window.height / 2)
+triangle.transform.set_position(Vector2(window.width / 2, window.height / 2))
 Collider.add_collider(triangle)
 
 triangle2 = Polygon([Vector2(0, 0), Vector2(100, 0), Vector2(50, 100)], color=Colors.red, width=5)
-triangle2.transform.position = Vector2(window.width / 2 + 50, window.height / 2 + 50)
+triangle2.transform.set_position(Vector2(window.width / 2 + 50, window.height / 2 + 50))
 Collider.add_collider(triangle2)
 
 
+child = Polygon.Square(10, color=Colors.blue)
+child.transform.parent = triangle2.transform
+child.transform.set_position(Vector2(50, 50))
+
 RealTime.set_dt(1/75)
+
+pac.transform.parent = rec2.transform
 
 
 while window.running:
@@ -60,9 +67,8 @@ while window.running:
     Lines.draw_ray(Input.get_mouse_position(), _dir, 350)
     square.transform.rotate(100 * RealTime.delta_time)
 
-    if hit := Raycast.raycast_circle(Input.get_mouse_position(), _dir, point):
+    if hit := Raycast.raycast_polygon(Input.get_mouse_position(), _dir, square, 400):
         Lines.draw_ray(hit.point, hit.normal, 100)
-        # print(player == hit.collider.object)
 
     # print(hit.point)
 
@@ -70,7 +76,7 @@ while window.running:
         print("up")
     pac.transform.rotate(30 * RealTime.delta_time)
     txt.transform.rotate(30 * RealTime.delta_time)
-    pac.transform.position = Input.get_mouse_position()
+    pac.transform.set_position(Input.get_mouse_position(), space=Space.World)
 
     if Input.get_key(K_a):
         player.get_rigidbody().add_force_at_position(Vector2(-30, 0), player.transform.position)
