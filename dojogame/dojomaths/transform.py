@@ -9,7 +9,9 @@ class Transform:
     def __init__(self, pos: Vector2 = Vector2.zero(), angle: float = 0, scale: Vector2 = Vector2(1, 1),
                  space: Space = Space.Self, game_object: Union['GameObject', 'Object'] = None,
                  parent: 'Transform' = None):
+        self.children = []
         self.parent = parent
+        self.set_parent(parent)
         self.rotation = angle
         self.scale = scale
         self.game_object = game_object
@@ -86,6 +88,16 @@ class Transform:
         t.rotate_around_origin(-self.rotation, self.position)
         return pos - t.position
 
+    def set_parent(self, parent: 'Transform'):
+        self.parent = parent
+        self.parent.children.append(self)
+
+    def get_parent(self):
+        return self.parent
+
+    def get_child(self, i: int):
+        return self.children[i]
+
     def update_position(self):
         if self.parent is None:
             self.position = self.local_position
@@ -96,6 +108,7 @@ class Transform:
             self.position = self.parent.relative_pos_to_absolute(self.local_position)
         if self.last_rotation_space == Space.Self:
             self.rotation = self.parent.rotation + self.local_rotation
+
     def update(self):  # TODO: Change?
         self.update_position()
         try:

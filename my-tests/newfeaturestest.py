@@ -3,8 +3,6 @@ from dojogame import *
 window = Window(400, 400, flags=RESIZABLE)
 window.set_bg(Color.from_hex("ff00ff"))
 
-pac = Sprite("data/pacman.png", Vector2(200, 100))
-pac.transform.set_position(Vector2(400, 400))
 
 txt = Text("freesansbold.ttf", 30, Colors.black, Color(255, 255, 255, 0))
 txt.set_text("wtf")
@@ -26,6 +24,9 @@ rec2 = Polygon.Rectangle(200, 100, color=Color(255, 5, 5))
 rec2.transform.set_position(Vector2(400, 400))
 rec2.transform.set_rotation(45)
 
+pac = Sprite("data/pacman.png", Vector2(200, 100), parent=rec2.transform)
+pac.transform.set_position(Vector2(400, 400))
+print(pac.transform.parent)
 player = Polygon.Square(10)
 Rigidbody.add_rigidbody(player)
 _dir = Vector2(0, -1)
@@ -49,8 +50,6 @@ child.transform.parent = triangle2.transform
 child.transform.set_position(Vector2(50, 50))
 
 RealTime.set_dt(1/75)
-
-pac.transform.parent = rec2.transform
 
 
 while window.running:

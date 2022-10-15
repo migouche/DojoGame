@@ -7,11 +7,12 @@ from dojogame.dojographics.colors import *
 
 
 class GameObject:
-    def __init__(self):
+    def __init__(self, position: Vector2 = Vector2.zero(), rotation: float = 0,
+                 scale: Vector2 = Vector2(1, 1), parent: Transform = None):
         self.rect = pygame.Rect(0, 0, 0, 0)
         self.collider = None
         self.rigidbody = None
-        self.transform = Transform(game_object=self)
+        self.transform = Transform(position, rotation, scale, game_object=self, parent=parent)
         arrays.game_objects.append(self)
 
     def draw(self, screen: pygame.Surface) -> pygame.Rect:
@@ -20,7 +21,7 @@ class GameObject:
     def update(self, screen):
         self.transform.update()
         try:
-            self.get_collider().aabb.update_aabb()  # change later to get_collider().update()
+            self.get_collider().aabb.update_aabb()  # TODO: change later to get_collider().update()
         except AttributeError:
             pass
 
@@ -51,8 +52,8 @@ class GameObject:
 
 
 class Sprite(GameObject):
-    def __init__(self, img, scale):
-        super().__init__()
+    def __init__(self, img: str, scale: Vector2, position: Vector2 = Vector2.zero(), rotation: float = 0, parent=None):
+        super().__init__(position, rotation, scale, parent)
         self.transform.set_local_scale(scale)
         self._scale = scale
         # self.transform = transform
@@ -62,7 +63,7 @@ class Sprite(GameObject):
         arrays.objects.append(self)
 
     def draw(self, screen) -> pygame.Rect:
-        if self._scale != self.transform.scale:
+        if self._scale != self.transform.scale:  # to avoid scaling the image every frame
             self._scale = self.transform.scale
             self.Img = pygame.transform.scale(self.Img, self.transform.scale.to_tuple())
             self.img_rect = self.Img.get_rect()
@@ -118,7 +119,7 @@ class Circle(GameObject):
                                   self.transform.position.to_tuple(), self.radius, self.width)
 
 
-class Text(GameObject):  # TODO: Rework to convert to GameObject child
+class Text(GameObject):
     def __init__(self, font, size: int, txt_color: Color = Colors.black, bg_color: Color = Colors.white):
         super().__init__()
         self.text = ""
