@@ -90,7 +90,10 @@ class Transform:
 
     def set_parent(self, parent: 'Transform'):
         self.parent = parent
-        self.parent.children.append(self)
+        try:
+            self.parent.children.append(self)
+        except AttributeError:
+            pass
 
     def get_parent(self):
         return self.parent
