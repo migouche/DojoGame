@@ -50,17 +50,18 @@ AABB = AxisAlignedBoundingBox
 
 class Collisions:
     @staticmethod
+    def find_arithmetic_mean(points: list) -> Vector2:
+        x = y = 0
+
+        for j in range(len(points)):
+            x += points[j].x
+            y += points[j].y
+        return Vector2(x / len(points), y / len(points))
+
+    @staticmethod
     def intersect_polygons(p1: Polygon, p2: Polygon) -> Collision:
         if not p1.get_collider().aabb.aabb_overlap(p2.get_collider().aabb):
             return Collision(False)
-
-        def find_arithmetic_mean(points: list) -> Vector2:
-            x = y = 0
-
-            for j in range(len(points)):
-                x += points[j].x
-                y += points[j].y
-            return Vector2(x / len(points), y / len(points))
 
         vertices_a = p1.get_absolute_vertices_positions()
         vertices_b = p2.get_absolute_vertices_positions()
@@ -106,14 +107,95 @@ class Collisions:
                 depth = axis_depth
                 normal = axis
 
-        center_a = find_arithmetic_mean(vertices_a)
-        center_b = find_arithmetic_mean(vertices_b)
+        center_a = Collisions.find_arithmetic_mean(vertices_a)
+        center_b = Collisions.find_arithmetic_mean(vertices_b)
 
         direction = center_b - center_a
 
         if Vector2.dot(direction, normal) < 0:
             normal = -normal
         return Collision(True, normal=normal)
+
+    @staticmethod
+    def contains_origin(vertices: list) -> bool:
+        """
+        Checks if a polygon contains the origin
+        :param vertices: list of vertices
+        :return: bool
+        """
+        intersections = 0
+        for i in range(len(vertices)):
+            va = vertices[i]
+            vb = vertices[(i + 1) % len(vertices)]
+            if va.y > 0 != vb.y > 0:
+                if va.x < 0 or vb.x < 0:
+                    if va.x + (0 - va.y) / (vb.y - va.y) * (vb.x - va.x) < 0:
+                        intersections += 1
+        return intersections % 2 == 1
+
+    @staticmethod
+    def simplex(vertices: list, axis: Vector2) -> tuple:
+        min_v = max_v = Vector2.dot(vertices[0], axis)
+        for vertex in vertices:
+            projection = Vector2.dot(vertex, axis)
+            if projection < min_v:
+                min_v = projection
+            if projection > max_v:
+                max_v = projection
+        return min_v, max_v
+
+    @staticmethod
+    def support(vertices_a: list, vertices_b: list, axis: Vector2) -> Vector2:
+        max_a = max_b = Vector2.dot(vertices_a[0], axis)
+        max_vertex_a = vertices_a[0]
+        max_vertex_b = vertices_b[0]
+        for vertex in vertices_a:
+            projection = Vector2.dot(vertex, axis)
+            if projection > max_a:
+                max_a = projection
+                max_vertex_a = vertex
+        for vertex in vertices_b:
+            projection = Vector2.dot(vertex, axis)
+            if projection > max_b:
+                max_b = projection
+                max_vertex_b = vertex
+        return max_vertex_a - max_vertex_b
+
+    @staticmethod
+    def gjk(p1: Polygon, p2: Polygon) -> Collision:
+        if not p1.get_collider().aabb.aabb_overlap(p2.get_collider().aabb):
+            return Collision(False)
+
+        vertices_a = p1.get_absolute_vertices_positions()
+        vertices_b = p2.get_absolute_vertices_positions()
+
+        center_a = Collisions.find_arithmetic_mean(vertices_a)
+        center_b = Collisions.find_arithmetic_mean(vertices_b)
+
+        direction = center_b - center_a
+
+        simplex = [Collisions.support(vertices_a, vertices_b, direction)]
+
+        direction = -simplex[0]
+
+        while True:
+            simplex.append(Collisions.support(vertices_a, vertices_b, direction))
+
+            if Vector2.dot(simplex[-1], direction) < 0:
+                return Collision(False)
+
+            if Collisions.contains_origin(simplex):
+                return Collision(True)
+
+    @staticmethod
+    def intersect_circles(c1: Circle, c2: Circle) -> Collision:
+        distance = Vector2.distance(c1.transform.position, c2.transform.position)
+        if distance > c1.radius + c2.radius:
+            return Collision(False)
+        normal = (c1.transform.position - c2.transform.position).normalized()
+        point = ((c1.transform.position - normal * c1.radius) -
+                 (c2.transform.position + normal * c2.radius)) / 2
+        return Collision(True, point, normal)
 
     @staticmethod
     def project_vertices(vertices: list, axis: Vector2) -> tuple:
@@ -162,4 +244,4 @@ class CircleCollider(Collider):
         self.aabb = AABB(circle)
 
     def collide_with(self, other) -> Collision:
-        raise NotImplementedError
+        return Collisions.intersect_circles(self.circle, other.circle)

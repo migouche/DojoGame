@@ -8,7 +8,7 @@ class Debug:
         try:
             aabb = polygon.get_collider().aabb
         except AttributeError:
-            return
+            raise AttributeError("Polygon has no collider to attach an AABB to")
 
         Debug.draw_rectangle_vertices([aabb.min_v,
                                        Vector2(aabb.min_v.x, aabb.max_v.y),

@@ -26,7 +26,6 @@ rec2.transform.set_rotation(45)
 
 pac = Sprite("data/pacman.png", Vector2(200, 100), parent=rec2.transform)
 pac.transform.set_position(Vector2(400, 400))
-print(pac.transform.parent)
 player = Polygon.Square(10)
 Rigidbody.add_rigidbody(player)
 _dir = Vector2(0, -1)
@@ -58,8 +57,11 @@ while window.running:
 
     Debug.draw_axis_aligned_bounding_box(triangle)
     Debug.draw_axis_aligned_bounding_box(triangle2)
-    triangle.color = triangle2.color = Colors.red if triangle.get_collider()\
-        .collide_with(triangle2.get_collider()) else Colors.blue
+
+    #triangle.color = triangle2.color = Colors.red if triangle.get_collider()\
+    #    .collide_with(triangle2.get_collider()) else Colors.blue
+
+    triangle.color = triangle2.color = Colors.red if Collisions.gjk(triangle, triangle2) else Colors.blue
 
     if Input.get_mouse_button_down(1):
         _dir.y *= -1
