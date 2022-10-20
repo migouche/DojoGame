@@ -10,6 +10,7 @@ txt.transform.set_position(Vector2(100, 100))
 
 square = Polygon.Square(40, color=Colors.purple)
 square.transform.set_position(Vector2(200, 200))
+square.transform.set_local_scale(Vector2(1, 2))
 Collider.add_collider(square)
 
 point2 = Circle(10)
@@ -58,10 +59,10 @@ while window.running:
     Debug.draw_axis_aligned_bounding_box(triangle)
     Debug.draw_axis_aligned_bounding_box(triangle2)
 
-    #triangle.color = triangle2.color = Colors.red if triangle.get_collider()\
-    #    .collide_with(triangle2.get_collider()) else Colors.blue
+    triangle.color = triangle2.color = Colors.red if triangle.get_collider()\
+        .collide_with(triangle2.get_collider()) else Colors.blue
 
-    triangle.color = triangle2.color = Colors.red if Collisions.gjk(triangle, triangle2) else Colors.blue
+    # triangle.color = triangle2.color = Colors.red if Collisions.gjk(triangle, triangle2) else Colors.blue
 
     if Input.get_mouse_button_down(1):
         _dir.y *= -1

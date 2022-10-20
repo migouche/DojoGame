@@ -52,7 +52,8 @@ class GameObject:
 
 
 class Sprite(GameObject):
-    def __init__(self, img: str, scale: Vector2, position: Vector2 = Vector2.zero(), rotation: float = 0, parent=None):
+    def __init__(self, img: str, scale: Vector2, position: Vector2 = Vector2.zero(),
+                 rotation: float = 0, parent=None):
         super().__init__(position, rotation, scale, parent)
         self.transform.set_local_scale(scale)
         self._scale = scale
@@ -76,7 +77,8 @@ class Sprite(GameObject):
 
 
 class Polygon(GameObject):
-    def __init__(self, vertices: list, color: Color = Colors.black, width: int = 0, antialias: bool = False):
+    def __init__(self, vertices: list, color: Color = Colors.black,
+                 width: int = 0, antialias: bool = False):
         super().__init__()
         self._collider = None
         self.local_vertices_positions = vertices
@@ -86,11 +88,13 @@ class Polygon(GameObject):
         # arrays.game_objects.append(self)
 
     def get_absolute_vertices_positions(self) -> [Vector2]:
-        return [self.transform.relative_pos_to_absolute(v) for v in self.local_vertices_positions]
+        return [self.transform.relative_pos_to_absolute(v) for v in
+                [Vector2.scale(lv, self.transform.scale) for lv in self.local_vertices_positions]]
 
     def draw(self, screen: pygame.Surface) -> pygame.Rect:
         return pygame.draw.polygon(screen, self.color.to_tuple(),
-                                   [v.to_tuple() for v in self.get_absolute_vertices_positions()], self.width)
+                                   [v.to_tuple() for v in self.get_absolute_vertices_positions()],
+                                   self.width)
 
     @staticmethod
     def Rectangle(width: int, height: int, color: Color = Colors.black, line_width: int = 0,
@@ -120,7 +124,8 @@ class Circle(GameObject):
 
 
 class Text(GameObject):
-    def __init__(self, font, size: int, txt_color: Color = Colors.black, bg_color: Color = Colors.white):
+    def __init__(self, font, size: int, txt_color: Color = Colors.black,
+                 bg_color: Color = Colors.white):
         super().__init__()
         self.text = ""
         self.size = size
