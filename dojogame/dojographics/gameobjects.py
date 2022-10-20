@@ -58,20 +58,26 @@ class Sprite(GameObject):
         self.transform.set_local_scale(scale)
         self._scale = scale
         # self.transform = transform
-        self.Img = pygame.transform.scale(pygame.image.load(img), self.transform.scale.to_tuple())
-        self.img_rect = self.Img.get_rect()
+        self.image_path = img
+        self.image = pygame.image.load(img)
+        self.image_rect = self.image.get_rect()
+        self.update_image()
         self.offset = scale / 2
         arrays.objects.append(self)
 
-    def draw(self, screen) -> pygame.Rect:
-        if self._scale != self.transform.scale:  # to avoid scaling the image every frame
-            self._scale = self.transform.scale
-            self.Img = pygame.transform.scale(self.Img, self.transform.scale.to_tuple())
-            self.img_rect = self.Img.get_rect()
+    def update_image(self):
+        self.image = pygame.transform.scale(pygame.image.load(self.image_path),
+                                            self.transform.local_scale.to_tuple())
+        self.image_rect = self.image.get_rect()
 
-        return screen.blit(pygame.transform.rotate(self.Img, -self.transform.rotation),
+    def draw(self, screen) -> pygame.Rect:
+        if self._scale != self.transform.local_scale:  # to avoid scaling the image every frame
+            self._scale = self.transform.local_scale
+            self.update_image()
+
+        return screen.blit(pygame.transform.rotate(self.image, -self.transform.rotation),
                            (self.transform.position.to_vector2_int() -
-                            GameObject.get_rotated_surface_size(self.Img,
+                            GameObject.get_rotated_surface_size(self.image,
                                                                 self.transform.rotation)).
                            to_tuple())
 
@@ -88,8 +94,9 @@ class Polygon(GameObject):
         # arrays.game_objects.append(self)
 
     def get_absolute_vertices_positions(self) -> [Vector2]:
-        return [self.transform.relative_pos_to_absolute(v) for v in
-                [Vector2.scale(lv, self.transform.scale) for lv in self.local_vertices_positions]]
+        return [self.transform.relative_pos_to_absolute(v)
+                for v in [Vector2.scale(lv, self.transform.local_scale)
+                          for lv in self.local_vertices_positions]]
 
     def draw(self, screen: pygame.Surface) -> pygame.Rect:
         return pygame.draw.polygon(screen, self.color.to_tuple(),

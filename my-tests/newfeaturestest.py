@@ -51,7 +51,6 @@ child.transform.set_position(Vector2(50, 50))
 
 RealTime.set_dt(1/75)
 
-
 while window.running:
     triangle.transform.rotate(RealTime.delta_time * 10)
     triangle2.transform.rotate(-RealTime.delta_time * 10)
@@ -90,7 +89,16 @@ while window.running:
         player.get_rigidbody().add_force_at_position(Vector2(0, 30), player.transform.position, space=Space.Self)
 
     if Input.get_mouse_button_down(1):
-        print("yeet")
+        pac.transform.set_local_scale(2 * pac.transform.local_scale)
+
+    if Input.get_mouse_button_down(3):
+        pac.transform.set_local_scale(pac.transform.local_scale / 2)
+
+    if Input.get_mouse_button_down(4):
+        pac.transform.set_local_scale(Vector2(pac.transform.local_scale.x, pac.transform.local_scale.y * 2))
+
+    if Input.get_mouse_button_down(5):
+        pac.transform.set_local_scale(Vector2(pac.transform.local_scale.x, pac.transform.local_scale.y / 2))
 
     # print(Input.MousePosition())
     # window.fillBG(white)

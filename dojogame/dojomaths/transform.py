@@ -13,7 +13,7 @@ class Transform:
         self.parent = parent
         self.set_parent(parent)
         self.rotation = angle
-        self.scale = scale
+        self.local_scale = scale
         self.game_object = game_object
 
         self.local_position = self.position = Vector2.zero()
@@ -47,8 +47,8 @@ class Transform:
             raise TypeError("Wrong Space given")
 
     def set_local_scale(self, scale):
-        self.scale = scale
-        self.update()
+        self.local_scale = scale
+        # self.update()
 
     def get_rotation(self, space: Space = Space.Self):
         if space == Space.Self:
@@ -115,10 +115,10 @@ class Transform:
     def update(self):  # TODO: Change?
         self.update_position()
         try:
-            self.game_object.offset = self.scale / 2
+            self.game_object.offset = self.local_scale / 2
             self.game_object.Img = pygame.transform.scale(self.game_object.Img,
-                                                          (self.scale.x,
-                                                           self.scale.y))
+                                                          (self.local_scale.x,
+                                                           self.local_scale.y))
             self.game_object.Img.get_rect()
         except AttributeError:
             pass

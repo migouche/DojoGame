@@ -54,11 +54,11 @@ class Window:
 
             self.fill_bg(self.bgColor)
 
-            for obj in arrays.objects:
+            '''for obj in arrays.objects:
                 size = pygame.transform.rotate(obj.Img, obj.transform.rotation).get_rect().size
                 self.screen.blit(pygame.transform.rotate(obj.Img, -obj.transform.rotation),
                                  (int(obj.transform.position.x) - int(size[0] / 2),
-                                  int(obj.transform.position.y) - int(size[1] / 2)))
+                                  int(obj.transform.position.y) - int(size[1] / 2)))'''
 
             for game_object in arrays.game_objects:
                 game_object.update(self.screen)

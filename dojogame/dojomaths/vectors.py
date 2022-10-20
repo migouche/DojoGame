@@ -12,17 +12,20 @@ class Vector2:
         self.x = x
         self.y = y
 
-    def __add__(self, v):
+    def __add__(self, v: 'Vector2'):
         return Vector2(self.x + v.x, self.y + v.y)
 
-    def __sub__(self, v):
+    def __sub__(self, v: 'Vector2'):
         return Vector2(self.x - v.x, self.y - v.y)
 
     def __neg__(self):
         return Vector2(-self.x, -self.y)
 
-    def __mul__(self, f):
+    def __mul__(self, f: float | int):
         return Vector2(self.x * f, self.y * f)
+
+    def __rmul__(self, other):
+        return self * other
 
     def __truediv__(self, f):
         return Vector2(self.x / f, self.y / f)
