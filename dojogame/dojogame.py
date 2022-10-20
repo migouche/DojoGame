@@ -5,6 +5,7 @@
 from dojogame.dojophysics import *
 from dojogame.dojographics import *
 from dojogame.dojodata import *
+from dojogame import dojoconstants
 
 
 def init():

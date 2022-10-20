@@ -1,5 +1,5 @@
 from dojogame import *
-
+from dojogame.dojoconstants import *
 window = Window(400, 400, flags=RESIZABLE)
 window.set_bg(Color.from_hex("ff00ff"))
 
@@ -88,16 +88,16 @@ while window.running:
     if Input.get_key(K_s):
         player.get_rigidbody().add_force_at_position(Vector2(0, 30), player.transform.position, space=Space.Self)
 
-    if Input.get_mouse_button_down(1):
+    if Input.get_mouse_button_down(MOUSE_BUTTON_LEFT):
         pac.transform.set_local_scale(2 * pac.transform.local_scale)
 
-    if Input.get_mouse_button_down(3):
+    if Input.get_mouse_button_down(MOUSE_BUTTON_RIGHT):
         pac.transform.set_local_scale(pac.transform.local_scale / 2)
 
-    if Input.get_mouse_button_down(4):
+    if Input.get_mouse_button_down(MOUSE_SCROLL_UP):
         pac.transform.set_local_scale(Vector2(pac.transform.local_scale.x, pac.transform.local_scale.y * 2))
 
-    if Input.get_mouse_button_down(5):
+    if Input.get_mouse_button_down(MOUSE_SCROLL_DOWN):
         pac.transform.set_local_scale(Vector2(pac.transform.local_scale.x, pac.transform.local_scale.y / 2))
 
     # print(Input.MousePosition())
