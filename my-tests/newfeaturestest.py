@@ -47,7 +47,7 @@ child = Polygon.Square(10, color=Colors.blue)
 child.transform.parent = triangle2.transform
 child.transform.set_position(Vector2(50, 50))
 
-square = Polygon.Square(40, color=Color(100, 0, 255, 0))
+square = Polygon.Square(40, color=Color(100, 0, 255, 100))
 square.transform.set_position(Vector2(200, 200))
 square.transform.set_local_scale(Vector2(1, 2))
 

@@ -99,9 +99,15 @@ class Polygon(GameObject):
                           for lv in self.local_vertices_positions]]
 
     def draw(self, screen: pygame.Surface) -> pygame.Rect:
-        return pygame.draw.polygon(screen, self.color.to_tuple(),
-                                   [v.to_tuple() for v in self.get_absolute_vertices_positions()],
-                                   self.width)
+        points = [v.to_tuple() for v in self.get_absolute_vertices_positions()]
+        lx, ly = zip(*points)
+        min_x, min_y, max_x, max_y = min(lx), min(ly), max(lx), max(ly)
+        target_rect = pygame.Rect(min_x, min_y, max_x - min_x, max_y - min_y)
+        shape_surface = pygame.Surface(target_rect.size, pygame.SRCALPHA)
+        pygame.draw.polygon(shape_surface, self.color.to_tuple(),
+                            [(x - min_x, y - min_y) for x, y in points])
+
+        return screen.blit(shape_surface, target_rect)
 
     @staticmethod
     def Rectangle(width: int, height: int, color: Color = Colors.black, line_width: int = 0,
@@ -131,7 +137,7 @@ class Circle(GameObject):
 
 
 class Text(GameObject):
-    def __init__(self, font, size: int, txt_color: Color = Colors.black,):
+    def __init__(self, font, size: int, txt_color: Color = Colors.black, ):
         super().__init__()
         self.text = ""
         self.size = size
