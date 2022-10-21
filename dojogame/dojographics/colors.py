@@ -8,7 +8,10 @@ class Color:
         self.alpha = a
 
     def __eq__(self, c):
-        return self.red == c.red and self.green == c.green and self.blue == c.blue and self.alpha == c.alpha
+        return self.red == c.red and\
+               self.green == c.green and\
+               self.blue == c.blue and\
+               self.alpha == c.alpha
 
     @staticmethod
     def from_hex(h):

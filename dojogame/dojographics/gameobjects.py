@@ -131,14 +131,12 @@ class Circle(GameObject):
 
 
 class Text(GameObject):
-    def __init__(self, font, size: int, txt_color: Color = Colors.black,
-                 bg_color: Color = Colors.white):
+    def __init__(self, font, size: int, txt_color: Color = Colors.black,):
         super().__init__()
         self.text = ""
         self.size = size
         self.font = font
         self.text_color = txt_color
-        self.bg_color = bg_color
         self.render_font = pygame.font.Font(self.font, self.size)
         self.render_text = pygame.Surface.__new__(pygame.Surface)
         self.set_text(self.text)
@@ -154,27 +152,19 @@ class Text(GameObject):
         self.size = size
         self.update_text()
 
-    def set_textColor(self, color):
+    def set_text_color(self, color):
         self.text_color = color
         self.update_text()
 
-    def setTextColour(self, color):
+    def set_text_colour(self, color):
         self.text_color = color
-        self.update_text()
-
-    def set_bg_color(self, color):
-        self.bg_color = color
-        self.update_text()
-
-    def set_bg_colour(self, color):
-        self.bg_color = color
         self.update_text()
 
     def update_text(self):
         self.render_font = pygame.font.Font(self.font, self.size)
         self.render_text = self.render_font.render(str(self.text), True,
-                                                   self.text_color.to_tuple(),
-                                                   self.bg_color.to_tuple())
+                                                   self.text_color.to_tuple())
+        self.render_text.set_alpha(self.text_color.alpha)
 
     def draw(self, screen: pygame.Surface) -> pygame.Rect:
         self.update_text()

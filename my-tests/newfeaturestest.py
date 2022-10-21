@@ -1,17 +1,15 @@
 from dojogame import *
 from dojogame.dojoconstants import *
+
 window = Window(400, 400, flags=RESIZABLE)
 window.set_bg(Color.from_hex("ff00ff"))
 
 
-txt = Text("freesansbold.ttf", 30, Colors.black, Color(255, 255, 255, 0))
+txt = Text("freesansbold.ttf", 30, Color(0, 0, 0, 100))
 txt.set_text("wtf")
 txt.transform.set_position(Vector2(100, 100))
 
-square = Polygon.Square(40, color=Colors.purple)
-square.transform.set_position(Vector2(200, 200))
-square.transform.set_local_scale(Vector2(1, 2))
-Collider.add_collider(square)
+
 
 point2 = Circle(10)
 point2.transform.position = Vector2(300, 250)
@@ -49,6 +47,11 @@ child = Polygon.Square(10, color=Colors.blue)
 child.transform.parent = triangle2.transform
 child.transform.set_position(Vector2(50, 50))
 
+square = Polygon.Square(40, color=Color(100, 0, 255, 0))
+square.transform.set_position(Vector2(200, 200))
+square.transform.set_local_scale(Vector2(1, 2))
+
+Collider.add_collider(square)
 RealTime.set_dt(1/75)
 
 while window.running:
