@@ -50,6 +50,19 @@ AABB = AxisAlignedBoundingBox
 
 class Collisions:
     @staticmethod
+    def point_inside_polygon(point: Vector2, polygon: Polygon) -> bool:
+        c = False
+        vertices = polygon.get_absolute_vertices_positions()
+
+        for i in range(len(vertices)):
+            j = (i + 1) % len(vertices)
+            if ((vertices[i].y > point.y) != (vertices[j].y > point.y)) and \
+                    (point.x < (vertices[j].x - vertices[i].x) * (point.y - vertices[i].y) /
+                     (vertices[j].y - vertices[i].y) + vertices[i].x):
+                c = not c
+        return c
+
+    @staticmethod
     def find_arithmetic_mean(points: list) -> Vector2:
         x = y = 0
 
@@ -209,6 +222,85 @@ class Collisions:
                 _max = p
         return _min, _max
 
+    @staticmethod
+    def find_closest_point_on_polygon(point: Vector2, polygon: Polygon) -> Vector2:
+        vertices = polygon.get_absolute_vertices_positions()
+        result = Vector2(None, None)
+        min_distance = float('inf')
+
+        for v in vertices:
+            if dist := Vector2.distance(point, v) < min_distance:
+                min_distance = dist
+                result = v
+
+        return result
+
+    @staticmethod
+    def project_circle(circle: Circle, axis: Vector2) -> tuple:
+        dir_radius = axis.normalized() * circle.radius
+
+        p1 = circle.transform.position + dir_radius
+        p2 = circle.transform.position - dir_radius
+
+        min_ = Vector2.dot(p1, axis)
+        max_ = Vector2.dot(p2, axis)
+
+        if min_ > max_:
+            min_, max_ = max_, min_
+
+        return min_, max_
+
+    @staticmethod
+    def intersect_circle_polygon(circle: Circle, polygon: Polygon) -> Collision:
+        vertices = polygon.get_absolute_vertices_positions()
+        normal = Vector2.zero()
+        depth = float('inf')
+
+        for i in range(len(vertices)):
+            va = vertices[i]
+            vb = vertices[(i + 1) % len(vertices)]
+
+            edge = vb - va
+            axis = Vector2(-edge.y, edge.x)
+
+            (min_a, max_a) = Collisions.project_vertices(vertices, axis)
+            (min_b, max_b) = Collisions.project_circle(circle, axis)
+
+            if min_a >= max_b or min_b >= max_a:
+                return Collision(False)
+
+            axis_depth = min(max_a - min_b, max_b - min_a)
+
+            if axis_depth < depth:
+                depth = axis_depth
+                normal = axis
+
+        closest_point = Collisions.find_closest_point_on_polygon(circle.transform.position, polygon)
+        axis = closest_point - circle.transform.position
+
+        (min_a, max_a) = Collisions.project_vertices(vertices, axis)
+        (min_b, max_b) = Collisions.project_circle(circle, axis)
+
+        if min_a >= max_b or min_b >= max_a:
+            return Collision(False)
+
+        axis_depth = min(max_a - min_b, max_b - min_a)
+
+        if axis_depth < depth:
+            depth = axis_depth
+            normal = axis
+
+        depth /= normal.magnitude()
+        normal = normal.normalized()
+
+        polygon_center = Collisions.find_arithmetic_mean(vertices)
+        direction = polygon_center - circle.transform.position
+
+        if Vector2.dot(direction, normal) < 0:
+            normal = -normal
+
+        return Collision(True, circle.transform.position + normal * depth, normal)
+
 
 class Collider:
     def collide_with(self, other) -> Collision:
@@ -244,4 +336,7 @@ class CircleCollider(Collider):
         self.aabb = AABB(circle)
 
     def collide_with(self, other) -> Collision:
-        return Collisions.intersect_circles(self.circle, other.circle)
+        if isinstance(other, CircleCollider):
+            return Collisions.intersect_circles(self.circle, other.circle)
+        else:
+            return Collisions.intersect_circle_polygon(self.circle, other.polygon)

@@ -1,47 +1,44 @@
-from dojogame.dojogame import *
+from dojogame import *
 
-canStart = False
+can_start = False
 
 window = Window(800, 600, "pong", "data/py.png")
 
-ball = Object("data/ball.png", Vector2(30, 30))
+Collider.add_collider(ball := Circle(15))
 
+Collider.add_collider(right_paddle := Polygon.Rectangle(30, 200))
+Collider.add_collider(left_paddle := Polygon.Rectangle(30, 200))
 
-RightPaddle = Object("data/pala.png", Vector2(30, 200))
+left_score = right_score = 0
 
-LeftPaddle = Object("data/pala.png", Vector2(30, 200))
+right_text = Text("freesansbold.ttf", 30, Colors.black)
+right_text.transform.set_position(Vector2(window.width / 2 + 200, 50))
+right_text.set_text(0)
 
-LeftScore = RightScore = 0
-
-# RightText = Text(Vector2((window.width / 2) + 200, 50), RightScore, 30, "freesansbold.ttf", black, white)
-RightText = Text("freesansbold.ttf", 30, Colors.black, Colors.white)
-RightText.rectTransform.set_pos(Vector2(window.width / 2 + 200, 50))
-RightText.set_text(0)
-
-# LeftText = Text(Vector2((window.width / 2) - 200, 50), LeftScore, 30, "freesansbold.ttf", black, white)
-LeftText = Text("freesansbold.ttf", 30, Colors.black, Colors.white)
-LeftText.rectTransform.set_pos(Vector2(window.width / 2 - 200, 50))
-LeftText.set_text(0)
+left_text = Text("freesansbold.ttf", 30, Colors.black)
+left_text.transform.set_position(Vector2(window.width / 2 - 200, 50))
+left_text.set_text(0)
 
 paddleSpeed = 500
-ballSpeed = 250
-ballDir = Vector2.random()
+ball_speed = 250
+ball_dir = Vector2.random()
+RealTime.set_dt(1/75)
 
 
 def ResetPos():
-    global ballDir, ballSpeed
-    ball.transform.position = Vector2(window.width / 2, window.height / 2)
-    RightPaddle.transform.set_pos(Vector2(window.width, window.height / 2))
-    LeftPaddle.transform.set_pos(Vector2(0, window.height / 2))
-    RightText.set_text(RightScore)
-    LeftText.set_text(LeftScore)
-    ballDir = Vector2.random()
-    ballSpeed = 250
+    global ball_dir, ball_speed
+    ball.transform.set_position(Vector2(window.width / 2, window.height / 2))
+    right_paddle.transform.set_position(Vector2(window.width, window.height / 2))
+    left_paddle.transform.set_position(Vector2(0, window.height / 2))
+    right_text.set_text(right_score)
+    left_text.set_text(left_score)
+    ball_dir = Vector2.random()
+    ball_speed = 250
 
 
 def lose():
-    global canStart
-    canStart = False
+    global can_start
+    can_start = False
     ResetPos()
 
 
@@ -49,49 +46,40 @@ ResetPos()
 
 while window.running:
     if Input.get_key(K_UP):
-        RightPaddle.transform.translate(Vector2(0, -1) * paddleSpeed * RealTime.delta_time)
+        right_paddle.transform.translate(Vector2(0, -1) * paddleSpeed * RealTime.delta_time)
     if Input.get_key(K_DOWN):
-        RightPaddle.transform.translate(Vector2(0, 1) * paddleSpeed * RealTime.delta_time)
+        right_paddle.transform.translate(Vector2(0, 1) * paddleSpeed * RealTime.delta_time)
     if Input.get_key(K_w):
-        LeftPaddle.transform.translate(Vector2(0, -1) * paddleSpeed * RealTime.delta_time)
+        left_paddle.transform.translate(Vector2(0, -1) * paddleSpeed * RealTime.delta_time)
     if Input.get_key(K_s):
-        LeftPaddle.transform.translate(Vector2(0, 1) * paddleSpeed * RealTime.delta_time)
-    if Input.get_key(K_e):
-        # ball.transform.setScale(ball.transform.scale + Vector2(5, 5))
-        # RightText.setTextColor(red)
-        # RightText.rectTransform.setPos(Vector2(50, 50))
-        # RightText.rectTransform.translate(Vector2(-1, 0))
-        pass
+        left_paddle.transform.translate(Vector2(0, 1) * paddleSpeed * RealTime.delta_time)
+
     if Input.get_key_down(K_q):
         window.quit()
 
-    if Vector2.distance(ball.transform.position, Vector2(window.width, ball.transform.position.y)) <= 20.0:
-        if Vector2.distance(ball.transform.position, RightPaddle.transform.position) <= 110:
-            ballDir = Vector2.deg_random(135, 225)
-            ballSpeed += 50
-        else:
-            LeftScore += 1
-            lose()
+    if ball.get_collider().collide_with(right_paddle.get_collider()):
+        ball_dir = Vector2.deg_random(135, 225)
+        ball_speed += 50
+    elif ball.transform.position.x >= window.width:
+        left_score += 1
+        lose()
 
-    if Vector2.distance(ball.transform.position, Vector2(0, ball.transform.position.y)) <= 20.0:
-        if Vector2.distance(ball.transform.position, LeftPaddle.transform.position) <= 110:
-            ballDir = Vector2.deg_random(-45, 45)
-            ballSpeed += 50
-        else:
-            RightScore += 1
-            lose()
+    if ball.get_collider().collide_with(left_paddle.get_collider()):
+        ball_dir = Vector2.deg_random(-45, 45)
+        ball_speed += 50
+    elif ball.transform.position.x <= 0:
+        right_score += 1
+        lose()
 
-    canStart = canStart or Input.get_key(K_SPACE)
+    can_start = can_start or Input.get_key(K_SPACE)
 
-    if canStart:
-        ball.transform.translate(ballDir * ballSpeed * RealTime.delta_time)
+    if ball.transform.position.y >= window.height - ball.radius or ball.transform.position.y <= ball.radius:
+        ball_dir.y *= -1
 
-    if Vector2.distance(ball.transform.position, Vector2(ball.transform.position.x, window.height)) <= 20:
-        ballDir.y *= -1
+    if can_start:
+        ball.transform.translate(ball_dir * ball_speed * RealTime.delta_time)
 
-    if Vector2.distance(ball.transform.position, Vector2(ball.transform.position.x, 0)) <= 30:
-        ballDir.y *= -1
-    RightPaddle.transform.position.y = Mathf.clamp(RightPaddle.transform.position.y, 0, window.height)
-    LeftPaddle.transform.position.y = Mathf.clamp(LeftPaddle.transform.position.y, 0, window.height)
+    right_paddle.transform.position.y = Mathf.clamp(right_paddle.transform.position.y, 0, window.height)
+    left_paddle.transform.position.y = Mathf.clamp(left_paddle.transform.position.y, 0, window.height)
 
     window.update()

@@ -33,13 +33,13 @@ class GameObject:
         if screen is not None:
             self.rect = self.draw(screen)
 
-    def get_collider(self):
+    def get_collider(self) -> 'Collider':
         if self.collider is None:
             raise AttributeError(f"GameObject has no collider")
         else:
             return self.collider
 
-    def get_rigidbody(self):
+    def get_rigidbody(self) -> 'Rigidbody':
         if self.rigidbody is None:
             raise AttributeError(f"GameObject has no rigidbody")
         else:

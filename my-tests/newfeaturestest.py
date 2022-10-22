@@ -93,6 +93,8 @@ while window.running:
 
     if Input.get_mouse_button_down(MOUSE_BUTTON_LEFT):
         pac.transform.set_local_scale(2 * pac.transform.local_scale)
+        if Collisions.point_inside_polygon(Input.get_mouse_position(), square):
+            print("inside")
 
     if Input.get_mouse_button_down(MOUSE_BUTTON_RIGHT):
         pac.transform.set_local_scale(pac.transform.local_scale / 2)

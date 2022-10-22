@@ -144,14 +144,14 @@ def Clamp(v, m, M):
 
 
 def lose():
-    global canStart
+    global can_start
     ball.resetPos()
     canStart = False
 
 
 running = True
 
-canStart = False
+can_start = False
 
 while running:
     if Vector2.distance(ball.pos, Vector2(size.x, ball.pos.y)) <= 20.0:
@@ -196,9 +196,9 @@ while running:
     if keys[pygame.K_s]:
         lPaddle.delta.y += 1
 
-    canStart = canStart or keys[pygame.K_SPACE]
+    can_start = can_start or keys[pygame.K_SPACE]
 
-    if canStart:
+    if can_start:
         ball.delta = ball.dir
     else:
         ball.delta = Vector2.zero()
