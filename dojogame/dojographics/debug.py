@@ -1,14 +1,16 @@
-from dojogame.dojographics.gameobjects import *
+from dojogame.dojomaths.vectors import Vector2
+from dojogame.dojographics.colors import Color, Colors
 from dojogame.dojodata import arrays
+import pygame.draw
 
 
 class Debug:
     @staticmethod
-    def draw_axis_aligned_bounding_box(polygon: Polygon, color: Color = Colors.black, width: int = 1):
-        try:
-            aabb = polygon.get_collider().aabb
-        except AttributeError:
-            raise AttributeError("Polygon has no collider to attach an AABB to")
+    def draw_axis_aligned_bounding_box(col: 'Collider', color: Color = Colors.black, width: int = 1):
+        if col is None:
+            raise ValueError("Collider is None")
+
+        aabb = col.aabb
 
         Debug.draw_rectangle_vertices([aabb.min_v,
                                        Vector2(aabb.min_v.x, aabb.max_v.y),

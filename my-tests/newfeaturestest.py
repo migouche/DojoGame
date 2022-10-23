@@ -1,6 +1,8 @@
 from dojogame import *
 from dojogame.dojoconstants import *
 
+from pygame.constants import *
+
 window = Window(400, 400, flags=RESIZABLE)
 window.set_bg(Color.from_hex("ff00ff"))
 
@@ -58,8 +60,8 @@ while window.running:
     triangle.transform.rotate(RealTime.delta_time * 10)
     triangle2.transform.rotate(-RealTime.delta_time * 10)
 
-    Debug.draw_axis_aligned_bounding_box(triangle)
-    Debug.draw_axis_aligned_bounding_box(triangle2)
+    Debug.draw_axis_aligned_bounding_box(triangle.get_collider())
+    Debug.draw_axis_aligned_bounding_box(triangle2.get_collider())
 
     triangle.color = triangle2.color = Colors.red if triangle.get_collider()\
         .collide_with(triangle2.get_collider()) else Colors.blue
@@ -71,7 +73,7 @@ while window.running:
     Lines.draw_ray(Input.get_mouse_position(), _dir, 350)
     square.transform.rotate(100 * RealTime.delta_time)
 
-    if hit := Raycast.raycast_polygon(Input.get_mouse_position(), _dir, square, 400):
+    if hit := Raycast.raycast_polygon(Input.get_mouse_position(), _dir, square.get_collider(), 400):
         Lines.draw_ray(hit.point, hit.normal, 100)
 
     # print(hit.point)

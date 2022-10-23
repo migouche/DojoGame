@@ -1,7 +1,7 @@
-from dojogame.dojomaths.vectors import *
-from dojogame.dojodata.enums import *
-from dojogame.dojomaths.realtime import *
-from dojogame.dojographics.gameobjects import *
+from dojogame.dojomaths.vectors import Vector2
+from dojogame.dojodata.enums import Space, ForceMode
+from dojogame.dojomaths.realtime import RealTime
+from dojogame.dojographics.gameobjects import GameObject
 
 
 #  requires A LOT of rework

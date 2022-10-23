@@ -1,4 +1,7 @@
-from dojogame.dojomaths.vectors import *
+import math
+
+from dojogame.dojomaths.vectors import Vector2
+from dojogame.dojomaths.dojomathfunctions import Mathf
 from dojogame.dojodata.enums import Space
 
 import pygame.transform
@@ -7,7 +10,7 @@ from typing import Union
 
 class Transform:
     def __init__(self, pos: Vector2 = Vector2.zero(), angle: float = 0, scale: Vector2 = Vector2(1, 1),
-                 space: Space = Space.Self, game_object: Union['GameObject', 'Object'] = None,
+                 space: Space = Space.Self, game_object: 'GameObject' = None,
                  parent: 'Transform' = None):
         self.children = []
         self.parent = parent
@@ -27,11 +30,12 @@ class Transform:
         self.update()
 
     def set_position(self, pos, space: Space = Space.Self):
-        self.last_position_space = space
         if space == Space.Self:
             self.local_position = pos
         elif space == Space.World:
-            self.position = pos
+            t = Transform(pos)
+            t.rotate_around_origin(-self.rotation, self.position)
+            self.local_position = t.position - self.position
         else:
             raise TypeError("Wrong Space given")
 
@@ -42,7 +46,9 @@ class Transform:
         if space == Space.Self:
             return self.local_position
         elif space == Space.World:
-            return self.position
+            t = Transform(self.local_position)
+            t.rotate_around_origin(self.rotation, self.position)
+            return self.parent.get_position(Space.World) + t.position
         else:
             raise TypeError("Wrong Space given")
 
@@ -102,15 +108,7 @@ class Transform:
         return self.children[i]
 
     def update_position(self):
-        if self.parent is None:
-            self.position = self.local_position
-            self.rotation = self.local_rotation
-            return
-
-        if self.last_position_space == Space.Self:
-            self.position = self.parent.relative_pos_to_absolute(self.local_position)
-        if self.last_rotation_space == Space.Self:
-            self.rotation = self.parent.rotation + self.local_rotation
+        self.position
 
     def update(self):  # TODO: Change?
         self.update_position()

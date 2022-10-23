@@ -1,9 +1,9 @@
 import pygame.draw
 
 from dojogame.dojodata import arrays
-from dojogame.dojomaths import *
-from dojogame.dojomaths.vectors import Vector2
-from dojogame.dojographics.colors import *
+from dojogame.dojomaths.vectors import Vector2, Vector2Int
+from dojogame.dojomaths.transform import Transform
+from dojogame.dojographics.colors import Color, Colors
 
 
 class GameObject:
@@ -137,9 +137,9 @@ class Circle(GameObject):
 
 
 class Text(GameObject):
-    def __init__(self, font, size: int, txt_color: Color = Colors.black, ):
+    def __init__(self, font, size: int, txt_color: Color = Colors.black, text: str = ""):
         super().__init__()
-        self.text = ""
+        self.text = text
         self.size = size
         self.font = font
         self.text_color = txt_color

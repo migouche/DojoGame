@@ -1,5 +1,5 @@
-from dojogame.dojographics.gameobjects import *
-from dojogame.dojomaths.vectors import *
+from dojogame.dojographics.gameobjects import GameObject, Polygon, Circle
+from dojogame.dojomaths.vectors import Vector2
 
 
 class Collision:
@@ -13,7 +13,7 @@ class Collision:
 
 
 class AxisAlignedBoundingBox:
-    def __init__(self, obj: Polygon | Circle):
+    def __init__(self, obj: GameObject):
         self.obj = obj
         self.min_v = self.max_v = Vector2.zero()
         self.update_aabb()
@@ -303,6 +303,10 @@ class Collisions:
 
 
 class Collider:
+
+    def __init__(self, object: GameObject):
+        self.aabb = AABB(object)
+
     def collide_with(self, other) -> Collision:
         raise NotImplementedError
 
@@ -318,8 +322,8 @@ class Collider:
 
 class PolygonCollider(Collider):
     def __init__(self, polygon: Polygon):
+        super().__init__(polygon)
         self.polygon = polygon
-        self.aabb = AABB(polygon)
 
     def collide_with(self, other: Collider) -> bool:
         if other is None:
@@ -332,8 +336,8 @@ class PolygonCollider(Collider):
 
 class CircleCollider(Collider):
     def __init__(self, circle: Circle):
+        super().__init__(circle)
         self.circle = circle
-        self.aabb = AABB(circle)
 
     def collide_with(self, other) -> Collision:
         if isinstance(other, CircleCollider):

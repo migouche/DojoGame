@@ -1,4 +1,7 @@
-from dojogame.dojophysics.collisions import *
+from dojogame.dojophysics.collisions import CircleCollider, PolygonCollider
+from dojogame.dojomaths.vectors import Vector2
+from dojogame.dojomaths.dojomathfunctions import Mathf
+import math
 
 
 class RaycastHit:
@@ -19,19 +22,14 @@ class Raycast:
         pass
 
     @staticmethod
-    def raycast_circle(start: Vector2, _dir: Vector2, circle: Circle | CircleCollider) -> RaycastHit:
-        # r_squared = 0
+    def raycast_circle(start: Vector2, _dir: Vector2, circle_collider: CircleCollider) -> RaycastHit:
+        if circle_collider is None:
+            raise ValueError("circle collider is None. Did you forget to add a collider to the object?")
+
+        circle = circle_collider.circle
+
+        r_squared = circle.radius ** 2
         direction = _dir.normalized()
-        if isinstance(circle, Circle):
-            try:
-                circle.get_collider()
-            except AttributeError:
-                return RaycastHit(False)
-            r_squared = circle.radius ** 2
-        elif isinstance(circle, CircleCollider):
-            r_squared = circle.circle.radius ** 2
-        else:
-            raise TypeError("circle must be of type Circle or CircleCollider")
 
         origin_to_circle = circle.transform.position - start
         origin_to_circle_squared = origin_to_circle.x ** 2 + origin_to_circle.y ** 2
@@ -78,17 +76,12 @@ class Raycast:
 
     @staticmethod
     def raycast_polygon(start: Vector2, _dir: Vector2,
-                        polygon: Polygon | PolygonCollider, distance) -> RaycastHit:
-        if isinstance(polygon, Polygon):
-            try:
-                polygon.get_collider()
-            except AttributeError:
-                return RaycastHit(False)
-            vertices = polygon.get_absolute_vertices_positions()
-        elif isinstance(polygon, PolygonCollider):
-            vertices = polygon.polygon.get_absolute_vertices_positions()
-        else:
-            raise TypeError("polygon must be of type Polygon or PolygonCollider")
+                        polygon_collider: PolygonCollider, distance) -> RaycastHit:
+        if polygon_collider is None:
+            raise ValueError("polygon collider is None. Did you forget to add a collider to the object?")
+
+        polygon = polygon_collider.polygon
+        vertices = polygon.get_absolute_vertices_positions()
 
         t = float("inf")
         crossings = 0
