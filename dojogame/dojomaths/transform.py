@@ -85,12 +85,12 @@ class Transform:
         self.position = Vector2(point.x * c - point.y * s + origin.x, point.x * s + point.y * c + origin.y)
 
     def relative_pos_to_absolute(self, pos: Vector2) -> Vector2:
-        t = Transform(pos + self.position)
+        t = Transform(pos + self.get_position(Space.World))
         t.rotate_around_origin(self.rotation, self.position)
         return t.position
 
     def absolute_pos_to_relative(self, pos: Vector2) -> Vector2:
-        t = Transform(self.position)
+        t = Transform(self.get_position(Space.World) - pos)
         t.rotate_around_origin(-self.rotation, self.position)
         return pos - t.position
 
@@ -108,7 +108,9 @@ class Transform:
         return self.children[i]
 
     def update_position(self):
-        self.position
+        t = Transform(self.local_position)
+        t.rotate_around_origin(self.rotation, self.position)
+        self.position = t.position + self.parent.position
 
     def update(self):  # TODO: Change?
         self.update_position()
