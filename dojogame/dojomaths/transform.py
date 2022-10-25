@@ -1,11 +1,11 @@
 import math
 
 from dojogame.dojomaths.vectors import Vector2
+from dojogame.dojomaths.matrix import Matrix
 from dojogame.dojomaths.dojomathfunctions import Mathf
 from dojogame.dojodata.enums import Space
 
 import pygame.transform
-from typing import Union
 
 
 class Transform:
@@ -15,12 +15,15 @@ class Transform:
         self.children = []
         self.parent = parent
         self.set_parent(parent)
-        self.rotation = angle
         self.local_scale = scale
         self.game_object = game_object
 
         self.local_position = self.position = Vector2.zero()
         self.local_rotation = self.rotation = 0
+
+        self.local_translation_matrix = self.\
+            local_rotation_matrix = self.\
+            local_scale_matrix = Matrix.empty(2, 2)
 
         self.set_position(pos, space)
         self.set_rotation(angle, space)
@@ -33,9 +36,7 @@ class Transform:
         if space == Space.Self:
             self.local_position = pos
         elif space == Space.World:
-            t = Transform(pos)
-            t.rotate_around_origin(-self.rotation, self.position)
-            self.local_position = t.position - self.position
+            raise NotImplementedError
         else:
             raise TypeError("Wrong Space given")
 
@@ -46,9 +47,7 @@ class Transform:
         if space == Space.Self:
             return self.local_position
         elif space == Space.World:
-            t = Transform(self.local_position)
-            t.rotate_around_origin(self.rotation, self.position)
-            return self.parent.get_position(Space.World) + t.position
+            return self.position
         else:
             raise TypeError("Wrong Space given")
 
@@ -65,11 +64,10 @@ class Transform:
             raise TypeError("Wrong Space given")
 
     def set_rotation(self, angle, space: Space = Space.Self):
-        self.last_rotation_space = space
         if space == Space.Self:
             self.local_rotation = angle % 360
         elif space == Space.World:
-            self.rotation = angle % 360
+            raise NotImplementedError
         else:
             raise TypeError("Wrong Space given")
 
@@ -82,7 +80,8 @@ class Transform:
 
         point = self.position - origin
 
-        self.position = Vector2(point.x * c - point.y * s + origin.x, point.x * s + point.y * c + origin.y)
+        self.position = Vector2(point.x * c - point.y * s + origin.x,
+                                point.x * s + point.y * c + origin.y)
 
     def relative_pos_to_absolute(self, pos: Vector2) -> Vector2:
         t = Transform(pos + self.get_position(Space.World))
@@ -108,9 +107,22 @@ class Transform:
         return self.children[i]
 
     def update_position(self):
-        t = Transform(self.local_position)
-        t.rotate_around_origin(self.rotation, self.position)
-        self.position = t.position + self.parent.position
+        self.local_translation_matrix = self.local_position.to_matrix_column()
+        self.local_rotation_matrix = \
+            Matrix([[c := math.cos(self.local_rotation * Mathf.Deg2Rad),
+                     -(s := math.sin(self.local_rotation * Mathf.Deg2Rad))],
+                    [s, c]])
+        self.local_scale_matrix = Matrix([[self.local_scale.x, 0], [0, self.local_scale.y]])
+
+        if self.parent is not None:
+            self.position = Vector2.from_matrix(self.parent.local_translation_matrix +
+                                                (self.parent.local_rotation_matrix *
+                                                 (self.parent.local_scale_matrix *
+                                                  self.local_position.to_matrix_column())))
+            self.rotation = self.parent.rotation + self.local_rotation
+        else:
+            self.position = self.local_position
+            self.rotation = self.local_rotation
 
     def update(self):  # TODO: Change?
         self.update_position()

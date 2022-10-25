@@ -3,8 +3,10 @@
 # This file contains all vector related calculations.
 
 import random
+import math
 
-from dojogame.dojomaths.dojomathfunctions import *
+from dojogame.dojomaths.dojomathfunctions import Mathf
+from dojogame.dojomaths.matrix import Matrix
 
 
 class Vector2:
@@ -114,6 +116,18 @@ class Vector2:
     @staticmethod
     def rotate_by_degs(v, d):
         return Vector2.rotate_by_rads(v, d * Mathf.Deg2Rad)
+
+    def to_matrix_column(self) -> Matrix:
+        return Matrix([[self.x], [self.y]])
+
+    def to_matrix_row(self, z: float = 0) -> Matrix:
+        return Matrix([[self.x, self.y, z]])
+
+    @staticmethod
+    def from_matrix(m: Matrix) -> 'Vector2':
+        if (m.rows == 2 or m.rows == 3) and m.columns == 1:
+            return Vector2(m.get_element(0, 0), m.get_element(1, 0))
+        raise ValueError("Matrix must be 2x1 or 3x1 to be converted to Vector2")
 
 
 class Vector2Int:
