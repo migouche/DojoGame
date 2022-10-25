@@ -12,7 +12,6 @@ class Button(GameObject):
 
         self.background.transform.set_parent(self.transform)
         self.background.transform.set_position(Vector2.zero())
-        self.background.transform.local_position = Vector2.zero()
 
         if self.foreground is not None:
             self.foreground.transform.set_parent(self.background.transform)

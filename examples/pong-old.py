@@ -1,4 +1,5 @@
 from dojogame import *
+from pygame.constants import *
 
 can_start = False
 
