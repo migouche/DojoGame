@@ -16,8 +16,8 @@ class Action:
 
 
 class Rigidbody:
-    def __init__(self, mass: float = 1, object: GameObject = None):
-        self.object = object
+    def __init__(self, game_object: GameObject, mass: float = 1):
+        self.game_object = game_object
         self.totalAction = Action()
         # self.position = pos
         # self.angle = angle
@@ -34,12 +34,12 @@ class Rigidbody:
         # posRel = position if space == Space.Self else \
         #    position - self.object.transform.position if space == Space.World else None
         if space == Space.Self:
-            absolute_pos = self.object.transform.relative_pos_to_absolute(position)
-            absolute_force = Vector2.rotate_by_degs(force, self.object.transform.rotation)
+            absolute_pos = self.game_object.transform.relative_pos_to_absolute(position)
+            absolute_force = Vector2.rotate_by_degs(force, self.game_object.transform.rotation)
 
             self.add_force_at_position(absolute_force, absolute_pos, mode, Space.World)
             return
-        pos_rel = position - self.object.transform.position if space == Space.World else None
+        pos_rel = position - self.game_object.transform.position if space == Space.World else None
         if pos_rel is None:
             raise TypeError("Wrong Space given")
 
@@ -55,17 +55,18 @@ class Rigidbody:
             raise TypeError("Wrong ForceMode given")
 
     def add_force(self, force: Vector2, mode: ForceMode = ForceMode.Force):
-        self.add_force_at_position(force, self.object.transform.position, mode)
+        self.add_force_at_position(force, self.game_object.transform.position, mode)
 
     def update_action(self):
         self.velocity += self.totalAction.dSpeed
         self.angularVelocity += self.totalAction.dAngle
 
-        self.object.transform.position += self.velocity * RealTime.delta_time
-        self.object.transform.rotation += self.angularVelocity * RealTime.delta_time
+        self.game_object.transform.position += self.velocity * RealTime.delta_time
+        self.game_object.transform.rotation += self.angularVelocity * RealTime.delta_time
 
         self.totalAction = Action()
 
     @staticmethod
-    def add_rigidbody(obj, mass: float = 1):
-        obj.rigidbody = Rigidbody(mass, obj)
+    def add_rigidbody(game_object, mass: float = 1) -> GameObject:
+        game_object.rigidbody = Rigidbody(game_object, mass)
+        return game_object

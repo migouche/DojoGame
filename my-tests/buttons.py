@@ -12,6 +12,7 @@ button.transform.set_position(Vector2(200, 200))
 def button_on_click():
     print("clicked")
 
+
 while window.running:
     if Input.get_key_down(K_ESCAPE) or Input.get_key_down(K_q):
         window.quit()

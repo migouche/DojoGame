@@ -31,8 +31,10 @@ player = Polygon.Square(10)
 Rigidbody.add_rigidbody(player)
 _dir = Vector2(0, -1)
 
+print(player.get_rigidbody())
+
 lastCircle = Circle(radius=5, color=Colors.white)  # should be and is in the middle
-lastCircle.transform.position = rec2.transform.position
+lastCircle.transform.set_position(Vector2(window.width / 2 + 50, window.height / 2 + 50))
 
 player.transform.set_rotation(10)
 
@@ -95,7 +97,7 @@ while window.running:
 
     if Input.get_mouse_button_down(MOUSE_BUTTON_LEFT):
         pac.transform.set_local_scale(2 * pac.transform.local_scale)
-        if Collisions.point_inside_polygon(Input.get_mouse_position(), square):
+        if Collisions.point_inside_polygon(Input.get_mouse_position(), square.get_collider()):
             print("inside")
 
     if Input.get_mouse_button_down(MOUSE_BUTTON_RIGHT):

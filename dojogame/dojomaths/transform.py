@@ -21,8 +21,8 @@ class Transform:
         self.local_position = self.position = Vector2.zero()
         self.local_rotation = self.rotation = 0
 
-        self.translation_matrix = self.\
-            rotation_matrix = self.\
+        self.translation_matrix = self. \
+            rotation_matrix = self. \
             scale_matrix = Matrix.empty(2, 2)
 
         self.set_position(pos, space)
@@ -84,9 +84,11 @@ class Transform:
                                 point.x * s + point.y * c + origin.y)
 
     def relative_pos_to_absolute(self, pos: Vector2) -> Vector2:
-        t = Transform(pos + self.get_position(Space.World))
-        t.rotate_around_origin(self.rotation, self.position)
-        return t.position
+        return Vector2.from_matrix(self.translation_matrix +
+                                       (self.rotation_matrix *
+                                        (self.scale_matrix *
+                                         pos.to_matrix_column())))
+
 
     def absolute_pos_to_relative(self, pos: Vector2) -> Vector2:
         t = Transform(self.get_position(Space.World) - pos)
@@ -108,10 +110,11 @@ class Transform:
 
     def update_position(self):
         if self.parent is not None:
-            self.position = Vector2.from_matrix(self.parent.translation_matrix +
+            '''self.position = Vector2.from_matrix(self.parent.translation_matrix +
                                                 (self.parent.rotation_matrix *
                                                  (self.parent.scale_matrix *
-                                                  self.local_position.to_matrix_column())))
+                                                  self.local_position.to_matrix_column())))'''
+            self.position = self.parent.relative_pos_to_absolute(self.local_position)
             self.rotation = self.parent.rotation + self.local_rotation
         else:
             self.position = self.local_position
