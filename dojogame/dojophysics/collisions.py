@@ -35,8 +35,11 @@ class AxisAlignedBoundingBox:
             self.min_v = Vector2(min_x, min_y)
             self.max_v = Vector2(max_x, max_y)
         elif isinstance(self.obj, Circle):
-            self.min_v = self.obj.transform.position - Vector2(self.obj.radius, self.obj.radius)
-            self.max_v = self.obj.transform.position + Vector2(self.obj.radius, self.obj.radius)
+            self.min_v = self.obj.transform.position - \
+                         Vector2(self.obj.radius, self.obj.radius)
+
+            self.max_v = self.obj.transform.position + \
+                         Vector2(self.obj.radius, self.obj.radius)
         else:
             raise TypeError("Wrong type of object given")
 
@@ -50,7 +53,10 @@ AABB = AxisAlignedBoundingBox
 
 class Collisions:
     @staticmethod
-    def point_inside_polygon(point: Vector2, polygon: Polygon) -> bool:
+    def point_inside_polygon(point: Vector2, polygon: 'PolygonCollider') -> bool:
+        if polygon is None:
+            raise TypeError("Polygon has no collider")
+        polygon = polygon.polygon
         c = False
         vertices = polygon.get_absolute_vertices_positions()
 
@@ -61,6 +67,13 @@ class Collisions:
                      (vertices[j].y - vertices[i].y) + vertices[i].x):
                 c = not c
         return c
+
+    @staticmethod
+    def point_inside_circle(point: Vector2, circle: 'CircleCollider') -> bool:
+        if circle is None:
+            raise TypeError("Circle has no collider")
+        circle = circle.circle
+        return (point - circle.transform.position).magnitude <= circle.radius
 
     @staticmethod
     def find_arithmetic_mean(points: list) -> Vector2:
@@ -275,7 +288,8 @@ class Collisions:
                 depth = axis_depth
                 normal = axis
 
-        closest_point = Collisions.find_closest_point_on_polygon(circle.transform.position, polygon)
+        closest_point = Collisions. \
+            find_closest_point_on_polygon(circle.transform.position, polygon)
         axis = closest_point - circle.transform.position
 
         (min_a, max_a) = Collisions.project_vertices(vertices, axis)
@@ -310,20 +324,27 @@ class Collider:
     def collide_with(self, other) -> Collision:
         raise NotImplementedError
 
+    def point_inside_collider(self, point: Vector2) -> bool:
+        raise NotImplementedError
+
     @staticmethod
-    def add_collider(go: GameObject):
+    def add_collider(go: GameObject) -> GameObject:
         if isinstance(go, Polygon):
             go.collider = PolygonCollider(go)
         elif isinstance(go, Circle):
             go.collider = CircleCollider(go)
         else:
             raise TypeError("Wrong type of object given")
+        return go
 
 
 class PolygonCollider(Collider):
     def __init__(self, polygon: Polygon):
         super().__init__(polygon)
         self.polygon = polygon
+
+    def point_inside_collider(self, point: Vector2) -> bool:
+        return Collisions.point_inside_polygon(point, self)
 
     def collide_with(self, other: Collider) -> bool:
         if other is None:
@@ -338,6 +359,9 @@ class CircleCollider(Collider):
     def __init__(self, circle: Circle):
         super().__init__(circle)
         self.circle = circle
+
+    def point_inside_collider(self, point: Vector2) -> bool:
+        return Collisions.point_inside_circle(point, self)
 
     def collide_with(self, other) -> Collision:
         if isinstance(other, CircleCollider):

@@ -3,15 +3,16 @@ from pygame.constants import *
 
 window = Window(400, 400, flags=RESIZABLE)
 
-polygon = Polygon.Square(100, color=Colors.red)
+polygon = Collider.add_collider(Polygon.Square(100, color=Colors.red))
 button = Button(polygon, Text("freesansbold.ttf", 30, Colors.black, "haha"))
 button.transform.set_position(Vector2(200, 200))
 
-print(button.transform.get_position(Space.World))
-print(button.background.transform.get_position(Space.Self))
-print(button.background.transform.get_position(Space.World))
-print(button.foreground.transform.get_position(Space.Self))
-print(button.foreground.transform.get_position(Space.World))
-while window.running:
 
+@button.on_click
+def button_on_click():
+    print("clicked")
+
+while window.running:
+    if Input.get_key_down(K_ESCAPE) or Input.get_key_down(K_q):
+        window.quit()
     window.update()
