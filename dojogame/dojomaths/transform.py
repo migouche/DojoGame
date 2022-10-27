@@ -83,14 +83,20 @@ class Transform:
         self.position = Vector2(point.x * c - point.y * s + origin.x,
                                 point.x * s + point.y * c + origin.y)
 
+    def get_local_to_world_matrix(self) -> Matrix:
+        return self.translation_matrix * (self.rotation_matrix * self.scale_matrix)
+
     def relative_pos_to_absolute(self, pos: Vector2) -> Vector2:
-        return Vector2.from_matrix(self.translation_matrix +
+        '''return Vector2.from_matrix(self.translation_matrix +
                                    (self.rotation_matrix *
                                     (self.scale_matrix *
-                                     pos.to_matrix_column())))
+                                     pos.to_matrix_column())))'''
+        return Vector2.from_matrix(self.get_local_to_world_matrix() * pos.to_matrix_column().add_row([1]))
 
     def absolute_pos_to_relative(self, pos: Vector2) -> Vector2:
-        return Vector2.from_matrix(((pos.to_matrix_column() - self.translation_matrix) / self.rotation_matrix) / self.scale_matrix)
+        '''return Vector2.from_matrix(
+            ((pos.to_matrix_column() - self.translation_matrix) / self.rotation_matrix) / self.scale_matrix)'''
+        return Vector2.from_matrix(self.get_local_to_world_matrix().inverse() * pos.to_matrix_column().add_row([1]))
 
     def set_parent(self, parent: 'Transform'):
         self.parent = parent
@@ -117,12 +123,12 @@ class Transform:
             self.position = self.local_position
             self.rotation = self.local_rotation
 
-        self.translation_matrix = self.position.to_matrix_column()
+        self.translation_matrix = Matrix([[1, 0, self.position.x], [0, 1, self.position.y], [0, 0, 1]])
         self.rotation_matrix = \
             Matrix([[c := math.cos(self.rotation * Mathf.Deg2Rad),
-                     -(s := math.sin(self.rotation * Mathf.Deg2Rad))],
-                    [s, c]])
-        self.scale_matrix = Matrix([[self.local_scale.x, 0], [0, self.local_scale.y]])
+                     -(s := math.sin(self.rotation * Mathf.Deg2Rad)), 0],
+                    [s, c, 0], [0, 0, 1]])
+        self.scale_matrix = Matrix([[self.local_scale.x, 0, 0], [0, self.local_scale.y, 0], [0, 0, 1]])
 
     def update(self):  # TODO: Change?
         self.update_position()
