@@ -12,7 +12,6 @@ txt.set_text("wtf")
 txt.transform.set_position(Vector2(100, 100))
 
 
-
 point2 = Circle(10)
 point2.transform.position = Vector2(300, 250)
 pos = point2.transform.position
@@ -25,7 +24,7 @@ rec2 = Polygon.Rectangle(200, 100, color=Color(255, 5, 5))
 rec2.transform.set_position(Vector2(400, 400))
 rec2.transform.set_rotation(45)
 
-pac = Sprite("data/pacman.png", Vector2(200, 100))
+pac = Sprite("data/pacman.png", Vector2(200, 100), parent=rec2.transform)
 pac.transform.set_position(Vector2(400, 400))
 player = Polygon.Square(10)
 Rigidbody.add_rigidbody(player)
@@ -84,7 +83,7 @@ while window.running:
         print("up")
     pac.transform.rotate(30 * RealTime.delta_time)
     txt.transform.rotate(30 * RealTime.delta_time)
-    pac.transform.set_position(Input.get_mouse_position())
+    pac.transform.set_position(Input.get_mouse_position(), space=Space.World)
 
     if Input.get_key(K_a):
         player.get_rigidbody().add_force_at_position(Vector2(-30, 0), player.transform.position)

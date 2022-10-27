@@ -95,8 +95,7 @@ class Polygon(GameObject):
 
     def get_absolute_vertices_positions(self) -> [Vector2]:
         return [self.transform.relative_pos_to_absolute(v)
-                for v in [Vector2.scale(lv, self.transform.local_scale)
-                          for lv in self.local_vertices_positions]]
+                for v in self.local_vertices_positions]
 
     def draw(self, screen: pygame.Surface) -> pygame.Rect:
         points = [v.to_tuple() for v in self.get_absolute_vertices_positions()]

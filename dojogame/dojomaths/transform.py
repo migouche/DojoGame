@@ -36,7 +36,7 @@ class Transform:
         if space == Space.Self:
             self.local_position = pos
         elif space == Space.World:
-            raise NotImplementedError
+            self.local_position = self.absolute_pos_to_relative(pos)
         else:
             raise TypeError("Wrong Space given")
 
@@ -85,15 +85,12 @@ class Transform:
 
     def relative_pos_to_absolute(self, pos: Vector2) -> Vector2:
         return Vector2.from_matrix(self.translation_matrix +
-                                       (self.rotation_matrix *
-                                        (self.scale_matrix *
-                                         pos.to_matrix_column())))
-
+                                   (self.rotation_matrix *
+                                    (self.scale_matrix *
+                                     pos.to_matrix_column())))
 
     def absolute_pos_to_relative(self, pos: Vector2) -> Vector2:
-        t = Transform(self.get_position(Space.World) - pos)
-        t.rotate_around_origin(-self.rotation, self.position)
-        return pos - t.position
+        return Vector2.from_matrix(((pos.to_matrix_column() - self.translation_matrix) / self.rotation_matrix) / self.scale_matrix)
 
     def set_parent(self, parent: 'Transform'):
         self.parent = parent
