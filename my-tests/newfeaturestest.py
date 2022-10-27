@@ -47,7 +47,7 @@ Collider.add_collider(triangle2)
 
 
 child = Polygon.Square(10, color=Colors.blue)
-child.transform.parent = triangle2.transform
+child.transform.set_parent(triangle2.transform)
 child.transform.set_position(Vector2(50, 50))
 
 square = Polygon.Square(40, color=Color(100, 0, 255, 100))

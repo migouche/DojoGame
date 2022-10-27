@@ -13,13 +13,13 @@ class Transform:
                  space: Space = Space.Self, game_object: 'GameObject' = None,
                  parent: 'Transform' = None):
         self.children = []
-        self.parent = parent
+        self._parent = parent
         self.set_parent(parent)
         self.local_scale = scale
         self.game_object = game_object
 
-        self.local_position = self.position = Vector2.zero()
-        self.local_rotation = self.rotation = 0
+        self._local_position = Vector2.zero()
+        self._local_rotation = 0
 
         self.translation_matrix = self. \
             rotation_matrix = self. \
@@ -32,14 +32,38 @@ class Transform:
 
         self.update()
 
+    @property
+    def parent(self) -> 'Transform':
+        return self._parent
+
+    @parent.setter
+    def parent(self, parent: 'Transform'):
+        self.set_parent(parent)
+
+    @property
+    def local_position(self) -> Vector2:
+        return self.get_position(Space.Self)
+
+    @local_position.setter
+    def local_position(self, pos: Vector2):
+        self.set_position(pos, Space.Self)
+
+    @property
+    def position(self) -> Vector2:
+        return self.get_position(Space.World)
+
+    @position.setter
+    def position(self, pos: Vector2):
+        self.set_position(pos, Space.World)
+
     def set_position(self, pos, space: Space = Space.Self):
         if space == Space.Self:
-            self.local_position = pos
+            self._local_position = pos
         elif space == Space.World:
             if self.parent is not None:
-                self.local_position = self.parent.absolute_pos_to_relative(pos)
+                self._local_position = self.parent.absolute_pos_to_relative(pos)
             else:
-                self.local_position = pos
+                self._local_position = pos
         else:
             raise TypeError("Wrong Space given")
 
@@ -48,9 +72,12 @@ class Transform:
 
     def get_position(self, space: Space = Space.Self):
         if space == Space.Self:
-            return self.local_position
+            return self._local_position
         elif space == Space.World:
-            return self.position
+            if self.parent is not None:
+                return self.parent.relative_pos_to_absolute(self._local_position)
+            else:
+                return self._local_position
         else:
             raise TypeError("Wrong Space given")
 
@@ -87,43 +114,30 @@ class Transform:
         point = self.position - origin
 
         self.position = Vector2(point.x * c - point.y * s + origin.x,
-                                point.x * s + point.y * c + origin.y)
+                                 point.x * s + point.y * c + origin.y)
 
     def get_local_to_world_matrix(self) -> Matrix:
         return self.translation_matrix * (self.rotation_matrix * self.scale_matrix)
 
     def relative_pos_to_absolute(self, pos: Vector2) -> Vector2:
-        '''return Vector2.from_matrix(self.translation_matrix +
-                                   (self.rotation_matrix *
-                                    (self.scale_matrix *
-                                     pos.to_matrix_column())))'''
         return Vector2.from_matrix(self.get_local_to_world_matrix() * pos.to_matrix_column().add_row([1]))
 
     def absolute_pos_to_relative(self, pos: Vector2) -> Vector2:
-        '''return Vector2.from_matrix(
-            ((pos.to_matrix_column() - self.translation_matrix) / self.rotation_matrix) / self.scale_matrix)'''
         return Vector2.from_matrix(self.get_local_to_world_matrix().inverse() * pos.to_matrix_column().add_row([1]))
 
     def set_parent(self, parent: 'Transform'):
-        self.parent = parent
+        self._parent = parent
         try:
             self.parent.children.append(self)
         except AttributeError:
             pass
-
-    def get_parent(self):
-        return self.parent
 
     def get_child(self, i: int):
         return self.children[i]
 
     def update_position(self):
         if self.parent is not None:
-            '''self.position = Vector2.from_matrix(self.parent.translation_matrix +
-                                                (self.parent.rotation_matrix *
-                                                 (self.parent.scale_matrix *
-                                                  self.local_position.to_matrix_column())))'''
-            self.position = self.parent.relative_pos_to_absolute(self.local_position)
+
             self.rotation = self.parent.rotation + self.local_rotation
         else:
             self.position = self.local_position
