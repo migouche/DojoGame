@@ -13,8 +13,9 @@ class Transform:
                  space: Space = Space.Self, game_object: 'GameObject' = None,
                  parent: 'Transform' = None):
         self.children = []
-        self._parent = parent
-        self.set_parent(parent)
+        self._parent = None
+        if parent is not None:
+            self.parent = parent
         self.local_scale = scale
         self.game_object = game_object
 
@@ -38,10 +39,12 @@ class Transform:
 
     @parent.setter
     def parent(self, parent: 'Transform'):
+        print("parent setter")
         self.set_parent(parent)
 
     @property
     def local_position(self) -> Vector2:
+        #  TODO: fight your inner self and make this not be called everytime (use update)
         return self.get_position(Space.Self)
 
     @local_position.setter
@@ -81,26 +84,45 @@ class Transform:
         else:
             raise TypeError("Wrong Space given")
 
+    @property
+    def local_rotation(self) -> float:
+        return self.get_rotation(Space.Self)
+
+    @local_rotation.setter
+    def local_rotation(self, angle: float):
+        self.set_rotation(angle, Space.Self)
+
+    @property
+    def rotation(self) -> float:
+        return self.get_rotation(Space.World)
+
+    @rotation.setter
+    def rotation(self, angle: float):
+        self.set_rotation(angle, Space.World)
+
     def set_local_scale(self, scale):
         self.local_scale = scale
         # self.update()
 
     def get_rotation(self, space: Space = Space.Self):
         if space == Space.Self:
-            return self.local_rotation
+            return self._local_rotation
         elif space == Space.World:
-            return self.rotation
+            if self.parent is not None:
+                return self.parent.rotation + self._local_rotation
+            else:
+                return self._local_rotation
         else:
             raise TypeError("Wrong Space given")
 
     def set_rotation(self, angle, space: Space = Space.Self):
         if space == Space.Self:
-            self.local_rotation = angle % 360
+            self._local_rotation = angle % 360
         elif space == Space.World:
             if self.parent is not None:
-                self.local_rotation = (angle - self.parent.rotation) % 360
+                self._local_rotation = (angle - self.parent.rotation) % 360
             else:
-                self.local_rotation = angle % 360
+                self._local_rotation = angle % 360
         else:
             raise TypeError("Wrong Space given")
 
@@ -114,7 +136,7 @@ class Transform:
         point = self.position - origin
 
         self.position = Vector2(point.x * c - point.y * s + origin.x,
-                                 point.x * s + point.y * c + origin.y)
+                                point.x * s + point.y * c + origin.y)
 
     def get_local_to_world_matrix(self) -> Matrix:
         return self.translation_matrix * (self.rotation_matrix * self.scale_matrix)
@@ -127,22 +149,12 @@ class Transform:
 
     def set_parent(self, parent: 'Transform'):
         self._parent = parent
-        try:
-            self.parent.children.append(self)
-        except AttributeError:
-            pass
+        self._parent.children.append(self)
 
     def get_child(self, i: int):
         return self.children[i]
 
     def update_position(self):
-        if self.parent is not None:
-
-            self.rotation = self.parent.rotation + self.local_rotation
-        else:
-            self.position = self.local_position
-            self.rotation = self.local_rotation
-
         self.translation_matrix = Matrix([[1, 0, self.position.x], [0, 1, self.position.y], [0, 0, 1]])
         self.rotation_matrix = \
             Matrix([[c := math.cos(self.rotation * Mathf.Deg2Rad),
