@@ -36,7 +36,10 @@ class Transform:
         if space == Space.Self:
             self.local_position = pos
         elif space == Space.World:
-            self.local_position = self.absolute_pos_to_relative(pos)
+            if self.parent is not None:
+                self.local_position = self.parent.absolute_pos_to_relative(pos)
+            else:
+                self.local_position = pos
         else:
             raise TypeError("Wrong Space given")
 
@@ -67,7 +70,10 @@ class Transform:
         if space == Space.Self:
             self.local_rotation = angle % 360
         elif space == Space.World:
-            raise NotImplementedError
+            if self.parent is not None:
+                self.local_rotation = (angle - self.parent.rotation) % 360
+            else:
+                self.local_rotation = angle % 360
         else:
             raise TypeError("Wrong Space given")
 
