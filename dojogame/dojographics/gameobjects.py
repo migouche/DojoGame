@@ -4,16 +4,18 @@ from dojogame.dojodata import arrays
 from dojogame.dojomaths.vectors import Vector2, Vector2Int
 from dojogame.dojomaths.transform import Transform
 from dojogame.dojographics.colors import Color, Colors
+from dojogame.dojographics.drawable import Drawable
 
 
-class GameObject:
+class GameObject(Drawable):
     def __init__(self, position: Vector2 = Vector2.zero(), rotation: float = 0,
                  scale: Vector2 = Vector2(1, 1), parent: Transform = None):
+        super().__init__(True)
         self.rect = pygame.Rect(0, 0, 0, 0)
-        self.collider = None
-        self.rigidbody = None
+        self._collider = None
+        self._rigidbody = None
         self.transform = Transform(position, rotation, scale, game_object=self, parent=parent)
-        arrays.game_objects.append(self)
+        # arrays.game_objects.append(self)
 
     def draw(self, screen: pygame.Surface) -> pygame.Rect:
         raise NotImplementedError
@@ -21,29 +23,31 @@ class GameObject:
     def update(self, screen):
         self.transform.update()
         try:
-            self.get_collider().aabb.update_aabb()  # TODO: change later to get_collider().update()
+            self.collider.aabb.update_aabb()  # TODO: change later to get_collider().update()
         except AttributeError:
             pass
 
         try:
-            self.get_rigidbody().update_action()
+            self.rigidbody.update_action()
         except AttributeError:
             pass
 
         if screen is not None:
             self.rect = self.draw(screen)
 
-    def get_collider(self) -> 'Collider':
-        if self.collider is None:
+    @property
+    def collider(self) -> 'Collider':
+        if self._collider is None:
             raise AttributeError(f"GameObject has no collider")
         else:
-            return self.collider
+            return self._collider
 
-    def get_rigidbody(self) -> 'Rigidbody':
-        if self.rigidbody is None:
+    @property
+    def rigidbody(self) -> 'Rigidbody':
+        if self._rigidbody is None:
             raise AttributeError(f"GameObject has no rigidbody")
         else:
-            return self.rigidbody
+            return self._rigidbody
 
     @staticmethod
     def get_rotated_surface_size(surface: pygame.Surface, rotation: float) -> Vector2Int:

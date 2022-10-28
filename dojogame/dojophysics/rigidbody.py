@@ -11,7 +11,7 @@ class Action:
         self.dSpeed = dSpeed
         self.dAngle = dAngle
 
-    def __add__(self, other):
+    def __add__(self, other) -> 'Action':
         return Action(self.dSpeed + other.dSpeed, self.dAngle + other.dAngle)
 
 
@@ -19,8 +19,6 @@ class Rigidbody:
     def __init__(self, game_object: GameObject, mass: float = 1):
         self.game_object = game_object
         self.totalAction = Action()
-        # self.position = pos
-        # self.angle = angle
         self.velocity = Vector2.zero()
         self.angularVelocity = 0
         self.mass = mass
@@ -31,8 +29,6 @@ class Rigidbody:
                               mode: ForceMode = ForceMode.Force,
                               space: Space = Space.World):
 
-        # posRel = position if space == Space.Self else \
-        #    position - self.object.transform.position if space == Space.World else None
         if space == Space.Self:
             absolute_pos = self.game_object.transform.relative_pos_to_absolute(position)
             absolute_force = Vector2.rotate_by_degs(force, self.game_object.transform.rotation)
@@ -68,5 +64,5 @@ class Rigidbody:
 
     @staticmethod
     def add_rigidbody(game_object, mass: float = 1) -> GameObject:
-        game_object.rigidbody = Rigidbody(game_object, mass)
+        game_object._rigidbody = Rigidbody(game_object, mass)
         return game_object

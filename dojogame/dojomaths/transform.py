@@ -73,7 +73,7 @@ class Transform:
     def translate(self, translation, space: Space = Space.Self):
         self.set_position(self.get_position(space) + translation, space)
 
-    def get_position(self, space: Space = Space.Self):
+    def get_position(self, space: Space = Space.Self) -> Vector2:
         if space == Space.Self:
             return self._local_position
         elif space == Space.World:
@@ -138,14 +138,15 @@ class Transform:
         self.position = Vector2(point.x * c - point.y * s + origin.x,
                                 point.x * s + point.y * c + origin.y)
 
-    def get_local_to_world_matrix(self) -> Matrix:
+    @property
+    def local_to_world_matrix(self) -> Matrix:
         return self.translation_matrix * (self.rotation_matrix * self.scale_matrix)
 
     def relative_pos_to_absolute(self, pos: Vector2) -> Vector2:
-        return Vector2.from_matrix(self.get_local_to_world_matrix() * pos.to_matrix_column().add_row([1]))
+        return Vector2.from_matrix(self.local_to_world_matrix * pos.to_matrix_column().add_row([1]))
 
     def absolute_pos_to_relative(self, pos: Vector2) -> Vector2:
-        return Vector2.from_matrix(self.get_local_to_world_matrix().inverse() * pos.to_matrix_column().add_row([1]))
+        return Vector2.from_matrix(self.local_to_world_matrix.inverse() * pos.to_matrix_column().add_row([1]))
 
     def set_parent(self, parent: 'Transform'):
         self._parent = parent

@@ -85,9 +85,12 @@ class Collisions:
         return Vector2(x / len(points), y / len(points))
 
     @staticmethod
-    def intersect_polygons(p1: Polygon, p2: Polygon) -> Collision:
-        if not p1.get_collider().aabb.aabb_overlap(p2.get_collider().aabb):
+    def intersect_polygons(c1: 'PolygonCollider', c2: 'PolygonCollider') -> Collision:
+        if not c1.aabb.aabb_overlap(c2.aabb):
             return Collision(False)
+
+        p1 = c1.polygon
+        p2 = c2.polygon
 
         vertices_a = p1.get_absolute_vertices_positions()
         vertices_b = p2.get_absolute_vertices_positions()
@@ -330,9 +333,9 @@ class Collider:
     @staticmethod
     def add_collider(go: GameObject) -> GameObject:
         if isinstance(go, Polygon):
-            go.collider = PolygonCollider(go)
+            go._collider = PolygonCollider(go)
         elif isinstance(go, Circle):
-            go.collider = CircleCollider(go)
+            go._collider = CircleCollider(go)
         else:
             raise TypeError("Wrong type of object given")
         return go
@@ -350,7 +353,7 @@ class PolygonCollider(Collider):
         if other is None:
             return False
         if isinstance(other, PolygonCollider):
-            return bool(Collisions.intersect_polygons(self.polygon, other.polygon))
+            return bool(Collisions.intersect_polygons(self, other))
         else:
             raise NotImplementedError
 

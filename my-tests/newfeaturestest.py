@@ -30,7 +30,7 @@ player = Polygon.Square(10)
 Rigidbody.add_rigidbody(player)
 _dir = Vector2(0, -1)
 
-print(player.get_rigidbody())
+print(player.rigidbody)
 
 lastCircle = Circle(radius=5, color=Colors.white)  # should be and is in the middle
 lastCircle.transform.set_position(Vector2(window.width / 2 + 50, window.height / 2 + 50))
@@ -55,17 +55,18 @@ square.transform.set_position(Vector2(200, 200))
 square.transform.set_local_scale(Vector2(1, 2))
 
 Collider.add_collider(square)
+print(square.collider.aabb)
 RealTime.set_dt(1/75)
 
 while window.running:
     triangle.transform.rotate(RealTime.delta_time * 10)
     triangle2.transform.rotate(-RealTime.delta_time * 10)
 
-    Debug.draw_axis_aligned_bounding_box(triangle.get_collider())
-    Debug.draw_axis_aligned_bounding_box(triangle2.get_collider())
+    Lines.draw_axis_aligned_bounding_box(triangle.collider)
+    Lines.draw_axis_aligned_bounding_box(triangle2.collider)
 
-    triangle.color = triangle2.color = Colors.red if triangle.get_collider()\
-        .collide_with(triangle2.get_collider()) else Colors.blue
+    triangle.color = triangle2.color = Colors.red if triangle.collider\
+        .collide_with(triangle2.collider) else Colors.blue
 
     # triangle.color = triangle2.color = Colors.red if Collisions.gjk(triangle, triangle2) else Colors.blue
 
@@ -74,7 +75,7 @@ while window.running:
     Lines.draw_ray(Input.get_mouse_position(), _dir, 350)
     square.transform.rotate(100 * RealTime.delta_time)
 
-    if hit := Raycast.raycast_polygon(Input.get_mouse_position(), _dir, square.get_collider(), 400):
+    if hit := Raycast.raycast_polygon(Input.get_mouse_position(), _dir, square.collider, 400):
         Lines.draw_ray(hit.point, hit.normal, 100)
 
     # print(hit.point)
@@ -86,17 +87,17 @@ while window.running:
     pac.transform.set_position(Input.get_mouse_position(), space=Space.World)
 
     if Input.get_key(K_a):
-        player.get_rigidbody().add_force_at_position(Vector2(-30, 0), player.transform.position)
+        player.rigidbody.add_force_at_position(Vector2(-30, 0), player.transform.position)
     if Input.get_key(K_d):
-        player.get_rigidbody().add_force_at_position(Vector2(30, 0), player.transform.position)
+        player.rigidbody.add_force_at_position(Vector2(30, 0), player.transform.position)
     if Input.get_key(K_w):
-        player.get_rigidbody().add_force_at_position(Vector2(0, -30), player.transform.position + Vector2(1, 0))
+        player.rigidbody.add_force_at_position(Vector2(0, -30), player.transform.position + Vector2(1, 0))
     if Input.get_key(K_s):
-        player.get_rigidbody().add_force_at_position(Vector2(0, 30), player.transform.position, space=Space.Self)
+        player.rigidbody.add_force_at_position(Vector2(0, 30), player.transform.position, space=Space.Self)
 
     if Input.get_mouse_button_down(MOUSE_BUTTON_LEFT):
         pac.transform.set_local_scale(2 * pac.transform.local_scale)
-        if Collisions.point_inside_polygon(Input.get_mouse_position(), square.get_collider()):
+        if Collisions.point_inside_polygon(Input.get_mouse_position(), square.collider):
             print("inside")
 
     if Input.get_mouse_button_down(MOUSE_BUTTON_RIGHT):

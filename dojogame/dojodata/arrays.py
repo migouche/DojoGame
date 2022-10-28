@@ -1,12 +1,8 @@
 # arrays.py
 
-objects = []
-texts = []
-debug = []
-game_objects = []
-polygon_colliders = []
-lambdas = {}
 
+drawables = []
+polygon_colliders = []
 
 keys = []
 oldKeys = []
