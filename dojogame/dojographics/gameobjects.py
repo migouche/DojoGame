@@ -61,13 +61,11 @@ class Sprite(GameObject):
         super().__init__(position, rotation, scale, parent)
         self.transform.set_local_scale(scale)
         self._scale = scale
-        # self.transform = transform
         self.image_path = img
         self.image = pygame.image.load(img)
         self.image_rect = self.image.get_rect()
         self.update_image()
         self.offset = scale / 2
-        #arrays.objects.append(self)
 
     def update_image(self):
         self.image = pygame.transform.scale(pygame.image.load(self.image_path),
@@ -140,44 +138,89 @@ class Circle(GameObject):
 
 
 class Text(GameObject):
-    def __init__(self, font, size: int, txt_color: Color = Colors.black, text: str = ""):
+    def __init__(self, font, size: int, color: Color = Colors.black, text: str = ""):
         super().__init__()
-        self.text = text
-        self.size = size
-        self.font = font
-        self.text_color = txt_color
+        self._text = text
+        self._size = size
+        self._font = font
+        self._color = color
         self.render_font = pygame.font.Font(self.font, self.size)
         self.render_text = pygame.Surface.__new__(pygame.Surface)
-        self.set_text(self.text)
+        self.update_text()
         self.rect = self.render_text.get_rect()
         self.rect.center = self.transform.position.to_tuple()
         # arrays.texts.append(self)
 
+    @property
+    def text(self) -> str:
+        return self._text
+
+    @text.setter
+    def text(self, text: str):
+        self.set_text(text)
+
     def set_text(self, text):
-        self.text = text
-        self.update_text()
+        if self._text != text:
+            self._text = text
+            self.update_text()
+
+    @property
+    def color(self) -> Color:
+        return self._color
+
+    @color.setter
+    def color(self, color: Color):
+        self.set_color(color)
+
+    @property
+    def colour(self) -> Color:
+        return self._color
+
+    @colour.setter
+    def colour(self, color: Color):
+        self.set_color(color)
+
+    def set_color(self, color):
+        if self._color != color:
+            self._color = color
+            self.update_text()
+
+    def set_colour(self, colour):
+        self.set_color(colour)
+
+    @property
+    def size(self) -> int:
+        return self._size
+
+    @size.setter
+    def size(self, size: int):
+        self.set_size(size)
 
     def set_size(self, size):
-        self.size = size
-        self.update_text()
+        if self._size != size:
+            self._size = size
+            self.update_text()
 
-    def set_text_color(self, color):
-        self.text_color = color
-        self.update_text()
+    @property
+    def font(self) -> str:
+        return self._font
 
-    def set_text_colour(self, color):
-        self.text_color = color
-        self.update_text()
+    @font.setter
+    def font(self, font: str):
+        self.set_font(font)
 
-    def update_text(self):
-        self.render_font = pygame.font.Font(self.font, self.size)
-        self.render_text = self.render_font.render(str(self.text), True,
-                                                   self.text_color.to_tuple())
-        self.render_text.set_alpha(self.text_color.alpha)
+    def set_font(self, font):
+        if self._font != font:
+            self._font = font
+            self.update_text()
+
+    def update_text(self):  # TODO: can make it faster by caching the text
+        self.render_font = pygame.font.Font(self._font, self._size)
+        self.render_text = self.render_font.render(str(self._text), True,
+                                                   self._color.to_tuple())
+        self.render_text.set_alpha(self._color.alpha)
 
     def draw(self, screen: pygame.Surface) -> pygame.Rect:
-        self.update_text()
-
         return screen.blit(pygame.transform.rotate(self.render_text, -self.transform.rotation),
                            (self.transform.position.to_vector2_int() -
                             GameObject.get_rotated_surface_size(self.render_text,

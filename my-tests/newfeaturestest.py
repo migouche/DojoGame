@@ -58,7 +58,7 @@ print(square.collider.aabb)
 RealTime.set_framerate(75)
 
 while window.running:
-    txt.set_text(f"FPS: {int(RealTime.clock.get_fps())}")
+    txt.text = f"FPS: {int(RealTime.clock.get_fps())}"
     triangle.transform.rotate(RealTime.delta_time * 10)
     triangle2.transform.rotate(-RealTime.delta_time * 10)
 

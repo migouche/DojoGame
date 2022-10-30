@@ -21,3 +21,7 @@ class RealTime:
     @staticmethod
     def tick():
         RealTime.clock.tick_busy_loop(RealTime.fps)
+        try:
+            RealTime.delta_time = 1 / RealTime.clock.get_fps()
+        except ZeroDivisionError:
+            pass
