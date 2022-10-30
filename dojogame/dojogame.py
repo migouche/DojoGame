@@ -10,4 +10,5 @@ from dojogame import dojoconstants
 
 def init():
     pygame.init()
+    RealTime.init()
     Input.update()

@@ -8,7 +8,6 @@ window.set_bg(Color.from_hex("ff00ff"))
 
 
 txt = Text("freesansbold.ttf", 30, Color(0, 0, 0, 100))
-txt.set_text("wtf")
 txt.transform.set_position(Vector2(100, 100))
 
 
@@ -56,9 +55,10 @@ square.transform.set_local_scale(Vector2(1, 2))
 
 Collider.add_collider(square)
 print(square.collider.aabb)
-RealTime.set_dt(1/75)
+RealTime.set_framerate(75)
 
 while window.running:
+    txt.set_text(f"FPS: {int(RealTime.clock.get_fps())}")
     triangle.transform.rotate(RealTime.delta_time * 10)
     triangle2.transform.rotate(-RealTime.delta_time * 10)
 

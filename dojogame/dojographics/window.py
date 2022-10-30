@@ -64,7 +64,7 @@ class Window:
 
             Input.update()
             pygame.display.flip()
-            RealTime.wait_for_real_time(RealTime.delta_time)
+            RealTime.tick()
 
     def quit(self):
         self.running = False
