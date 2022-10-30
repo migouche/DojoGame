@@ -20,8 +20,4 @@ class RealTime:
 
     @staticmethod
     def tick():
-        '''RealTime.t = RealTime.t + dt
-        wait = RealTime.t - RealTime.clock.get_rawtime()
-        if wait > 0:
-            pygame.time.delay(wait)'''
         RealTime.clock.tick_busy_loop(RealTime.fps)

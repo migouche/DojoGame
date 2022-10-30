@@ -109,10 +109,7 @@ while window.running:
     if Input.get_mouse_button_down(MOUSE_SCROLL_DOWN):
         pac.transform.set_local_scale(Vector2(pac.transform.local_scale.x, pac.transform.local_scale.y / 2))
 
-    # print(Input.MousePosition())
-    # window.fillBG(white)
     window.update()
 
     if Input.get_key_down(K_q):
         window.quit()
-    # print(pygame.display.get_window_size())
