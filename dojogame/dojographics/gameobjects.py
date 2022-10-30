@@ -67,7 +67,7 @@ class Sprite(GameObject):
         self.image_rect = self.image.get_rect()
         self.update_image()
         self.offset = scale / 2
-        arrays.objects.append(self)
+        #arrays.objects.append(self)
 
     def update_image(self):
         self.image = pygame.transform.scale(pygame.image.load(self.image_path),
@@ -151,7 +151,7 @@ class Text(GameObject):
         self.set_text(self.text)
         self.rect = self.render_text.get_rect()
         self.rect.center = self.transform.position.to_tuple()
-        arrays.texts.append(self)
+        # arrays.texts.append(self)
 
     def set_text(self, text):
         self.text = text

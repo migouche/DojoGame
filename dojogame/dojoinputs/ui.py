@@ -29,7 +29,7 @@ class Button(GameObject):
     def calculate_mouse(self):
         self.old_clicked = self.clicked
         self.old_hovered = self.hovered
-        self.hovered = self.background.get_collider(). \
+        self.hovered = self.background.collider. \
             point_inside_collider(Input.get_mouse_position())
 
         if self.hovered:

@@ -13,6 +13,11 @@ def button_on_click():
     print("clicked")
 
 
+@button.on_hover_enter
+def button_on_hover():
+    print("hovered")
+
+
 while window.running:
     if Input.get_key_down(K_ESCAPE) or Input.get_key_down(K_q):
         window.quit()
