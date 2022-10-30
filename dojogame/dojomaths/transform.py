@@ -57,7 +57,10 @@ class Transform:
 
     @position.setter
     def position(self, pos: Vector2):
+        print("position setter")
         self.set_position(pos, Space.World)
+
+    position.__doc__ = "Position of the transform in world space"
 
     def set_position(self, pos, space: Space = Space.Self):
         if space == Space.Self:

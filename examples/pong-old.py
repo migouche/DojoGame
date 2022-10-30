@@ -23,7 +23,6 @@ left_text.set_text(0)
 paddleSpeed = 500
 ball_speed = 250
 ball_dir = Vector2.random()
-RealTime.set_dt(1/75)
 
 
 def ResetPos():
@@ -58,14 +57,14 @@ while window.running:
     if Input.get_key_down(K_q):
         window.quit()
 
-    if ball.get_collider().collide_with(right_paddle.get_collider()):
+    if ball.collider.collide_with(right_paddle.collider):
         ball_dir = Vector2.deg_random(135, 225)
         ball_speed += 50
     elif ball.transform.position.x >= window.width:
         left_score += 1
         lose()
 
-    if ball.get_collider().collide_with(left_paddle.get_collider()):
+    if ball.collider.collide_with(left_paddle.collider):
         ball_dir = Vector2.deg_random(-45, 45)
         ball_speed += 50
     elif ball.transform.position.x <= 0:
