@@ -167,10 +167,7 @@ class Matrix:
 
         if det == 0:
             raise ZeroDivisionError("Matrix is singular")
-        if self.rows == 2 and False:
-            return self.adjoint() / det
-        else:
-            return self.adjoint().transposed() / det
+        return self.adjoint().transposed() / det
 
     @staticmethod
     def from_row_matrix(row_matrix: 'list | Matrix') -> 'Matrix':
