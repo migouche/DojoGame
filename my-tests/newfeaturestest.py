@@ -29,8 +29,6 @@ player = Polygon.Square(10)
 Rigidbody.add_rigidbody(player)
 _dir = Vector2(0, -1)
 
-print(player.rigidbody)
-
 lastCircle = Circle(radius=5, color=Colors.white)  # should be and is in the middle
 lastCircle.transform.set_position(Vector2(window.width / 2 + 50, window.height / 2 + 50))
 
@@ -54,7 +52,6 @@ square.transform.set_position(Vector2(200, 200))
 square.transform.set_local_scale(Vector2(1, 2))
 
 Collider.add_collider(square)
-print(square.collider.aabb)
 RealTime.set_framerate(75)
 
 while window.running:

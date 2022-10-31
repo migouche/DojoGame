@@ -33,13 +33,16 @@ class Transform:
 
         self.update()
 
+    def set_parent(self, parent: 'Transform'):
+        self._parent = parent
+        self._parent.children.append(self)
+
     @property
     def parent(self) -> 'Transform':
         return self._parent
 
     @parent.setter
     def parent(self, parent: 'Transform'):
-        print("parent setter")
         self.set_parent(parent)
 
     @property
@@ -57,10 +60,7 @@ class Transform:
 
     @position.setter
     def position(self, pos: Vector2):
-        print("position setter")
         self.set_position(pos, Space.World)
-
-    position.__doc__ = "Position of the transform in world space"
 
     def set_position(self, pos, space: Space = Space.Self):
         if space == Space.Self:
@@ -150,10 +150,6 @@ class Transform:
 
     def absolute_pos_to_relative(self, pos: Vector2) -> Vector2:
         return Vector2.from_matrix(self.local_to_world_matrix.inverse() * pos.to_matrix_column().add_row([1]))
-
-    def set_parent(self, parent: 'Transform'):
-        self._parent = parent
-        self._parent.children.append(self)
 
     def get_child(self, i: int):
         return self.children[i]

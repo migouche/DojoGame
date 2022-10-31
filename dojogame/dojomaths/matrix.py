@@ -154,8 +154,8 @@ class Matrix:
         if self.rows != self.columns:
             raise TypeError("Matrix must be square")
         if self.rows == 2:
-            return Matrix([[self.get_element(1, 1), -self.get_element(0, 1)],
-                           [-self.get_element(1, 0), self.get_element(0, 0)]])
+            return Matrix([[self.get_element(1, 1), -self.get_element(1, 0)],
+                           [-self.get_element(0, 1), self.get_element(0, 0)]])
         else:
             return Matrix([[Matrix.parity(i, j) * self.remove_row(i).remove_column(j).determinant()
                             for j in range(self.columns)] for i in range(self.rows)])
@@ -167,7 +167,7 @@ class Matrix:
 
         if det == 0:
             raise ZeroDivisionError("Matrix is singular")
-        if self.rows == 2:
+        if self.rows == 2 and False:
             return self.adjoint() / det
         else:
             return self.adjoint().transposed() / det

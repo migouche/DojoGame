@@ -92,7 +92,7 @@ class MatrixTests(unittest.TestCase):
     def test_matrix_adjoint(self):
         # 2x2 matrix
         matrix1 = Matrix([[1, 2], [3, 4]])
-        matrix2 = Matrix([[4, -2], [-3, 1]])
+        matrix2 = Matrix([[4, -3], [-2, 1]])
         self.assertEqual(matrix1.adjoint(), matrix2)
 
         # 3x3 matrix
