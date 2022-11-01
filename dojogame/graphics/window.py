@@ -1,9 +1,9 @@
 from typing import Union
 
-from dojogame.dojographics.colors import Colors
-from dojogame.dojoinputs import Input, Button
-from dojogame.dojodata import arrays
-from dojogame.dojomaths.realtime import RealTime
+from dojogame.graphics.colors import Colors
+from dojogame.inputs import Input, Button
+from dojogame.data import arrays
+from dojogame.maths.realtime import RealTime
 
 from pygame.constants import QUIT
 import pygame.display

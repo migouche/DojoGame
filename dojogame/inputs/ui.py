@@ -1,7 +1,7 @@
-from dojogame.dojographics.gameobjects import GameObject
-from dojogame.dojomaths.transform import Transform
-from dojogame.dojomaths.vectors import Vector2
-from dojogame.dojoinputs.inputs import Input
+from dojogame.graphics.gameobjects import GameObject
+from dojogame.maths.transform import Transform
+from dojogame.maths.vectors import Vector2
+from dojogame.inputs.inputs import Input
 
 from typing import Callable
 

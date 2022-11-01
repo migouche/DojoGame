@@ -1,10 +1,10 @@
 import pygame.draw
 
-from dojogame.dojodata import arrays
-from dojogame.dojomaths.vectors import Vector2, Vector2Int
-from dojogame.dojomaths.transform import Transform
-from dojogame.dojographics.colors import Color, Colors
-from dojogame.dojographics.drawable import Drawable
+from dojogame.data import arrays
+from dojogame.maths.vectors import Vector2, Vector2Int
+from dojogame.maths.transform import Transform
+from dojogame.graphics.colors import Color, Colors
+from dojogame.graphics.drawable import Drawable
 
 
 class GameObject(Drawable):

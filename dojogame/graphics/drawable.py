@@ -1,5 +1,5 @@
 # drawable.py
-from dojogame.dojodata.arrays import drawables
+from dojogame.data.arrays import drawables
 
 
 class Drawable():

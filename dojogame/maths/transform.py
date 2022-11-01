@@ -1,9 +1,9 @@
 import math
 
-from dojogame.dojomaths.vectors import Vector2
-from dojogame.dojomaths.matrix import Matrix
-from dojogame.dojomaths.dojomathfunctions import Mathf
-from dojogame.dojodata.enums import Space
+from dojogame.maths.vectors import Vector2
+from dojogame.maths.matrix import Matrix
+from dojogame.maths.dojomathfunctions import Mathf
+from dojogame.data.enums import Space
 
 import pygame.transform
 

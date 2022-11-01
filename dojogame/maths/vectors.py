@@ -5,8 +5,8 @@
 import random
 import math
 
-from dojogame.dojomaths.dojomathfunctions import Mathf
-from dojogame.dojomaths.matrix import Matrix
+from dojogame.maths.dojomathfunctions import Mathf
+from dojogame.maths.matrix import Matrix
 
 
 class Vector2:

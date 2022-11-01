@@ -1,6 +1,6 @@
-from dojogame.dojomaths.vectors import Vector2
-from dojogame.dojographics.colors import Color, Colors
-from dojogame.dojographics.drawable import Drawable
+from dojogame.maths.vectors import Vector2
+from dojogame.graphics.colors import Color, Colors
+from dojogame.graphics.drawable import Drawable
 from typing import Callable
 
 import pygame.draw

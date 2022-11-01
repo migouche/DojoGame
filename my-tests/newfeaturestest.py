@@ -1,5 +1,5 @@
 from dojogame import *
-from dojogame.dojoconstants import *
+from dojogame.constants import *
 
 from pygame.constants import *
 
