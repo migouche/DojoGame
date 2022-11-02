@@ -3,7 +3,7 @@ from pygame.constants import *
 
 can_start = False
 
-window = Window(800, 600, "pong", "data/py.png")
+window = Window(800, 600, "pong", "data/images/py.png")
 
 Collider.add_collider(ball := Circle(15))
 

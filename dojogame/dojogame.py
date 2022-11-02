@@ -6,6 +6,7 @@ from dojogame.physics import *
 from dojogame.graphics import *
 from dojogame.data import *
 from dojogame import constants
+from dojogame.audio import *
 
 
 def init():

@@ -23,7 +23,7 @@ rec2 = Polygon.Rectangle(200, 100, color=Color(255, 5, 5))
 rec2.transform.set_position(Vector2(400, 400))
 rec2.transform.set_rotation(45)
 
-pac = Sprite("data/pacman.png", Vector2(200, 100), parent=rec2.transform)
+pac = Sprite("data/images/pacman.png", Vector2(200, 100), parent=rec2.transform)
 pac.transform.set_position(Vector2(400, 400))
 player = Polygon.Square(10)
 Rigidbody.add_rigidbody(player)

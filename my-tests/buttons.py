@@ -7,15 +7,12 @@ polygon = Collider.add_collider(Polygon.Square(100, color=Colors.red))
 button = Button(polygon, Text("freesansbold.ttf", 30, Colors.black, "haha"))
 button.transform.set_position(Vector2(200, 200))
 
+sound = Sound("data/audio/270334__littlerobotsoundfactory__jingle-lose-01.wav")
+
 
 @button.on_click
 def button_on_click():
-    print("clicked")
-
-
-@button.on_hover_enter
-def button_on_hover():
-    print("hovered")
+    sound.play()
 
 
 while window.running:

@@ -1,3 +1,5 @@
+import math
+
 from dojogame.maths.vectors import Vector2
 from dojogame.data.enums import Space, ForceMode
 from dojogame.maths.realtime import RealTime
@@ -66,3 +68,55 @@ class Rigidbody:
     def add_rigidbody(game_object, mass: float = 1) -> GameObject:
         game_object._rigidbody = Rigidbody(game_object, mass)
         return game_object
+
+
+class AngularInertia:
+    class RecTriangle:
+        def __init__(self, base: float, height: float, density: float):
+            self.base = base
+            self.height = height
+            self.density = density
+
+        @property
+        def inertia(self) -> float:
+            return self.density * (self.height * self.base ** 3 / 4 + self.base * self.height ** 3 / 12)
+
+    class Triangle:
+        def __init__(self, vertices: list[Vector2], density: float):
+            if len(vertices) != 3:
+                raise TypeError("Triangle must have 3 vertices")
+            self.vertices = vertices
+            self.density = density
+
+        def triangles(self) -> tuple:
+            p1, p2, p3 = self.vertices
+            v1 = p2 - p1
+            v2 = p3 - p1
+            p4 = p1 + Vector2.scale(v2, v1) / v1.magnitude() ** 2 * v1
+            return AngularInertia.RecTriangle(
+                (p4 - p1).magnitude(),
+                (p4 - p3).magnitude(),
+                self.density), AngularInertia.RecTriangle(
+                       (p2 - p1).magnitude(),
+                       (p4 - p3).magnitude(),
+                       self.density)
+
+        @property
+        def inertia(self) -> float:
+            p1, p2, p3 = self.vertices
+            v1 = p2 - p1
+            v2 = p3 - p1
+            p4 = p1 + Vector2.scale(v2, v1) / v1.magnitude() ** 2 * v1
+            i = 1
+            i = math.copysign(i, Vector2.cross(p4 - p1, p3 - p1))
+            return abs((tri := self.triangles())[0].inertia + i * tri[1].inertia)
+
+    class Polygon:
+        def __init__(self, vertices: list[Vector2], density: float):
+            self.vertices = vertices
+            self.density = density
+
+        @property
+        def inertia(self) -> float:
+            return sum([AngularInertia.Triangle([self.vertices[0], self.vertices[i], self.vertices[i + 1]],
+                                                self.density).inertia for i in range(1, len(self.vertices) - 1)])
