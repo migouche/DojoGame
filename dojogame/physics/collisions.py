@@ -192,7 +192,7 @@ class Collisions:
 
     @staticmethod
     def gjk(p1: Polygon, p2: Polygon) -> Collision:
-        if not p1.get_collider().aabb.aabb_overlap(p2.get_collider().aabb):
+        if not p1.collider.aabb.aabb_overlap(p2.collider.aabb):
             return Collision(False)
 
         vertices_a = p1.get_absolute_vertices_positions()

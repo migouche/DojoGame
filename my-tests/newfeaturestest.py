@@ -26,7 +26,7 @@ rec2.transform.set_rotation(45)
 pac = Sprite("data/images/pacman.png", Vector2(200, 100), parent=rec2.transform)
 pac.transform.set_position(Vector2(400, 400))
 player = Polygon.Square(10)
-Rigidbody.add_rigidbody(player)
+Rigidbody.add_rigidbody(player, 1)
 _dir = Vector2(0, -1)
 
 lastCircle = Circle(radius=5, color=Colors.white)  # should be and is in the middle
