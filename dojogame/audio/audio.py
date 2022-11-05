@@ -46,7 +46,7 @@ class Sound:
 
 
 class Channel:
-    def __init__(self, data: int | pygame.mixer.Channel):
+    def __init__(self, data):
         if isinstance(data, int):
             self._channel = pygame.mixer.Channel(data)
         else:
