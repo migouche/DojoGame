@@ -2,16 +2,6 @@ from dojogame.graphics.gameobjects import GameObject, Polygon, Circle
 from dojogame.maths.vectors import Vector2
 
 
-class Collision:
-    def __init__(self, collide: bool, point: Vector2 = None, normal: Vector2 = None):
-        self.collide = collide
-        self.point = point
-        self.normal = normal
-
-    def __bool__(self):
-        return self.collide
-
-
 class AxisAlignedBoundingBox:
     def __init__(self, obj: GameObject):
         self.obj = obj
@@ -56,7 +46,11 @@ class Collisions:
     def point_inside_polygon(point: Vector2, polygon: 'PolygonCollider') -> bool:
         if polygon is None:
             raise TypeError("Polygon has no collider")
-        polygon = polygon.polygon
+        polygon = polygon.game_object
+
+        if not isinstance(polygon, Polygon):
+            raise TypeError("Collider must be attached to a Polygon")
+
         c = False
         vertices = polygon.get_absolute_vertices_positions()
 
@@ -72,7 +66,12 @@ class Collisions:
     def point_inside_circle(point: Vector2, circle: 'CircleCollider') -> bool:
         if circle is None:
             raise TypeError("Circle has no collider")
-        circle = circle.circle
+
+        circle = circle.game_object
+
+        if not isinstance(circle, Circle):
+            raise TypeError("Collider must be attached to a circle")
+
         return (point - circle.transform.position).magnitude <= circle.radius
 
     @staticmethod
@@ -85,12 +84,15 @@ class Collisions:
         return Vector2(x / len(points), y / len(points))
 
     @staticmethod
-    def intersect_polygons(c1: 'PolygonCollider', c2: 'PolygonCollider') -> Collision:
+    def intersect_polygons(c1: 'PolygonCollider', c2: 'PolygonCollider') -> 'Collision':
         if not c1.aabb.aabb_overlap(c2.aabb):
             return Collision(False)
 
-        p1 = c1.polygon
-        p2 = c2.polygon
+        p1 = c1.game_object
+        p2 = c2.game_object
+
+        if not isinstance(p1, Polygon) or not isinstance(p2, Polygon):
+            raise TypeError("Colliders must be attached to polygons")
 
         vertices_a = p1.get_absolute_vertices_positions()
         vertices_b = p2.get_absolute_vertices_positions()
@@ -143,7 +145,7 @@ class Collisions:
 
         if Vector2.dot(direction, normal) < 0:
             normal = -normal
-        return Collision(True, normal=normal)
+        return Collision(True, collider=c2)
 
     @staticmethod
     def contains_origin(vertices: list) -> bool:
@@ -191,7 +193,7 @@ class Collisions:
         return max_vertex_a - max_vertex_b
 
     @staticmethod
-    def gjk(p1: Polygon, p2: Polygon) -> Collision:
+    def gjk(p1: Polygon, p2: Polygon) -> 'Collision':
         if not p1.collider.aabb.aabb_overlap(p2.collider.aabb):
             return Collision(False)
 
@@ -217,7 +219,12 @@ class Collisions:
                 return Collision(True)
 
     @staticmethod
-    def intersect_circles(c1: Circle, c2: Circle) -> Collision:
+    def intersect_circles(c1: 'CircleCollider', c2: 'CircleCollider') -> 'Collision':
+        c1 = c1.game_object
+        c2 = c2.game_object
+        if not isinstance(c1, Circle) or not isinstance(c2, Circle):
+            raise TypeError("Colliders must be attached to circles")
+
         distance = Vector2.distance(c1.transform.position, c2.transform.position)
         if distance > c1.radius + c2.radius:
             return Collision(False)
@@ -267,7 +274,17 @@ class Collisions:
         return min_, max_
 
     @staticmethod
-    def intersect_circle_polygon(circle: Circle, polygon: Polygon) -> Collision:
+    def intersect_circle_polygon(circle: 'CircleCollider', polygon: 'PolygonCollider') -> 'Collision':
+
+        circle = circle.game_object
+        polygon = polygon.game_object
+
+        if not isinstance(circle, Circle) or not isinstance(polygon, Polygon):
+            raise TypeError('Circle and Polygon must be instances of Circle and Polygon')
+
+        if not circle.collider.aabb.aabb_overlap(polygon.collider.aabb):
+            return Collision(False)
+
         vertices = polygon.get_absolute_vertices_positions()
         normal = Vector2.zero()
         depth = float('inf')
@@ -318,13 +335,31 @@ class Collisions:
 
         return Collision(True, circle.transform.position + normal * depth, normal)
 
+    @staticmethod
+    def segment_intersect_segment(a1: Vector2, a2: Vector2, b1: Vector2, b2: Vector2) -> 'Collision':
+        s1 = a2 - a1
+        s2 = b2 - b1
+
+        d = -s2.x * s1.y + s1.x * s2.y
+        if d == 0:
+            return Collision(False)
+
+        s = (-s1.y * (a1.x - b1.x) + s1.x * (a1.y - b1.y)) / d
+        t = (s2.x * (a1.y - b1.y) - s2.y * (a1.x - b1.x)) / d
+
+        if 0 <= s <= 1 and 0 <= t <= 1:
+            p = ContactPoint(a1 + (t * s1), (b2 - b1).left_perpendicular().normalized())
+            return Collision(True, [p])
+        return Collision(False)
+
 
 class Collider:
 
-    def __init__(self, object: GameObject):
-        self.aabb = AABB(object)
+    def __init__(self, game_object: GameObject):
+        self.game_object = game_object
+        self.aabb = AABB(game_object)
 
-    def collide_with(self, other) -> Collision:
+    def collide_with(self, other) -> 'Collision':
         raise NotImplementedError
 
     def point_inside_collider(self, point: Vector2) -> bool:
@@ -344,7 +379,6 @@ class Collider:
 class PolygonCollider(Collider):
     def __init__(self, polygon: Polygon):
         super().__init__(polygon)
-        self.polygon = polygon
 
     def point_inside_collider(self, point: Vector2) -> bool:
         return Collisions.point_inside_polygon(point, self)
@@ -361,13 +395,53 @@ class PolygonCollider(Collider):
 class CircleCollider(Collider):
     def __init__(self, circle: Circle):
         super().__init__(circle)
-        self.circle = circle
 
     def point_inside_collider(self, point: Vector2) -> bool:
         return Collisions.point_inside_circle(point, self)
 
-    def collide_with(self, other) -> Collision:
+    def collide_with(self, other) -> 'Collision':
         if isinstance(other, CircleCollider):
-            return Collisions.intersect_circles(self.circle, other.circle)
+            return Collisions.intersect_circles(self.game_object.collider, other.game_object.collider)
         else:
-            return Collisions.intersect_circle_polygon(self.circle, other.polygon)
+            return Collisions.intersect_circle_polygon(self.game_object.collider, other.polygon.collider)
+
+
+class ContactPoint:
+    def __init__(self, point: Vector2, normal: Vector2, other_collider: Collider = None):
+        self.point = point
+        self.normal = normal
+        self.other_collider = other_collider
+
+
+class Collision:
+    def __init__(self, collide: bool, contacts: ['ContactPoint'] = None, collider: Collider = None):
+        self.collide = collide
+        self.contacts = contacts
+        self.contact_count = len(contacts) if contacts is not None else 0
+        self.collider = collider
+
+        self.game_object = self.rigidbody = self.transform = None
+
+        if isinstance(collider, PolygonCollider):
+            self.game_object = collider.game_object
+        elif isinstance(collider, CircleCollider):
+            self.game_object = collider.game_object
+
+        if self.game_object is not None:
+            try:
+                self.rigidbody = self.game_object.rigidbody
+            except AttributeError:
+                self.rigidbody = None
+            self.transform = self.game_object.transform
+
+        self.impulse = Vector2.zero()
+        self.relative_velocity = Vector2.zero()
+
+    def get_contacts(self) -> [ContactPoint]:
+        return self.contacts
+
+    def get_contact(self, index: int) -> ContactPoint:
+        return self.contacts[index]
+
+    def __bool__(self):
+        return self.collide

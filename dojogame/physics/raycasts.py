@@ -26,7 +26,7 @@ class Raycast:
         if circle_collider is None:
             raise ValueError("circle collider is None. Did you forget to add a collider to the object?")
 
-        circle = circle_collider.circle
+        circle = circle_collider.game_object
 
         r_squared = circle.radius ** 2
         direction = _dir.normalized()
@@ -80,7 +80,8 @@ class Raycast:
         if polygon_collider is None:
             raise ValueError("polygon collider is None. Did you forget to add a collider to the object?")
 
-        polygon = polygon_collider.polygon
+        polygon = polygon_collider.game_object
+
         vertices = polygon.get_absolute_vertices_positions()
 
         t = float("inf")
