@@ -62,18 +62,24 @@ class Button(GameObject):
 
     def on_click(self, func: Callable):  # decorator
         self._on_click = func
+        del func
 
     def on_hold(self, func: Callable):  # decorator
         self._on_hold = func
+        del func
 
     def on_release(self, func: Callable):  # decorator
         self._on_release = func
+        del func
 
     def on_hover_enter(self, func: Callable):  # decorator
         self._on_hover_enter = func
+        del func
 
     def on_hover_stay(self, func: Callable):  # decorator
         self._on_hover_stay = func
+        del func
 
     def on_hover_exit(self, func: Callable):  # decorator
         self._on_hover_exit = func
+        del func
