@@ -62,6 +62,10 @@ while window.running:
     Lines.draw_axis_aligned_bounding_box(triangle.collider)
     Lines.draw_axis_aligned_bounding_box(triangle2.collider)
 
+    col = triangle.collider.collide_with(triangle2.collider)
+    for p in col.get_contacts():
+        Lines.draw_circle(p.point, 5, Colors.green, 0)
+
     triangle.color = triangle2.color = Colors.red if triangle.collider\
         .collide_with(triangle2.collider) else Colors.blue
 

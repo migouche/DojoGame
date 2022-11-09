@@ -1,3 +1,5 @@
+import array
+
 from dojogame.graphics.gameobjects import GameObject, Polygon, Circle
 from dojogame.maths.vectors import Vector2
 
@@ -144,8 +146,16 @@ class Collisions:
         direction = center_b - center_a
 
         if Vector2.dot(direction, normal) < 0:
-            normal = -normal
-        return Collision(True, collider=c2)
+            normal = -normal  # normal will be used for continuous collision detection,
+            # doesn't make sense to use it with static collision detection
+
+        points = []
+        for i in range(len(vertices_a)):
+            for j in range(len(vertices_b)):
+                if col := Collisions.segment_intersect_segment(vertices_a[i], vertices_a[(i + 1) % len(vertices_a)],
+                                                               vertices_b[j], vertices_b[(j + 1) % len(vertices_b)]):
+                    points.append(col.get_contact(0))
+        return Collision(True, points, collider=c2)
 
     @staticmethod
     def contains_origin(vertices: list) -> bool:
@@ -333,7 +343,7 @@ class Collisions:
         if Vector2.dot(direction, normal) < 0:
             normal = -normal
 
-        return Collision(True, circle.transform.position + normal * depth, normal)
+        return Collision(True, circle.transform.position + normal * depth, normal)  # TODO: this will give error
 
     @staticmethod
     def segment_intersect_segment(a1: Vector2, a2: Vector2, b1: Vector2, b2: Vector2) -> 'Collision':
@@ -348,7 +358,8 @@ class Collisions:
         t = (s2.x * (a1.y - b1.y) - s2.y * (a1.x - b1.x)) / d
 
         if 0 <= s <= 1 and 0 <= t <= 1:
-            p = ContactPoint(a1 + (t * s1), (b2 - b1).left_perpendicular().normalized())
+            p = ContactPoint(a1 + (t * s1), (b2 - b1).
+                             left_perpendicular().normalized())  # TODO: you're better than this
             return Collision(True, [p])
         return Collision(False)
 
@@ -383,11 +394,11 @@ class PolygonCollider(Collider):
     def point_inside_collider(self, point: Vector2) -> bool:
         return Collisions.point_inside_polygon(point, self)
 
-    def collide_with(self, other: Collider) -> bool:
+    def collide_with(self, other: Collider) -> 'Collision':
         if other is None:
-            return False
+            return Collision(False)
         if isinstance(other, PolygonCollider):
-            return bool(Collisions.intersect_polygons(self, other))
+            return Collisions.intersect_polygons(self, other)
         else:
             raise NotImplementedError
 
@@ -416,7 +427,7 @@ class ContactPoint:
 class Collision:
     def __init__(self, collide: bool, contacts: ['ContactPoint'] = None, collider: Collider = None):
         self.collide = collide
-        self.contacts = contacts
+        self.contacts = [] if contacts is None else contacts
         self.contact_count = len(contacts) if contacts is not None else 0
         self.collider = collider
 
