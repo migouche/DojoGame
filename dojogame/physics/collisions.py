@@ -1,4 +1,4 @@
-import array
+import math
 
 from dojogame.graphics.gameobjects import GameObject, Polygon, Circle
 from dojogame.maths.vectors import Vector2
@@ -238,10 +238,27 @@ class Collisions:
         distance = Vector2.distance(c1.transform.position, c2.transform.position)
         if distance > c1.radius + c2.radius:
             return Collision(False)
-        normal = (c1.transform.position - c2.transform.position).normalized()
-        point = ((c1.transform.position - normal * c1.radius) -
-                 (c2.transform.position + normal * c2.radius)) / 2
-        return Collision(True, point, normal)
+        if distance < abs(c1.radius - c2.radius):
+            return Collision(True)
+        try:
+            a = (c1.radius ** 2 - c2.radius ** 2 + distance ** 2) / (2 * distance)
+        except ZeroDivisionError:
+            return Collision(True)
+        # b = (c2.radius ** 2 - c1.radius ** 2 + distance ** 2) / (2 * distance)
+
+        h = math.sqrt(c1.radius ** 2 - a ** 2)
+
+        p5 = c1.transform.position + a * (c2.transform.position - c1.transform.position) / distance
+
+        p3 = Vector2(p5.x - h * (c2.transform.position.y - c1.transform.position.y) / distance,
+                     p5.y + h * (c2.transform.position.x - c1.transform.position.x) / distance)
+        p4 = Vector2(p5.x + h * (c2.transform.position.y - c1.transform.position.y) / distance,
+                     p5.y - h * (c2.transform.position.x - c1.transform.position.x) / distance)
+        n3 = (p3 - c2.transform.position).normalized()
+        n4 = (p4 - c2.transform.position).normalized()
+
+        points = [ContactPoint(p3, n3, c2.collider), ContactPoint(p4, n4, c2.collider)]
+        return Collision(True, points, collider=c2.collider)
 
     @staticmethod
     def project_vertices(vertices: list, axis: Vector2) -> tuple:
@@ -321,9 +338,11 @@ class Collisions:
         closest_point = Collisions. \
             find_closest_point_on_polygon(circle.transform.position, polygon)
         axis = closest_point - circle.transform.position
-
-        (min_a, max_a) = Collisions.project_vertices(vertices, axis)
-        (min_b, max_b) = Collisions.project_circle(circle, axis)
+        try:
+            (min_a, max_a) = Collisions.project_vertices(vertices, axis)
+            (min_b, max_b) = Collisions.project_circle(circle, axis)
+        except ZeroDivisionError:
+            return Collision(False)
 
         if min_a >= max_b or min_b >= max_a:
             return Collision(False)
@@ -342,8 +361,16 @@ class Collisions:
 
         if Vector2.dot(direction, normal) < 0:
             normal = -normal
-
-        return Collision(True, circle.transform.position + normal * depth, normal)  # TODO: this will give error
+        points = []
+        print("yes")
+        for v in range(len(vertices)):
+            if col := Collisions.segment_intersect_circle(vertices[v], vertices[(v + 1) % len(vertices)],
+                                                          circle.collider):
+                points += col.contacts
+                print("col")
+        if len(points) == 0:
+            return Collision(False)
+        return Collision(True, points, circle.collider)
 
     @staticmethod
     def segment_intersect_segment(a1: Vector2, a2: Vector2, b1: Vector2, b2: Vector2) -> 'Collision':
@@ -362,6 +389,34 @@ class Collisions:
                              left_perpendicular().normalized())  # TODO: you're better than this
             return Collision(True, [p])
         return Collision(False)
+
+    @staticmethod
+    def segment_intersect_circle(a1: Vector2, a2: Vector2, c1: 'CircleCollider'):
+        c1 = c1.game_object
+        if not isinstance(c1, Circle):
+            raise TypeError('Collider must be attached to Circle')
+
+        dx = a2.x - a1.x
+        dy = a2.y - a1.y
+
+        dr = math.sqrt(dx * dx + dy * dy)
+        D = a1.x * a2.y - a2.x * a1.y
+
+        if (det := (c1.radius ** 2) * (dr ** 2) - (D ** 2)) < 0:
+            print("no")
+            return Collision(False)
+
+        sgn = lambda x: 1 if x >= 0 else -1
+
+        v1 = Vector2((D * dy + sgn(dy) * dx * math.sqrt(det) / (dr ** 2)),
+                     (-D * dx + abs(dy) * math.sqrt(det)) / (dr ** 2))
+        v2 = Vector2((D * dy - sgn(dy) * dx * math.sqrt(det)) / (dr ** 2),
+                     (-D * dx - abs(dy) * math.sqrt(det)) / (dr ** 2))
+
+        points = [ContactPoint(v1, (v1 - c1.transform.position).normalized(), c1.collider),
+                  ContactPoint(v2, (v2 - c1.transform.position).normalized(), c1.collider)]
+
+        return Collision(True, points, c1.collider)
 
 
 class Collider:
@@ -410,11 +465,13 @@ class CircleCollider(Collider):
     def point_inside_collider(self, point: Vector2) -> bool:
         return Collisions.point_inside_circle(point, self)
 
-    def collide_with(self, other) -> 'Collision':
+    def collide_with(self, other: Collider) -> 'Collision':
+        if not isinstance(other, Collider):
+            raise TypeError("Wrong type of object given")
         if isinstance(other, CircleCollider):
             return Collisions.intersect_circles(self.game_object.collider, other.game_object.collider)
         else:
-            return Collisions.intersect_circle_polygon(self.game_object.collider, other.polygon.collider)
+            return Collisions.intersect_circle_polygon(self.game_object.collider, other.game_object.collider)
 
 
 class ContactPoint:
@@ -425,34 +482,63 @@ class ContactPoint:
 
 
 class Collision:
-    def __init__(self, collide: bool, contacts: ['ContactPoint'] = None, collider: Collider = None):
-        self.collide = collide
-        self.contacts = [] if contacts is None else contacts
-        self.contact_count = len(contacts) if contacts is not None else 0
-        self.collider = collider
+    def __init__(self, collide: bool, contacts: ['ContactPoint'] = [], collider: Collider = None):
+        self._collide = collide
+        self._contacts = contacts.copy()
+        self._contact_count = len(contacts) if contacts is not None else 0
+        self._collider = collider
 
-        self.game_object = self.rigidbody = self.transform = None
+        self._game_object = self._rigidbody = self._transform = None
 
         if isinstance(collider, PolygonCollider):
-            self.game_object = collider.game_object
+            self._game_object = collider.game_object
         elif isinstance(collider, CircleCollider):
-            self.game_object = collider.game_object
+            self._game_object = collider.game_object
 
-        if self.game_object is not None:
+        if self._game_object is not None:
             try:
-                self.rigidbody = self.game_object.rigidbody
+                self._rigidbody = self._game_object.rigidbody
             except AttributeError:
-                self.rigidbody = None
-            self.transform = self.game_object.transform
+                self._rigidbody = None
+            self._transform = self._game_object.transform
 
-        self.impulse = Vector2.zero()
-        self.relative_velocity = Vector2.zero()
+        self._impulse = Vector2.zero()
+        self._relative_velocity = Vector2.zero()
 
-    def get_contacts(self) -> [ContactPoint]:
-        return self.contacts
+    @property
+    def contacts(self) -> [ContactPoint]:
+        return self._contacts
 
     def get_contact(self, index: int) -> ContactPoint:
-        return self.contacts[index]
+        return self._contacts[index]
+
+    @property
+    def contact_count(self) -> int:
+        return self._contact_count
+
+    @property
+    def game_object(self) -> GameObject:
+        return self._game_object
+
+    @property
+    def transform(self) -> 'Transform':
+        return self._transform
+
+    @property
+    def collider(self) -> Collider:
+        return self._collider
+
+    @property
+    def impulse(self) -> Vector2:
+        return self._impulse
+
+    @property
+    def relative_velocity(self) -> Vector2:
+        return self._relative_velocity
+
+    @property
+    def rigidbody(self) -> 'Rigidbody':
+        return self._rigidbody
 
     def __bool__(self):
-        return self.collide
+        return self._collide
