@@ -26,6 +26,9 @@ while window.running:
     for point in col.contacts:
         Lines.draw_circle(point.point, 5, Colors.black)
 
+    for point in col2.contacts:
+        Lines.draw_circle(point.point, 5, Colors.black)
+
     if Input.get_key_down(pygame.constants.K_ESCAPE) or Input.get_key_down(pygame.constants.K_q):
         window.quit()
 

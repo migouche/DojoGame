@@ -1,7 +1,7 @@
 from dojogame import *
 from pygame.constants import *
 
-window = Window(400, 400, flags=RESIZABLE)
+window = Window(400, 400, flags=FULLSCREEN)
 
 polygon = Collider.add_collider(Polygon.Square(100, color=Colors.red))
 button = Button(polygon, Text("freesansbold.ttf", 30, Colors.black, "haha"))
