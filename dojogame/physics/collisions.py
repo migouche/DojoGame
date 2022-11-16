@@ -364,7 +364,7 @@ class Collisions:
         points = []
         print("yes")
         for v in range(len(vertices)):
-            if col := Collisions.segment_intersect_circle(vertices[v], vertices[(v + 1) % len(vertices)],
+            if col := Collisions.segment_intersect_circle2(vertices[v], vertices[(v + 1) % len(vertices)],
                                                           circle.collider):
                 points += col.contacts
                 print("col")
@@ -417,6 +417,52 @@ class Collisions:
                   ContactPoint(v2, (v2 - c1.transform.position).normalized(), c1.collider)]
 
         return Collision(True, points, c1.collider)
+
+    @staticmethod
+    def segment_intersect_circle2(a1: Vector2, a2: Vector2, c1: 'CircleCollider'):
+        c1 = c1.game_object
+        if not isinstance(c1, Circle):
+            raise TypeError('Collider must be attached to Circle')
+        a = a1.x
+        b = a2.x
+        c = c1.transform.position.x
+        d = a1.y
+        e = a2.y
+        f = c1.transform.position.y
+        g = c1.radius
+        contact_points = []
+        try:
+            x1 = (math.sqrt((2 * a * b - 2 * a * c - 2 * b ** 2 + 2 * b * c + 2 * d * e - 2 * d * f - 2 * e ** 2 + 2 * e * f) ** 2 - 4 * (
+                                        a ** 2 - 2 * a * b + b ** 2 + d ** 2 - 2 * d * e + e ** 2) * (
+                                        b ** 2 - 2 * b * c + c ** 2 + e ** 2 - 2 * e * f + f ** 2 - g ** 2)) - 2 * a * b + 2 * a * c + 2 * b ** 2 - 2 * b * c - 2 * d * e + 2 * d * f + 2 * e ** 2 - 2 * e * f) / (
+                            2 * (a ** 2 - 2 * a * b + b ** 2 + d ** 2 - 2 * d * e + e ** 2))
+            x2 = -x1
+
+            if 0 >= x1 >= 1:
+                contact_points.append(ContactPoint(v := Vector2(x1 * a1.x + (1 - x1) * a2.x, x1 * a1.y + (1 - x1) * a2.y), v.left_perpendicular().normalized(), c1.collider))
+            if 0 >= x2 >= 1:
+                contact_points.append(ContactPoint(v := Vector2(x2 * a1.x + (1 - x2) * a2.x, x2 * a1.y + (1 - x2) * a2.y), v.left_perpendicular().normalized(), c1.collider))
+        except ValueError:
+            pass
+
+        try:
+            x3 = (-1 / 2 * math.sqrt((2 * a * b - 2 * a * c - 2 * b ** 2 + 2 * b * c + 2 * d * e - 2 * d * f - 2 * e ** 2 + 2 * e * f) ** 2 - 4 * (a ** 2 - 2 * a * b + b ** 2 + d ** 2 - 2 * d * e + e ** 2) * (b ** 2 - 2 * b * c + c ** 2 + e ** 2 - 2 * e * f + f ** 2 - g ** 2)) - a * b + a * c + b ** 2 - b * c - d * e + d * f + e ** 2 - e * f) / (a ** 2 - 2 * a * b + b ** 2 + d ** 2 - 2 * d * e + e ** 2)
+            x4 = -x3
+
+            if 0 >= x3 >= 1:
+                contact_points.append(ContactPoint(v := Vector2(x3 * a1.x + (1 - x3) * a2.x, x3 * a1.y + (1 - x3) * a2.y), v.left_perpendicular().normalized(), c1.collider))
+            if 0 >= x4 >= 1:
+                contact_points.append(ContactPoint(v := Vector2(x4 * a1.x + (1 - x4) * a2.x, x4 * a1.y + (1 - x4) * a2.y), v.left_perpendicular().normalized(), c1.collider))
+        except ValueError:
+            pass
+        if len(contact_points) == 0:
+            print("no")
+            return Collision(False)
+
+        print("hey")
+
+        return Collision(True, contact_points, c1.collider)
+
 
 
 class Collider:
