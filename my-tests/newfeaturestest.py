@@ -3,13 +3,13 @@ from dojogame.constants import *
 
 from pygame.constants import *
 
-window = Window(400, 400, flags=RESIZABLE)
-window.set_bg(Color.from_hex("ff00ff"))
+# window = Window(400, 400, flags=RESIZABLE)
+# window.set_bg(Color.from_hex("ff00ff"))
 
+game = DojoGame()
 
 txt = Text("freesansbold.ttf", 30, Color(0, 0, 0, 100))
 txt.transform.set_position(Vector2(100, 100))
-
 
 point2 = Circle(10)
 point2.transform.position = Vector2(300, 250)
@@ -30,18 +30,17 @@ Rigidbody.add_rigidbody(player, 1)
 _dir = Vector2(0, -1)
 
 lastCircle = Circle(radius=5, color=Colors.white)  # should be and is in the middle
-lastCircle.transform.set_position(Vector2(window.width / 2 + 50, window.height / 2 + 50))
+lastCircle.transform.set_position(Vector2(250, 250))
 
 player.transform.set_rotation(10)
 
 triangle = Polygon([Vector2(0, 0), Vector2(100, 0), Vector2(50, 100)], color=Colors.red, width=0)
-triangle.transform.set_position(Vector2(window.width / 2, window.height / 2))
+triangle.transform.set_position(Vector2(200, 200))
 Collider.add_collider(triangle)
 
 triangle2 = Polygon([Vector2(0, 0), Vector2(100, 0), Vector2(50, 100)], color=Colors.red, width=5)
-triangle2.transform.set_position(Vector2(window.width / 2 + 50, window.height / 2 + 50))
+triangle2.transform.set_position(Vector2(250, 250))
 Collider.add_collider(triangle2)
-
 
 child = Polygon.Square(10, color=Colors.blue)
 child.transform.set_parent(triangle2.transform)
@@ -54,7 +53,17 @@ square.transform.set_local_scale(Vector2(1, 2))
 Collider.add_collider(square)
 RealTime.set_framerate(75)
 
-while window.running:
+
+def pre_init():
+    print("pre init")
+
+
+def start():
+    print("start")
+    game.window.set_bg(Color.from_hex("ff00ff"))
+
+
+def update():
     txt.text = f"FPS: {int(RealTime.clock.get_fps())}"
     triangle.transform.rotate(RealTime.delta_time * 10)
     triangle2.transform.rotate(-RealTime.delta_time * 10)
@@ -66,7 +75,7 @@ while window.running:
     for p in col.contacts:
         Lines.draw_circle(p.point, 5, Colors.green, 0)
 
-    triangle.color = triangle2.color = Colors.red if triangle.collider\
+    triangle.color = triangle2.color = Colors.red if triangle.collider \
         .collide_with(triangle2.collider) else Colors.blue
 
     # triangle.color = triangle2.color = Colors.red if Collisions.gjk(triangle, triangle2) else Colors.blue
@@ -110,7 +119,10 @@ while window.running:
     if Input.get_mouse_button_down(MOUSE_SCROLL_DOWN):
         pac.transform.set_local_scale(Vector2(pac.transform.local_scale.x, pac.transform.local_scale.y / 2))
 
-    window.update()
+    # window.update()
 
-    if Input.get_key_down(K_q):
-        window.quit()
+    # if Input.get_key_down(K_q):
+    # window.quit()
+
+
+game.run()

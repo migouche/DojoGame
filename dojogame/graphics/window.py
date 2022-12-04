@@ -1,3 +1,4 @@
+import inspect
 from typing import Union
 
 from dojogame.graphics.colors import Colors
@@ -7,12 +8,14 @@ from dojogame.maths.realtime import RealTime
 
 from pygame.constants import QUIT
 import pygame.display
+from inspect import currentframe
 
 
 class Window:
     def __init__(self, width: int = 0, height: int = 0, title: str = "Game Window", icon: str = None,
                  flags: Union[list[int], int] = 0,
                  depth: int = 0, display: int = 0, vsync: bool = False):
+
         Input.update()
         self.running = True
         totalFlags = 0
@@ -32,6 +35,8 @@ class Window:
 
         self.bgColor = Colors.white
         Input.update()  # can't figure out why I need 2 Input.Update(). It just works like that
+
+
 
     def fill_bg(self, color):
         if self.running:

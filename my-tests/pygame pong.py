@@ -17,6 +17,9 @@ class Vector2:  # de 50 a 250
     def __mul__(self, f):
         return Vector2(self.x * f, self.y * f)
 
+    def __truediv__(self, other):
+        return Vector2(self.x / other, self.y / other)
+
     @staticmethod
     def zero():
         return Vector2(0, 0)

@@ -7,9 +7,6 @@ from dojogame.graphics import *
 from dojogame.data import *
 from dojogame import constants
 from dojogame.audio import *
+from dojogame.application import *
 
 
-def init():
-    pygame.init()
-    RealTime.init()
-    Input.update()

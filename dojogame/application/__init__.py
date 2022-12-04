@@ -1,0 +1,1 @@
+from dojogame.application.application import *

@@ -1,7 +1,7 @@
 from dojogame import *
 from pygame.constants import *
 
-window = Window(400, 400, flags=FULLSCREEN)
+game = DojoGame()
 
 polygon = Collider.add_collider(Polygon.Square(100, color=Colors.red))
 button = Button(polygon, Text("freesansbold.ttf", 30, Colors.black, "haha"))
@@ -15,7 +15,9 @@ def button_on_click():
     sound.play()
 
 
-while window.running:
+def update():
     if Input.get_key_down(K_ESCAPE) or Input.get_key_down(K_q):
-        window.quit()
-    window.update()
+        game.quit()
+
+
+game.run()
