@@ -54,8 +54,8 @@ Collider.add_collider(square)
 RealTime.set_framerate(75)
 
 
-def pre_init():
-    print("pre init")
+def config():
+    print("config")
 
 
 def start():

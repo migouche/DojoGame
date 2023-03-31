@@ -6,7 +6,7 @@ from dojogame.inputs.inputs import Input
 from pygame.constants import RESIZABLE
 from pygame import init, mixer, quit
 
-_window_args = (800, 800)
+_window_args = (800, 600)
 _window_kwargs = {"title": "Dojo Game", "flags": RESIZABLE, "vsync": False}
 _config_called = False
 
@@ -21,7 +21,7 @@ class DojoGame:
         while frame.f_code.co_filename.startswith('<frozen'):
             frame = frame.f_back
         try:
-            frame.f_locals['pre_init']()
+            frame.f_locals['config']()
         except KeyError:
             pass
         _config_called = True
@@ -68,7 +68,7 @@ class DojoGame:
                       depth: int = 0, display: int = 0, vsync: bool = False):
         global _window_args, _window_kwargs, _config_called
         if _config_called:
-            raise Exception("This function can only be called inside the pre_init function")
+            raise Exception("This function can only be called inside the config function")
         _window_args = (width, height)
         _window_kwargs = {"title": title, "icon": icon, "flags": flags,
                           "depth": depth, "display": display, "vsync": vsync}
@@ -77,7 +77,7 @@ class DojoGame:
     def config_mixer(frequency: int = 44100, size: int = -16, channels: int = 2, buffer: int = 512,
                      devicename: str = None, allowedchanges: [int] = None):
         if _config_called:
-            raise Exception("This function can only be called inside the pre_init function")
+            raise Exception("This function can only be called inside the config function")
         changes = 0
         for change in allowedchanges:
             changes |= change

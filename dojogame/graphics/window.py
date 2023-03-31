@@ -62,10 +62,15 @@ class Window:
 
             self.fill_bg(self.bgColor)
 
+            screen_temp = pygame.Surface((self.width, self.height))
+            screen_temp.fill(self.bgColor.to_tuple())
+
             for drawable in arrays.drawables:
-                drawable.update(self.screen)
+                drawable.update(screen_temp)
                 if not drawable.persistent:
                     arrays.drawables.remove(drawable)
+
+            self.screen.blit(screen_temp, (0, 0))
 
             Input.update()
             pygame.display.flip()

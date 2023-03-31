@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.poetry]
 name = "dojogame"
-version = "0.2.2"
+version = "0.3.0"
 description = "Wrapper for Pygame"
 readme = "README.md"
 license = "GPL-3.0-or-later"

@@ -18,8 +18,8 @@ txt.transform.position = Vector2(100, 20)
 txt2 = Text("freesansbold.ttf", 20, Colors.black)
 txt2.transform.position = Vector2(100, 40)
 
-
-def pre_init():
+ 
+def config():
     DojoGame.config_window(800, 600, "Collision Tests", flags=pygame.constants.RESIZABLE)
 
 

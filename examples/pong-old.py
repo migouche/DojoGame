@@ -20,7 +20,7 @@ left_text = Text("freesansbold.ttf", 30, Colors.black)
 left_text.set_text(0)
 
 paddleSpeed = 500
-ball_speed = 250
+ball_speed = 100
 ball_dir = Vector2.random()
 
 
@@ -54,6 +54,8 @@ def start():
 
 
 def update():
+    if Input.get_key_down(K_ESCAPE):
+        game.quit()
     global ball_dir, ball_speed, left_score, right_score, can_start
 
     if Input.get_key(K_UP):
