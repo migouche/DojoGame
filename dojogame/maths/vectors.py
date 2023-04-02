@@ -38,6 +38,14 @@ class Vector2:
     def __eq__(self, v):
         return self.x == v.x and self.y == v.y
 
+    def __getitem__(self, item):
+        if item == 0:
+            return self.x
+        elif item == 1:
+            return self.y
+        else:
+            raise IndexError("Vector2 index out of range")
+
     def to_tuple(self) -> tuple:
         return self.x, self.y
 

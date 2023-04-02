@@ -391,78 +391,40 @@ class Collisions:
         return Collision(False)
 
     @staticmethod
-    def segment_intersect_circle(a1: Vector2, a2: Vector2, c1: 'CircleCollider'):
-        c1 = c1.game_object
-        if not isinstance(c1, Circle):
-            raise TypeError('Collider must be attached to Circle')
+    def LineIntersectCircle(p: Circle, lsp, lep):
+        # p is the circle parameter, lsp and lep is the two end of the line
+        x0, y0 = p.transform.position
+        r0 = p.radius
 
-        dx = a2.x - a1.x
-        dy = a2.y - a1.y
-
-        dr = math.sqrt(dx * dx + dy * dy)
-        D = a1.x * a2.y - a2.x * a1.y
-
-        if (det := (c1.radius ** 2) * (dr ** 2) - (D ** 2)) < 0:
-            print("no")
-            return Collision(False)
-
-        sgn = lambda x: 1 if x >= 0 else -1
-
-        v1 = Vector2((D * dy + sgn(dy) * dx * math.sqrt(det) / (dr ** 2)),
-                     (-D * dx + abs(dy) * math.sqrt(det)) / (dr ** 2))
-        v2 = Vector2((D * dy - sgn(dy) * dx * math.sqrt(det)) / (dr ** 2),
-                     (-D * dx - abs(dy) * math.sqrt(det)) / (dr ** 2))
-
-        points = [ContactPoint(v1, (v1 - c1.transform.position).normalized(), c1.collider),
-                  ContactPoint(v2, (v2 - c1.transform.position).normalized(), c1.collider)]
-
-        return Collision(True, points, c1.collider)
-
-    @staticmethod
-    def segment_intersect_circle2(a1: Vector2, a2: Vector2, c1: 'CircleCollider'):
-        c1 = c1.game_object
-        if not isinstance(c1, Circle):
-            raise TypeError('Collider must be attached to Circle')
-        a = a1.x
-        b = a2.x
-        c = c1.transform.position.x
-        d = a1.y
-        e = a2.y
-        f = c1.transform.position.y
-        g = c1.radius
-        contact_points = []
-        try:
-            x1 = (math.sqrt((2 * a * b - 2 * a * c - 2 * b ** 2 + 2 * b * c + 2 * d * e - 2 * d * f - 2 * e ** 2 + 2 * e * f) ** 2 - 4 * (
-                                        a ** 2 - 2 * a * b + b ** 2 + d ** 2 - 2 * d * e + e ** 2) * (
-                                        b ** 2 - 2 * b * c + c ** 2 + e ** 2 - 2 * e * f + f ** 2 - g ** 2)) - 2 * a * b + 2 * a * c + 2 * b ** 2 - 2 * b * c - 2 * d * e + 2 * d * f + 2 * e ** 2 - 2 * e * f) / (
-                            2 * (a ** 2 - 2 * a * b + b ** 2 + d ** 2 - 2 * d * e + e ** 2))
-            x2 = -x1
-
-            if 0 >= x1 >= 1:
-                contact_points.append(ContactPoint(v := Vector2(x1 * a1.x + (1 - x1) * a2.x, x1 * a1.y + (1 - x1) * a2.y), v.left_perpendicular().normalized(), c1.collider))
-            if 0 >= x2 >= 1:
-                contact_points.append(ContactPoint(v := Vector2(x2 * a1.x + (1 - x2) * a2.x, x2 * a1.y + (1 - x2) * a2.y), v.left_perpendicular().normalized(), c1.collider))
-        except ValueError:
-            pass
-
-        try:
-            x3 = (-1 / 2 * math.sqrt((2 * a * b - 2 * a * c - 2 * b ** 2 + 2 * b * c + 2 * d * e - 2 * d * f - 2 * e ** 2 + 2 * e * f) ** 2 - 4 * (a ** 2 - 2 * a * b + b ** 2 + d ** 2 - 2 * d * e + e ** 2) * (b ** 2 - 2 * b * c + c ** 2 + e ** 2 - 2 * e * f + f ** 2 - g ** 2)) - a * b + a * c + b ** 2 - b * c - d * e + d * f + e ** 2 - e * f) / (a ** 2 - 2 * a * b + b ** 2 + d ** 2 - 2 * d * e + e ** 2)
-            x4 = -x3
-
-            if 0 >= x3 >= 1:
-                contact_points.append(ContactPoint(v := Vector2(x3 * a1.x + (1 - x3) * a2.x, x3 * a1.y + (1 - x3) * a2.y), v.left_perpendicular().normalized(), c1.collider))
-            if 0 >= x4 >= 1:
-                contact_points.append(ContactPoint(v := Vector2(x4 * a1.x + (1 - x4) * a2.x, x4 * a1.y + (1 - x4) * a2.y), v.left_perpendicular().normalized(), c1.collider))
-        except ValueError:
-            pass
-        if len(contact_points) == 0:
-            print("no")
-            return Collision(False)
-
-        print("hey")
-
-        return Collision(True, contact_points, c1.collider)
-
+        x1, y1 = lsp
+        x2, y2 = lep
+        if x1 == x2:
+            if abs(r0) >= abs(x1 - x0):
+                p1 = x1, y0 - math.sqrt(r0 ** 2 - (x1 - x0) ** 2)
+                p2 = x1, y0 + math.sqrt(r0 ** 2 - (x1 - x0) ** 2)
+                inp = [p1, p2]
+                # select the points lie on the line segment
+                inp = [p for p in inp if min(y1, y2) <= p[1] <= max(y1, y2)]
+            else:
+                inp = []
+        else:
+            k = (y1 - y2) / (x1 - x2)
+            b0 = y1 - k * x1
+            a = k ** 2 + 1
+            b = 2 * k * (b0 - y0) - 2 * x0
+            c = (b0 - y0) ** 2 + x0 ** 2 - r0 ** 2
+            delta = b ** 2 - 4 * a * c
+            if delta >= 0:
+                p1x = (-b - math.sqrt(delta)) / (2 * a)
+                p2x = (-b + math.sqrt(delta)) / (2 * a)
+                p1y = k * x1 + b0
+                p2y = k * x2 + b0
+                inp = [[p1x, p1y], [p2x, p2y]]
+                # select the points lie on the line segment
+                inp = [Vector2.from_tuple(p) for p in inp if min(x1, x2) <= p[0] <= max(x1, x2)]
+            else:
+                inp = []
+        return inp
 
 
 class Collider:
