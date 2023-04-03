@@ -2,7 +2,7 @@
 from dojogame.data.arrays import drawables
 
 
-class Drawable():
+class Drawable:
     def __init__(self, persistent: bool):
         self.persistent = persistent
         drawables.append(self)

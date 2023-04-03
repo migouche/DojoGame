@@ -50,7 +50,7 @@ class Vector2:
         return self.x, self.y
 
     @staticmethod
-    def from_tuple(t: tuple):
+    def from_tuple(t: tuple|list):
         return Vector2(t[0], t[1])
 
     @staticmethod
@@ -165,7 +165,7 @@ class Vector2Int:
         return self.x, self.y
 
     @staticmethod
-    def from_tuple(t: tuple):
+    def from_tuple(t: tuple[int]|list[int]):
         return Vector2Int(t[0], t[1])
 
     @staticmethod

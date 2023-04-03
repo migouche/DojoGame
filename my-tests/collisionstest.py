@@ -27,12 +27,14 @@ def update():
     c2.transform.position = Input.get_mouse_position()
 
     col = c1.collider.collide_with(c2.collider)
-    # col2 = c2.collider.collide_with(p1.collider) #TODO: uncomment this line and you'll know what to fix, I'm going to bed now
-    col3 = Collisions.LineIntersectCircle(c2,
-                                                   p1.get_absolute_vertices_positions()[0],
-                                                   p1.get_absolute_vertices_positions()[1])
+    col2 = Collision(False)
+    col3 = Collisions.segment_intersect_circle(p1.get_absolute_vertices_positions()[2],
+                                               p1.get_absolute_vertices_positions()[3],
+                                               c2.collider)
+    col3 = c2.collider.collide_with(p1.collider) #TODO: uncomment this line and you'll know what to fix, I'm going to bed now
 
-    txt.text = f"Collision: {bool(col) or bool(col2) or len(col3) > 0}"
+
+    txt.text = f"Collision: {bool(col) or bool(col2) or bool(col3)}"
     txt2.text = f"Fps: {int(RealTime.clock.get_fps())}"
     for point in col.contacts:
         Lines.draw_circle(point.point, 5, Colors.black)
@@ -40,8 +42,8 @@ def update():
     for point in col2.contacts:
         Lines.draw_circle(point.point, 5, Colors.black)
 
-    for point in col3:
-        Lines.draw_circle(point, 5, Colors.black)
+    for point in col3.contacts:
+        Lines.draw_circle(point.point, 5, Colors.black)
 
     if Input.get_key_down(pygame.constants.K_ESCAPE) or Input.get_key_down(pygame.constants.K_q):
         game.quit()
