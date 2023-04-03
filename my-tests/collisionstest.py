@@ -28,10 +28,8 @@ def update():
 
     col = c1.collider.collide_with(c2.collider)
     col2 = Collision(False)
-    col3 = Collisions.segment_intersect_circle(p1.get_absolute_vertices_positions()[2],
-                                               p1.get_absolute_vertices_positions()[3],
-                                               c2.collider)
-    col3 = c2.collider.collide_with(p1.collider) #TODO: uncomment this line and you'll know what to fix, I'm going to bed now
+
+    col3 = c2.collider.collide_with(p1.collider)
 
 
     txt.text = f"Collision: {bool(col) or bool(col2) or bool(col3)}"

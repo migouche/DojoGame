@@ -6,17 +6,17 @@ can_start = False
 # window = Window(800, 600, "pong", "data/images/py.png")
 
 game = DojoGame()
-Collider.add_collider(ball := Circle(15))
+Collider.add_collider(ball := Circle(15, Colors.white))
 
-Collider.add_collider(right_paddle := Polygon.Rectangle(30, 200))
-Collider.add_collider(left_paddle := Polygon.Rectangle(30, 200))
+Collider.add_collider(right_paddle := Polygon.Rectangle(30, 200, Colors.white))
+Collider.add_collider(left_paddle := Polygon.Rectangle(30, 200, Colors.white))
 
 left_score = right_score = 0
 
-right_text = Text("freesansbold.ttf", 30, Colors.black)
+right_text = Text("freesansbold.ttf", 30, Colors.white)
 right_text.set_text(0)
 
-left_text = Text("freesansbold.ttf", 30, Colors.black)
+left_text = Text("freesansbold.ttf", 30, Colors.white)
 left_text.set_text(0)
 
 paddleSpeed = 500
@@ -48,6 +48,7 @@ def pre_init():
 def start():
     global window
     window = game.window
+    window.set_bg(Colors.black)
     right_text.transform.set_position(Vector2(window.width / 2 + 200, 50))
     left_text.transform.set_position(Vector2(window.width / 2 - 200, 50))
     reset_pos()

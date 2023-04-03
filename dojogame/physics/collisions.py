@@ -490,9 +490,9 @@ class ContactPoint:
 
 
 class Collision:
-    def __init__(self, collide: bool, contacts: list[ContactPoint] = [], collider: Collider = None):
+    def __init__(self, collide: bool, contacts: list[ContactPoint]|tuple[ContactPoint] = (), collider: Collider = None):
         self._collide = collide
-        self._contacts = contacts.copy()
+        self._contacts = contacts
         self._contact_count = len(contacts) if contacts is not None else 0
         self._collider = collider
 

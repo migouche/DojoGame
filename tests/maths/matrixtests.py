@@ -1,5 +1,5 @@
 import unittest
-from dojogame.dojomaths.matrix import Matrix
+from dojogame.maths.matrix import Matrix
 
 
 class MatrixTests(unittest.TestCase):
