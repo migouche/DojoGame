@@ -1,19 +1,17 @@
-import inspect
-from typing import Union
+# window.py
 
 from dojogame.graphics.colors import Colors
-from dojogame.inputs import Input, Button
+from dojogame.inputs import Input, Button # Need to import it
 from dojogame.data import arrays
 from dojogame.maths.realtime import RealTime
 
 from pygame.constants import QUIT
 import pygame.display
-from inspect import currentframe
 
 
 class Window:
     def __init__(self, width: int = 0, height: int = 0, title: str = "Game Window", icon: str = None,
-                 flags: Union[list[int], int] = 0,
+                 flags: list[int]|int = 0,
                  depth: int = 0, display: int = 0, vsync: bool = False):
 
         Input.update()

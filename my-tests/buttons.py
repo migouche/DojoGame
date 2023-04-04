@@ -12,7 +12,16 @@ sound = Sound("data/audio/270334__littlerobotsoundfactory__jingle-lose-01.wav")
 
 @button.on_click
 def button_on_click():
+    print("button clicked")
     sound.play()
+
+@button.on_hold
+def button_on_hold():
+    print("button held")
+
+@button.on_release
+def button_on_release():
+    print("button released")
 
 
 def update():
