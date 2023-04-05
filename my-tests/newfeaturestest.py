@@ -51,7 +51,6 @@ square.transform.set_position(Vector2(200, 200))
 square.transform.set_local_scale(Vector2(1, 2))
 
 Collider.add_collider(square)
-RealTime.set_framerate(75)
 
 debug_time = Text("freesansbold.ttf", 20, Colors.black)
 debug_time.transform.set_position(Vector2(400, 100))
@@ -64,6 +63,7 @@ def config():
 def start():
     print("start")
     game.window.set_bg(Color.from_hex("ff00ff"))
+    RealTime.set_framerate(75)
 
 
 def update():

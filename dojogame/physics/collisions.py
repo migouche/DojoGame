@@ -38,7 +38,7 @@ class AxisAlignedBoundingBox:
 
     def aabb_overlap(self, other: 'AxisAlignedBoundingBox') -> bool:
         return self.min_v.x < other.max_v.x and self.max_v.x > other.min_v.x and \
-               self.min_v.y < other.max_v.y and self.max_v.y > other.min_v.y
+            self.min_v.y < other.max_v.y and self.max_v.y > other.min_v.y
 
 
 AABB = AxisAlignedBoundingBox
@@ -429,7 +429,7 @@ class Collisions:
 
 class Collider:
 
-    def __init__(self, game_object: GameObject|Polygon|Circle):
+    def __init__(self, game_object: GameObject | Polygon | Circle):
         self.game_object = game_object
         self.aabb = AABB(game_object)
 
@@ -490,7 +490,8 @@ class ContactPoint:
 
 
 class Collision:
-    def __init__(self, collide: bool, contacts: list[ContactPoint]|tuple[ContactPoint] = (), collider: Collider = None):
+    def __init__(self, collide: bool, contacts: list[ContactPoint] | tuple[ContactPoint] = (),
+                 collider: Collider = None):
         self._collide = collide
         self._contacts = contacts
         self._contact_count = len(contacts) if contacts is not None else 0

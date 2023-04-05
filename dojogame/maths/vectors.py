@@ -16,7 +16,7 @@ class Vector2:
         self.y = y
 
     def __add__(self, v: 'Vector2'):
-        return Vector2.from_tuple(JITVecs.add(*self, *v)) # if __getitem__() is defined you can unpack it, neat
+        return Vector2.from_tuple(JITVecs.add(*self, *v))  # if __getitem__() is defined you can unpack it, neat
 
     def __sub__(self, v: 'Vector2'):
         return Vector2.from_tuple(JITVecs.sub(*self, *v))
@@ -49,7 +49,7 @@ class Vector2:
         return self.x, self.y
 
     @staticmethod
-    def from_tuple(t: tuple|list):
+    def from_tuple(t: tuple | list):
         return Vector2(t[0], t[1])
 
     @staticmethod
@@ -77,7 +77,7 @@ class Vector2:
         return JITVecs.angle_deg(*a, *b)
 
     def to_vector2_int(self):
-        return Vector2Int(*self) # the unpack operator is just too cool
+        return Vector2Int(*self)  # the unpack operator is just too cool
 
     def magnitude(self):
         return JITVecs.mag(*self)
@@ -141,6 +141,7 @@ class Vector2Int:
     def __init__(self, x, y):
         self.x = int(x)
         self.y = int(y)
+
     def __getitem__(self, item):
         return (self.x, self.y)[item]
 
@@ -172,7 +173,7 @@ class Vector2Int:
         return self.x, self.y
 
     @staticmethod
-    def from_tuple(t: tuple[int]|list[int]):
+    def from_tuple(t: tuple[int] | list[int]):
         return Vector2Int(t[0], t[1])
 
     @staticmethod

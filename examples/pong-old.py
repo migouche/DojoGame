@@ -26,9 +26,9 @@ ball_dir = Vector2.random()
 
 def reset_pos():
     global ball_dir, ball_speed
-    ball.transform.set_position(Vector2(window.width / 2, window.height / 2))
-    right_paddle.transform.set_position(Vector2(window.width, window.height / 2))
-    left_paddle.transform.set_position(Vector2(0, window.height / 2))
+    ball.transform.set_position(Vector2(game.window.width / 2, game.window.height / 2))
+    right_paddle.transform.set_position(Vector2(game.window.width, game.window.height / 2))
+    left_paddle.transform.set_position(Vector2(0, game.window.height / 2))
     right_text.set_text(right_score)
     left_text.set_text(left_score)
     ball_dir = Vector2.random()
@@ -41,16 +41,15 @@ def lose():
     reset_pos()
 
 
-def pre_init():
+def config():
     DojoGame.config_window(800, 600, "pong", "data/py.png", flags=0)
 
 
 def start():
-    global window
-    window = game.window
-    window.set_bg(Colors.black)
-    right_text.transform.set_position(Vector2(window.width / 2 + 200, 50))
-    left_text.transform.set_position(Vector2(window.width / 2 - 200, 50))
+    game.window.set_bg(Colors.black)
+    RealTime.set_framerate(75)
+    right_text.transform.set_position(Vector2(game.window.width / 2 + 200, 50))
+    left_text.transform.set_position(Vector2(game.window.width / 2 - 200, 50))
     reset_pos()
 
 
@@ -74,7 +73,7 @@ def update():
     if ball.collider.collide_with(right_paddle.collider):
         ball_dir = Vector2.deg_random(135, 225)
         ball_speed += 50
-    elif ball.transform.position.x >= window.width:
+    elif ball.transform.position.x >= game.window.width:
         left_score += 1
         lose()
 
@@ -87,14 +86,14 @@ def update():
 
     can_start = can_start or Input.get_key(K_SPACE)
 
-    if ball.transform.position.y >= window.height - ball.radius or ball.transform.position.y <= ball.radius:
+    if ball.transform.position.y >= game.window.height - ball.radius or ball.transform.position.y <= ball.radius:
         ball_dir.y *= -1
 
     if can_start:
         ball.transform.translate(ball_dir * ball_speed * RealTime.delta_time)
 
-    right_paddle.transform.position.y = Mathf.clamp(right_paddle.transform.position.y, 0, window.height)
-    left_paddle.transform.position.y = Mathf.clamp(left_paddle.transform.position.y, 0, window.height)
+    right_paddle.transform.position.y = Mathf.clamp(right_paddle.transform.position.y, 0, game.window.height)
+    left_paddle.transform.position.y = Mathf.clamp(left_paddle.transform.position.y, 0, game.window.height)
 
 
 game.run()

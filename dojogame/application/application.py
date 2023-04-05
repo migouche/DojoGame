@@ -4,7 +4,7 @@ from dojogame.graphics.window import Window
 from dojogame.maths.realtime import RealTime
 from dojogame.inputs.inputs import Input
 from pygame.constants import RESIZABLE
-from pygame import init, mixer, quit
+from pygame import init, mixer, quit, error
 
 _window_args = (800, 600)
 _window_kwargs = {"title": "Dojo Game", "flags": RESIZABLE, "vsync": False}
@@ -41,11 +41,19 @@ class DojoGame:
             while self._window.running:
                 frame.f_locals['update']()
                 self._window.update()
+                try:
+                    frame.f_locals['late_update']()
+                except KeyError:
+                    pass
+                self._window.late_update()
 
                 # if Input.get_key_down(K_q):
                 # self.window.quit()
         except KeyError:
             raise Exception("Main loop must be inside an update function")
+        except error as e:
+            if self.window.running:
+                raise e
         except Exception as e:
             quit()
             raise e

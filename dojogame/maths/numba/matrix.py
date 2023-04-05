@@ -4,22 +4,21 @@
 
 # TODO: dew it
 
-from numba import njit, cuda, float32, prange
+from numba import njit, jit, cuda, float32, prange
+
 
 class JITMatrix:
     @staticmethod
-    #@njit
-    def add(a, b):
-        c = a.copy()
-        for i in prange(len(c)):
-            for j in prange(len(c[0])):
-                c[i, j] += b[i, j]
-        return c
-
+    @jit
+    def add(a, b, c): # reference: c = a + b
+        for i in prange(len(a)):
+            for j in range(len(a[0])):
+                c[i][j] += b[i][j]
 
     @staticmethod
     @cuda.jit
     def fast_matmul(A, B, C, TPB):
+        # C = A * B
         # Define an array in the shared memory
         # The size and type of the arrays must be known at compile time
         sA = cuda.shared.array(shape=(TPB, TPB), dtype=float32)
@@ -32,7 +31,7 @@ class JITMatrix:
         bpg = cuda.gridDim.x  # blocks per grid
 
         if x >= C.shape[0] and y >= C.shape[1]:
-            # Quit if (x, y) is outside of valid C boundary
+            # Quit if (x, y) is outside valid C boundary
             return
 
         # Each thread computes one element in the result matrix.

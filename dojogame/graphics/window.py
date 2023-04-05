@@ -1,7 +1,7 @@
 # window.py
 
 from dojogame.graphics.colors import Colors
-from dojogame.inputs import Input, Button # Need to import it
+from dojogame.inputs import Input, Button  # Need to import it
 from dojogame.data import arrays
 from dojogame.maths.realtime import RealTime
 
@@ -13,7 +13,7 @@ import time
 
 class Window:
     def __init__(self, width: int = 0, height: int = 0, title: str = "Game Window", icon: str = None,
-                 flags: list[int]|int = 0,
+                 flags: list[int] | int = 0,
                  depth: int = 0, display: int = 0, vsync: bool = False):
 
         Input.update()
@@ -36,8 +36,6 @@ class Window:
 
         self.bgColor = Colors.white
         Input.update()  # can't figure out why I need 2 Input.Update(). It just works like that
-
-
 
     def fill_bg(self, color):
         if self.running:
@@ -74,6 +72,13 @@ class Window:
             self.screen.blit(screen_temp, (0, 0))
 
             Input.update()
+            #pygame.display.flip()
+            #s = time.time()
+            #RealTime.tick()
+            #self.debug_time = (time.time() - s) / (1 / RealTime.fps) * 100
+
+    def late_update(self):
+        if self.running:
             pygame.display.flip()
             s = time.time()
             RealTime.tick()

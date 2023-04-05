@@ -15,9 +15,11 @@ def button_on_click():
     print("button clicked")
     sound.play()
 
+
 @button.on_hold
 def button_on_hold():
     print("button held")
+
 
 @button.on_release
 def button_on_release():
