@@ -1,8 +1,11 @@
 # dojomaths/matrix.py
 
+from numba import typed
+from dojogame.maths.numba.matrix import JITMatrix
 
 class Matrix:
     def __init__(self, matrix):
+        #self.matrix = matrix
         self.matrix = matrix
         self.rows = len(self.matrix)
 
@@ -12,6 +15,13 @@ class Matrix:
                 raise TypeError("Matrix must be rectangular")
 
         self.dimension = (self.rows, self.columns)
+
+
+    def to_typed_list(self):
+        m = typed.List()
+        for row in self.matrix:
+            m.append(typed.List(row))
+
 
     def __getitem__(self, key: int | tuple) -> float | list:
         if isinstance(key, int):
@@ -41,6 +51,7 @@ class Matrix:
     def __add__(self, other: 'Matrix') -> 'Matrix':
         if self.dimension != other.dimension:
             raise TypeError("Matrices must have the same dimension")
+        #return JITMatrix.add(self.matrix, other.matrix)
         return Matrix([[self.matrix[i][j] + other.matrix[i][j]
                         for j in range(self.columns)] for i in range(self.rows)])
 

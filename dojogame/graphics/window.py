@@ -8,6 +8,8 @@ from dojogame.maths.realtime import RealTime
 from pygame.constants import QUIT
 import pygame.display
 
+import time
+
 
 class Window:
     def __init__(self, width: int = 0, height: int = 0, title: str = "Game Window", icon: str = None,
@@ -17,6 +19,7 @@ class Window:
         Input.update()
         self.running = True
         totalFlags = 0
+        self.debug_time = 0
         if type(flags) is not int:
             for flag in flags:
                 totalFlags |= flag
@@ -72,7 +75,9 @@ class Window:
 
             Input.update()
             pygame.display.flip()
+            s = time.time()
             RealTime.tick()
+            self.debug_time = (time.time() - s) / (1 / RealTime.fps) * 100
 
     def quit(self):
         self.running = False

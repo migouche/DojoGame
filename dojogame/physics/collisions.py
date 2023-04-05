@@ -429,7 +429,7 @@ class Collisions:
 
 class Collider:
 
-    def __init__(self, game_object: GameObject):
+    def __init__(self, game_object: GameObject|Polygon|Circle):
         self.game_object = game_object
         self.aabb = AABB(game_object)
 

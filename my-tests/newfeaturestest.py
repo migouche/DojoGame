@@ -53,6 +53,9 @@ square.transform.set_local_scale(Vector2(1, 2))
 Collider.add_collider(square)
 RealTime.set_framerate(75)
 
+debug_time = Text("freesansbold.ttf", 20, Colors.black)
+debug_time.transform.set_position(Vector2(400, 100))
+
 
 def config():
     print("config")
@@ -120,9 +123,10 @@ def update():
         pac.transform.set_local_scale(Vector2(pac.transform.local_scale.x, pac.transform.local_scale.y / 2))
 
     # window.update()
+    debug_time.text = f"Percentage of free time: {int(game.window.debug_time)}%"
 
-    # if Input.get_key_down(K_q):
-    # window.quit()
+    if Input.get_key_down(K_q) or Input.get_key_down(K_ESCAPE):
+        game.quit()
 
 
 game.run()

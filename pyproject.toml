@@ -27,7 +27,9 @@ classifiers=[
 
 [tool.poetry.dependencies]
 python = ">=3.8"
+python = "<3.11"
 pygame = ">=2.0"
+numba = ">=0.53"
 
 [tool.poetry.dev-dependencies]
 pytest = ">=7.0"
