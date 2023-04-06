@@ -40,20 +40,16 @@ class DojoGame:
         try:
             while self._window.running:
                 frame.f_locals['update']()
+                if not self._window.running:
+                    break
                 self._window.update()
                 try:
                     frame.f_locals['late_update']()
                 except KeyError:
                     pass
                 self._window.late_update()
-
-                # if Input.get_key_down(K_q):
-                # self.window.quit()
         except KeyError:
             raise Exception("Main loop must be inside an update function")
-        except error as e:
-            if self.window.running:
-                raise e
         except Exception as e:
             quit()
             raise e
