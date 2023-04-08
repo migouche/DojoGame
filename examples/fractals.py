@@ -13,8 +13,7 @@ like all the stuff about surfarrays and blit_arrays, for now i use a hacky worka
 game = DojoGame()
 
 
-def config():
-    game.config_window(640, 480, "Fractals")
+
 
 
 res = width, height = 640, 480
@@ -27,9 +26,13 @@ max_iter = 64
 
 screen_array = np.full((640, 480, 3), [0, 0, 0], dtype=np.uint8)
 
-texture = pygame.image.load("data/mandelbrottex2.bmp")
+image_path = "data/mandelbrottex2.bmp"
+
+texture = pygame.image.load(image_path)
 texture_size = min(texture.get_size()) - 1
 texture_array = pygame.surfarray.pixels3d(texture)
+def config():
+    game.config_window(640, 480, "Fractals", image_path)
 
 
 @njit(fastmath=True, parallel=True)
@@ -58,13 +61,13 @@ def update():
         game.quit()
 
     if Input.get_key(K_a):
-        increment[0] += vel * RealTime.delta_time * 15
+        increment[0] += vel * RealTime.delta_time * 50
     if Input.get_key(K_d):
-        increment[0] -= vel * RealTime.delta_time * 15
+        increment[0] -= vel * RealTime.delta_time * 50
     if Input.get_key(K_w):
-        increment[1] += vel * RealTime.delta_time * 15
+        increment[1] += vel * RealTime.delta_time * 50
     if Input.get_key(K_s):
-        increment[1] -= vel * RealTime.delta_time * 15
+        increment[1] -= vel * RealTime.delta_time * 50
 
     if Input.get_key(K_UP) or Input.get_key(K_DOWN):
         inv_scale = 2 - scale
