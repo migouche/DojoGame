@@ -23,6 +23,7 @@ increment = np.array([0.0, 0.0])
 scale = .993
 vel = .01
 zoom = 2.2 / height
+max_iter = 64
 
 screen_array = np.full((640, 480, 3), [0, 0, 0], dtype=np.uint8)
 
@@ -32,25 +33,28 @@ texture_array = pygame.surfarray.pixels3d(texture)
 
 
 @njit(fastmath=True, parallel=True)
-def render(sa, _zoom, _offset, dx, dy):
-    print("dx: ", dx, "dy: ", dy)
+def render(sa, _zoom, _offset, dx, dy, _max_iter):
     for x in prange(width):
         for y in range(height):
             c = (x - _offset[0]) * _zoom - dx + 1j * ((y - _offset[1]) * _zoom - dy)
             z = 0
             num_iter = 0
-            for i in range(64):
+            for i in range(_max_iter):
                 z = z ** 2 + c
                 if z.real * z.real + z.imag * z.imag > 4:
                     break
                 num_iter += 1
-            col = int(texture_size * num_iter / 64)
+            col = int(texture_size * num_iter / _max_iter)
             sa[x, y] = texture_array[col, col]
     return sa
 
 
+def start():
+    RealTime.set_framerate(1000)
+
+
 def update():
-    global zoom, scale, vel, increment
+    global zoom, scale, vel, increment, max_iter
     if Input.get_key_down(K_ESCAPE) or Input.get_key_down(K_q):
         game.quit()
 
@@ -72,12 +76,21 @@ def update():
             zoom *= inv_scale
             vel *= inv_scale
 
+    if Input.get_key_down(K_PLUS):
+        max_iter += 1
+    if Input.get_key_down(K_MINUS):
+        max_iter -= 1
+
+    if Input.get_key_down(K_SPACE):
+        print("FPS:", RealTime.clock.get_fps(), "zoom:", zoom, "offset:", offset, "increment:", increment, "max_iter:", max_iter)
+
+
     game.window.set_title(f"Fractals. FPS: {RealTime.clock.get_fps()}")
 
 
 def late_update():
     global screen_array
-    screen_array = render(screen_array, zoom, offset, increment[0], increment[1])
+    screen_array = render(screen_array, zoom, offset, increment[0], increment[1], max_iter)
     pygame.surfarray.blit_array(game.window.screen, screen_array)
 
 
