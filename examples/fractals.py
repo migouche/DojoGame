@@ -27,7 +27,7 @@ max_iter = 64
 
 screen_array = np.full((640, 480, 3), [0, 0, 0], dtype=np.uint8)
 
-texture = pygame.image.load("data/mandelbrottex1.bmp")
+texture = pygame.image.load("data/mandelbrottex2.bmp")
 texture_size = min(texture.get_size()) - 1
 texture_array = pygame.surfarray.pixels3d(texture)
 
@@ -46,7 +46,6 @@ def render(sa, _zoom, _offset, dx, dy, _max_iter):
                 num_iter += 1
             col = int(texture_size * num_iter / _max_iter)
             sa[x, y] = texture_array[col, col]
-    return sa
 
 
 def start():
@@ -85,8 +84,7 @@ def update():
 
 
 def late_update():
-    global screen_array
-    screen_array = render(screen_array, zoom, offset, increment[0], increment[1], max_iter)
+    render(screen_array, zoom, offset, increment[0], increment[1], max_iter)
     pygame.surfarray.blit_array(game.window.screen, screen_array)
 
 
