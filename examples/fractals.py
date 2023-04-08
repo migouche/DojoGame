@@ -81,11 +81,7 @@ def update():
     if Input.get_key_down(K_MINUS):
         max_iter -= 1
 
-    if Input.get_key_down(K_SPACE):
-        print("FPS:", RealTime.clock.get_fps(), "zoom:", zoom, "offset:", offset, "increment:", increment, "max_iter:", max_iter)
-
-
-    game.window.set_title(f"Fractals. FPS: {RealTime.clock.get_fps()}")
+    game.window.set_title(f"Fractals. FPS: {RealTime.clock.get_fps()}, Max Iter: {max_iter}")
 
 
 def late_update():
