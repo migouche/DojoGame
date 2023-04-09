@@ -12,10 +12,6 @@ like all the stuff about surfarrays and blit_arrays, for now i use a hacky worka
 
 game = DojoGame()
 
-
-
-
-
 res = width, height = 640, 480
 offset = np.array([1.3 * width, height]) // 2
 increment = np.array([0.0, 0.0])
@@ -31,6 +27,8 @@ image_path = "data/mandelbrottex2.bmp"
 texture = pygame.image.load(image_path)
 texture_size = min(texture.get_size()) - 1
 texture_array = pygame.surfarray.pixels3d(texture)
+
+
 def config():
     game.config_window(640, 480, "Fractals", image_path)
 
@@ -49,6 +47,29 @@ def render(sa, _zoom, _offset, dx, dy, _max_iter):
                 num_iter += 1
             col = int(texture_size * num_iter / _max_iter)
             sa[x, y] = texture_array[col, col]
+
+
+@njit(fastmath=True,
+      parallel=True)  # See https://en.wikipedia.org/wiki/Plotting_algorithms_for_the_Mandelbrot_set#Optimized_escape_time_algorithms
+def wiki_render(sa, _zoom, _offset, dx, dy, _max_iter):
+    for _x in prange(width):
+        for _y in range(height):
+            x0 = (_x - _offset[0]) * _zoom - dx
+            y0 = (_y - _offset[1]) * _zoom - dy
+
+            x = 0
+            y = 0
+            x2 = 0
+            y2 = 0
+            i = 0
+            while x * x + y * y < 4 and i < _max_iter:
+                y = 2 * x * y + y0
+                x = x2 - y2 + x0
+                x2 = x * x
+                y2 = y * y
+                i += 1
+            col = int(texture_size * i / _max_iter)
+            sa[_x, _y] = texture_array[col, col]
 
 
 def start():
@@ -87,7 +108,7 @@ def update():
 
 
 def late_update():
-    render(screen_array, zoom, offset, increment[0], increment[1], max_iter)
+    wiki_render(screen_array, zoom, offset, increment[0], increment[1], max_iter)
     pygame.surfarray.blit_array(game.window.screen, screen_array)
 
 
