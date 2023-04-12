@@ -62,7 +62,7 @@ def wiki_render(sa, _zoom, _offset, dx, dy, _max_iter):
             x2 = 0
             y2 = 0
             i = 0
-            while x * x + y * y < 4 and i < _max_iter:
+            while x2 + y2 <= 4 and i < _max_iter:
                 y = 2 * x * y + y0
                 x = x2 - y2 + x0
                 x2 = x * x
@@ -73,7 +73,7 @@ def wiki_render(sa, _zoom, _offset, dx, dy, _max_iter):
 
 
 def start():
-    RealTime.set_framerate(1000)
+    RealTime.set_framerate(60)
 
 
 def update():
@@ -99,9 +99,9 @@ def update():
             zoom *= inv_scale
             vel *= inv_scale
 
-    if Input.get_key_down(K_PLUS):
+    if Input.get_key(K_PLUS):
         max_iter += 1
-    if Input.get_key_down(K_MINUS):
+    if Input.get_key(K_MINUS):
         max_iter -= 1
 
     game.window.set_title(f"Fractals. FPS: {RealTime.clock.get_fps()}, Max Iter: {max_iter}")
