@@ -1,11 +1,10 @@
 # dojomaths/matrix.py
 
 from numba import typed
-from dojogame.maths.numba.matrix import JITMatrix
 
 
 class Matrix:
-    def __init__(self, matrix):
+    def __init__(self, matrix, copy=True):
         # self.matrix = matrix
         self.matrix = matrix
         self.rows = len(self.matrix)
@@ -166,7 +165,7 @@ class Matrix:
             return det
 
     def transposed(self) -> 'Matrix':
-        return Matrix([[self.get_element(j, i) for j in range(self.rows)] for i in range(self.columns)])
+        return Matrix(list(map(list, zip(*self.matrix))))
 
     def adjoint(self) -> 'Matrix':
         if self.rows != self.columns:

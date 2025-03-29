@@ -42,7 +42,7 @@ triangle2 = Polygon([Vector2(0, 0), Vector2(100, 0), Vector2(50, 100)], color=Co
 triangle2.transform.set_position(Vector2(250, 250))
 Collider.add_collider(triangle2)
 
-child = Polygon.Square(10, color=Colors.blue)
+child = Polygon.Square(10, color=Colors.green)
 child.transform.set_parent(triangle2.transform)
 child.transform.set_position(Vector2(50, 50))
 

@@ -3,11 +3,10 @@
 # This file contains all vector related calculations.
 
 import random
-import math
+from math import atan2, sin, cos
 
 from dojogame.maths.dojomathfunctions import Mathf
 from dojogame.maths.matrix import Matrix
-from dojogame.maths.numba.vectors import JITVecs
 
 
 class Vector2:
@@ -16,22 +15,22 @@ class Vector2:
         self.y = y
 
     def __add__(self, v: 'Vector2'):
-        return Vector2.from_tuple(JITVecs.add(*self, *v))  # if __getitem__() is defined you can unpack it, neat
+        return Vector2(x=self.x + v.x, y=self.y + v.y)
 
     def __sub__(self, v: 'Vector2'):
-        return Vector2.from_tuple(JITVecs.sub(*self, *v))
+        return Vector2(x=self.x - v.x, y=self.y - v.y)
 
     def __neg__(self):
-        return Vector2.from_tuple(JITVecs.neg(*self))
+        return Vector2(-self.x, -self.y)
 
     def __mul__(self, f: float | int):
-        return Vector2.from_tuple(JITVecs.mul(*self, f))
+        return Vector2(x=self.x * f, y=self.y * f)
 
-    def __rmul__(self, other):
+    def __rmul__(self, other: float | int):
         return self * other
 
-    def __truediv__(self, f):
-        return Vector2.from_tuple(JITVecs.div(*self, f))
+    def __truediv__(self, f: float | int):
+        return Vector2(x=self.x / f, y=self.y / f)
 
     def __str__(self):
         return "Vector2:(" + str(self.x) + ", " + str(self.y) + ")"
@@ -58,29 +57,29 @@ class Vector2:
 
     @staticmethod
     def dot(a, b) -> float:
-        return JITVecs.dot(*a, *b)
+        return a.x * b.x + a.y * b.y
 
     @staticmethod
     def cross(a, b) -> float:
-        return JITVecs.cross(*a, *b)
+        return a.x * b.y - a.y * b.x
 
     @staticmethod
     def scale(a, b):
-        return Vector2.from_tuple(JITVecs.scale(*a, *b))
+        return Vector2(a.x * b.x, a.y * b.y)
 
     @staticmethod
     def angle_rad(a, b) -> float:
-        return JITVecs.angle(*a, *b)
+        return atan2(Vector2.cross(a, b), Vector2.dot(a, b))
 
     @staticmethod
     def angle_deg(a, b):
-        return JITVecs.angle_deg(*a, *b)
+        return Vector2.angle_rad(a, b) * Mathf.Rad2Deg
 
     def to_vector2_int(self):
         return Vector2Int(*self)  # the unpack operator is just too cool
 
     def magnitude(self):
-        return JITVecs.mag(*self)
+        return self.x ** 2 + self.y ** 2
 
     def left_perpendicular(self):
         return Vector2(self.y, -self.x)
@@ -90,14 +89,14 @@ class Vector2:
 
     @staticmethod
     def distance(a, b):
-        return JITVecs.dist(*a, *b)
+        return (b - a).magnitude()
 
     def normalized(self):
-        return Vector2.from_tuple(JITVecs.norm(*self))
+        return self / self.magnitude()
 
     @staticmethod
     def from_angle_rad(angle):
-        return Vector2(math.cos(angle), math.sin(angle))
+        return Vector2(cos(angle), sin(angle))
 
     @staticmethod
     def from_angle_deg(angle):
@@ -117,8 +116,8 @@ class Vector2:
 
     @staticmethod
     def rotate_by_rads(v, r):
-        return Vector2(int((v.x * math.cos(r) - v.y * math.sin(r)) * 1000) / 1000,
-                       int((v.x * math.sin(r) + v.y * math.cos(r)) * 1000) / 1000)
+        return Vector2(int((v.x * cos(r) - v.y * sin(r)) * 1000) / 1000,
+                       int((v.x * sin(r) + v.y * cos(r)) * 1000) / 1000)
 
     @staticmethod
     def rotate_by_degs(v, d):
@@ -149,19 +148,19 @@ class Vector2Int:
         return iter((self.x, self.y))
 
     def __add__(self, v):
-        return Vector2Int.from_tuple(JITVecs.add(*self, *v))
+        return Vector2Int(self.x + v.x, self.y + v.y)
 
     def __sub__(self, v):
-        return Vector2Int.from_tuple(JITVecs.sub(*self, *v))
+        return Vector2Int(self.x - v.x, self.y - v.y)
 
     def __mul__(self, f):
-        return Vector2Int.from_tuple(JITVecs.mul(*self, f))
+        return Vector2Int(self.x * f, self.y * f)
 
     def __truediv__(self, f):
-        return Vector2Int.from_tuple(JITVecs.div(*self, f))
+        return Vector2Int(self.x / f, self.y / f)
 
     def __neg__(self):
-        return Vector2Int.from_tuple(JITVecs.neg(*self))
+        return Vector2Int(-self.x, -self.y)
 
     def __str__(self):
         return "Vector2Int:(" + str(self.x) + ", " + str(self.y) + ")"
@@ -181,11 +180,11 @@ class Vector2Int:
         return Vector2(0, 0)
 
     def magnitude(self):
-        return JITVecs.mag(*self)
+        return self.x ** 2 + self.y ** 2
 
     @staticmethod
     def distance(a, b):
         return (b - a).magnitude()
 
     def normalized(self):
-        return Vector2Int.from_tuple(JITVecs.norm(*self))
+        return Vector2Int(self.x / self.magnitude(), self.y / self.magnitude())

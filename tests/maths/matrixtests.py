@@ -4,8 +4,7 @@ from dojogame.maths.matrix import Matrix
 
 class MatrixTests(unittest.TestCase):
     def test_matrix_sum(self):
-        print("hey")
-        # 2x2 matrix
+            # 2x2 matrix
         matrix1 = Matrix([[1, 2], [3, 4]])
         matrix2 = Matrix([[5, 6], [7, 8]])
         matrix3 = Matrix([[6, 8], [10, 12]])
